@@ -317,8 +317,12 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #hwOut{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:500 18px var(--f-body);padding:0 10px;box-sizing:border-box;width:100%}
 #hwOut:focus{outline:2px solid var(--xl);outline-offset:-1px}
 .hw-st{font-size:12px;color:var(--muted);line-height:1.35;min-height:16px;overflow:hidden}
-.hw-btns{display:flex;align-items:center;gap:2px;margin-top:auto}.hw-btns .grow{flex:1}.hw-btns .ib{width:40px;height:40px}
+.hw-btns{display:flex;align-items:center;gap:2px;margin-top:auto}.hw-btns .grow{flex:1}.hw-btns .ib{width:36px;height:36px}
 #hwIns{justify-content:center;background:var(--xl);border-color:var(--xl)}
+.hw-tr{position:absolute;left:12px;top:10px;display:flex;align-items:baseline;gap:10px;color:#5F6675;font-size:13px;pointer-events:none}
+.hw-tr b{font:600 44px/1 Caveat, var(--f-body);color:var(--xl)}
+#hwEr[aria-pressed="true"]{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
+#hwOut:disabled{opacity:.5}
 #xlHwB[aria-pressed="true"]{background:color-mix(in srgb,var(--xl) 18%,transparent);color:var(--xl)}
 @media (max-width:640px){.hw-main{flex-direction:column}.hw-side{width:auto}.hw-btns{margin-top:0}}
 /* kalkulačka */
@@ -504,11 +508,11 @@ input[type=range]{accent-color:var(--accent)}
     <div class="xl-hw" id="xlHw" hidden aria-label="Psaní rukou">
       <div class="hw-sym"><div class="hw-tabs" id="hwTabs"></div><div class="hw-keys" id="hwKeys"></div></div>
       <div class="hw-main">
-        <div class="hw-pad"><canvas id="hwC"></canvas><span class="hw-ph" id="hwPh">Pište sem perem – text, číslo nebo vzorec (např. =SUMA(A1:A5), α = 0,05)</span></div>
+        <div class="hw-pad"><canvas id="hwC"></canvas><div class="hw-tr" id="hwTr" hidden></div><span class="hw-ph" id="hwPh">Pište sem perem – text, číslo nebo vzorec (např. =SUMA(A1:A5), α = 0,05)</span></div>
         <div class="hw-side">
           <input id="hwOut" type="text" autocomplete="off" spellcheck="false" aria-label="Rozpoznaný text" placeholder="Rozpoznaný text">
           <div class="hw-st" id="hwSt"></div>
-          <div class="hw-btns"><button class="ib" id="hwUndo" title="Zpět poslední tah" aria-label="Zpět poslední tah"></button><button class="ib" id="hwClear" title="Smazat vše" aria-label="Smazat vše"></button><button class="ib" id="hwRec" title="Rozpoznat" aria-label="Rozpoznat"></button><span class="grow"></span><button class="ib" id="hwClose" title="Zavřít" aria-label="Zavřít"></button></div>
+          <div class="hw-btns"><button class="ib" id="hwUndo" title="Zpět" aria-label="Zpět"></button><button class="ib" id="hwEr" title="Guma (nebo tlačítko na peru)" aria-label="Guma" aria-pressed="false"></button><button class="ib" id="hwClear" title="Smazat vše" aria-label="Smazat vše"></button><button class="ib" id="hwRec" title="Rozpoznat" aria-label="Rozpoznat"></button><button class="ib" id="hwLearn" title="Naučit se moje písmo" aria-label="Naučit se moje písmo"></button><span class="grow"></span><button class="ib" id="hwClose" title="Zavřít" aria-label="Zavřít"></button></div>
           <button class="btn primary" id="hwIns">Vložit do buňky</button>
         </div>
       </div>
@@ -569,6 +573,7 @@ const IC={
  stop:'<rect x="6.5" y="6.5" width="11" height="11" rx="2"/>',
  note:'<path d="M5 4h14v10l-5 6H5z"/><path d="M14 20v-6h5"/>',
  trash2:'<path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13"/>',
+ abc:'<path d="M3 18l4.5-12L12 18M4.6 14h5"/><path d="M20.5 12v6M20.5 14.5a3 3 0 11-6 0 3 3 0 016 0z"/>',
  star:'<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/>',
  down:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
  up:'<path d="M6 15l6-6 6 6"/>',
@@ -2274,7 +2279,9 @@ const BASE_TPL=[
  ['/',[[[.9,0],[.1,1]]]]
 ];
 let TPLC=null;
-function tplClouds(){if(TPLC)return TPLC;TPLC=BASE_TPL.map(([s,st])=>({s,c:pcloud(st)}));(store.get('calcT',[])||[]).forEach(t=>TPLC.push({s:t.s,c:t.c,u:true}));return TPLC;}
+const CALC_MAP={'×':'*','·':'*','÷':'/',':':'/','−':'-'};
+function tplClouds(){if(TPLC)return TPLC;TPLC=BASE_TPL.map(([s,st])=>({s,c:pcloud(st)}));(store.get('calcT',[])||[]).forEach(t=>TPLC.push({s:t.s,c:t.c,u:true}));
+  (store.get('hwT',[])||[]).forEach(t=>{const ch=CALC_MAP[t.s]||t.s;if(/^[0-9+*/()]$/.test(ch))TPLC.push({s:ch,c:t.c.map(q=>({x:q[0],y:q[1],id:q[2]})),u:true});});return TPLC;}
 function bbOf(strokes){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;strokes.forEach(s=>s.forEach(q=>{x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}));return {x0,y0,x1,y1,w:x1-x0,h:y1-y0,cx:(x0+x1)/2,cy:(y0+y1)/2};}
 const median=a=>{const b=a.slice().sort((x,y)=>x-y);return b.length?b[b.length>>1]:0;};
 function classify(g,H){
@@ -2970,10 +2977,10 @@ async function xlInsertImage(file){
 
 /* ---------- psaní rukou a speciální znaky v tabulce ---------- */
 const HW_SYM={'Řecká':'α β γ δ ε ζ η θ ι κ λ μ ν ξ π ρ σ τ υ φ χ ψ ω Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω','Matematika':'± × ÷ · √ ∛ ∞ ≈ ≠ ≤ ≥ ∑ ∏ ∫ ∂ Δ ∇ ∈ ∉ ⊂ ∪ ∩ ∀ ∃ → ⇒ ⇔ ∠ ⊥ ∥ ‰ ° ′ ″','Indexy':'⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁿ ˣ ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₊ ₋ ₙ ₓ ₘ','Jednotky':'°C Kč € $ £ % µ Ω m² m³ cm² cm³ km/h m/s m/s² kg/m³ N·m kWh ‰'};
-const HW={strokes:[],cur:null,timer:0,tab:'Řecká',busy:0};
+const HW={strokes:[],cur:null,timer:0,tab:'Řecká',busy:0,hist:[],mode:'pen',erasing:false,ept:null,train:null,last:null};
 function xlHwToggle(on){
   const p=$('#xlHw');on=on===undefined?p.hidden:on;p.hidden=!on;$('#xlHwB').setAttribute('aria-pressed',String(on));
-  if(on){hwTabs();requestAnimationFrame(hwSize);}
+  if(on){hwTabs();requestAnimationFrame(hwSize);hwStatus();}else if(HW.train)hwTrainEnd();
 }
 function hwTabs(){
   const t=$('#hwTabs');t.replaceChildren();Object.keys(HW_SYM).forEach(k=>{const b=el('button',{class:'hw-tab','aria-pressed':String(k===HW.tab)},esc(k));b.onclick=()=>{HW.tab=k;hwTabs();};t.append(b);});
@@ -2995,6 +3002,22 @@ function hwDraw(){
     if(st.length===1){g.beginPath();g.arc(st[0][0],st[0][1],2,0,Math.PI*2);g.fillStyle='#1B2232';g.fill();}});
   $('#hwPh').hidden=!!(HW.strokes.length||HW.cur);
 }
+function hwDraw(){
+  const c=$('#hwC'),g=c.getContext('2d'),d=c.width/(c.getBoundingClientRect().width||1);g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);g.scale(d,d);
+  const W2=c.width/d,H2=c.height/d;g.strokeStyle='rgba(30,113,69,.25)';g.setLineDash([6,6]);g.lineWidth=1;g.beginPath();g.moveTo(16,H2*0.68);g.lineTo(W2-16,H2*0.68);g.stroke();g.setLineDash([]);
+  g.strokeStyle='#1B2232';g.fillStyle='#1B2232';g.lineCap='round';g.lineJoin='round';g.lineWidth=3;
+  HW.strokes.concat(HW.cur?[HW.cur]:[]).forEach(st=>{if(st.length>1){g.beginPath();g.moveTo(st[0][0],st[0][1]);for(let i=1;i<st.length-1;i++){const mx=(st[i][0]+st[i+1][0])/2,my=(st[i][1]+st[i+1][1])/2;g.quadraticCurveTo(st[i][0],st[i][1],mx,my);}g.lineTo(st[st.length-1][0],st[st.length-1][1]);g.stroke();}
+    else if(st.length===1){g.beginPath();g.arc(st[0][0],st[0][1],2,0,Math.PI*2);g.fill();}});
+  if(HW.ept){g.strokeStyle='rgba(194,37,58,.7)';g.lineWidth=1.5;g.beginPath();g.arc(HW.ept[0],HW.ept[1],HW_ER,0,Math.PI*2);g.stroke();}
+  $('#hwPh').hidden=!!(HW.strokes.length||HW.cur||HW.train);
+}
+const HW_ER=14;
+function hwHist(){HW.hist.push(HW.strokes.slice());if(HW.hist.length>100)HW.hist.shift();}
+function hwEraseAt(x,y){
+  const n=HW.strokes.length;HW.strokes=HW.strokes.filter(st=>{if(st.length===1)return Math.hypot(st[0][0]-x,st[0][1]-y)>HW_ER;for(let i=1;i<st.length;i++)if(distSeg(x,y,st[i-1][0],st[i-1][1],st[i][0],st[i][1])<=HW_ER)return false;return true;});
+  return n!==HW.strokes.length;
+}
+function hwSetMode(m){HW.mode=m;$('#hwEr').setAttribute('aria-pressed',String(m==='eraser'));$('#hwC').style.cursor=m==='eraser'?'cell':'crosshair';}
 function hwImage(){
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;HW.strokes.forEach(st=>st.forEach(q=>{x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}));
   const pad=24,k=Math.min(3,1400/Math.max(40,x1-x0+pad*2)),c=document.createElement('canvas');c.width=Math.round((x1-x0+pad*2)*k);c.height=Math.round((y1-y0+pad*2)*k);
@@ -3002,29 +3025,108 @@ function hwImage(){
   HW.strokes.forEach(st=>{g.beginPath();st.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));if(st.length===1)g.lineTo(st[0][0]+.5,st[0][1]);g.stroke();});
   return new Promise(res=>c.toBlob(res,'image/png'));
 }
+
+/* offline rozpoznávač písma – $P mraky bodů, učí se z oprav a tréninku */
+const HW_UNSUP=Object.fromEntries(Object.entries(SUP).map(([k,v])=>[v,k]));
+let HWTC=null;
+const hwT=()=>store.get('hwT',[])||[];
+function hwTpl(){if(HWTC)return HWTC;HWTC=tplClouds().slice();hwT().forEach(t=>HWTC.push({s:t.s,c:t.c.map(q=>({x:q[0],y:q[1],id:q[2]})),r:t.r,u:2}));return HWTC;}
+function hwSave(T){while(T.length>2500)T.shift();store.set('hwT',T);HWTC=null;TPLC=null;}
+function hwAddTpl(T,ch,pc,r){const same=T.filter(t=>t.s===ch);if(same.length>=12)T.splice(T.indexOf(same[0]),1);T.push({s:ch,c:pc.map(q=>[+q.x.toFixed(3),+q.y.toFixed(3),q.id]),r:+r.toFixed(3)});}
+function hwLocal(strokes){
+  const out={text:'',groups:[]};if(!strokes.length)return out;
+  const padH=$('#hwC').getBoundingClientRect().height||200;
+  const bbs=strokes.map(s=>bbOf([s]));const Hraw=median(bbs.filter(b=>b.h>b.w*0.4).map(b=>b.h))||median(bbs.map(b=>Math.max(b.w,b.h)))||40;
+  const idx=strokes.map((s,i)=>i).sort((a,b)=>bbs[a].x0-bbs[b].x0),groups=[];
+  idx.forEach(i=>{const b=bbs[i],g=groups[groups.length-1];
+    if(g){const ov=Math.min(g.bb.x1,b.x1)-Math.max(g.bb.x0,b.x0),mw=Math.max(1,Math.min(g.bb.w,b.w)),tol=Hraw*0.08;
+      const contains=(b.w<=g.bb.w&&b.cx>=g.bb.x0-tol&&b.cx<=g.bb.x1+tol)||(g.bb.w<=b.w&&g.bb.cx>=b.x0-tol&&g.bb.cx<=b.x1+tol);
+      if(ov>0.35*mw||contains){g.strokes.push(strokes[i]);g.bb=bbOf(g.strokes);return;}}
+    groups.push({strokes:[strokes[i]],bb:b});});
+  const H=median(groups.filter(g=>g.bb.h>g.bb.w*0.4&&Math.max(g.bb.w,g.bb.h)>Hraw*0.3).map(g=>g.bb.h))||Hraw;
+  const base=median(groups.filter(g=>g.bb.h>0.5*H).map(g=>g.bb.y1))||0;
+  const T=hwTpl();let prev=null;
+  groups.forEach(g=>{const b=g.bb,n=g.strokes.length,sz=Math.max(b.w,b.h),r=b.h/padH;let ch,d=0,pc=null;
+    if(sz<0.28*H)ch=(b.cy>base-0.15*H&&b.h>b.w*1.4)?',':'.';
+    else if(n<=2&&b.w>2.6*b.h&&b.h<0.5*H){ch='-';if(n===2){const[a,c]=g.strokes.map(x=>bbOf([x]));if(Math.abs(a.cy-c.cy)>0.12*H)ch='=';}}
+    else{pc=pcloud(g.strokes);let bd=Infinity;
+      for(const t of T){let dd=pMatch(pc,t.c);if(t.u===2)dd*=0.8;else if(t.u)dd*=0.85;if(t.r)dd*=1+0.6*Math.min(1,Math.abs(Math.log(Math.max(r,1e-3)/t.r)));if(dd<bd){bd=dd;ch=t.s;}}
+      d=bd;
+      if((ch==='1'||ch==='/')&&n===1&&!hwT().some(t=>t.s==='/'||t.s==='1')){const st=g.strokes[0],top=st.reduce((a,q)=>q[1]<a[1]?q:a),bot=st.reduce((a,q)=>q[1]>a[1]?q:a);ch=(top[0]-bot[0])/(b.h||1)>0.35?'/':'1';}
+      if(ch==='*')ch='·';}
+    let shown=ch;
+    if(prev&&b.y1<base-0.45*H&&b.h<0.7*H&&SUP[ch])shown=SUP[ch];
+    if(prev&&b.x0-prev.x1>0.85*H)out.text+=' ';
+    out.text+=shown;out.groups.push({ch,pc,r,d});prev=b;});
+  return out;
+}
+function hwLearn(L,text){
+  if(!L||!L.groups.length)return 0;
+  const chars=Array.from(text.replace(/\s+/g,'')).map(c=>HW_UNSUP[c]||c);
+  if(chars.length!==L.groups.length)return 0;
+  const T=hwT();let n=0;
+  L.groups.forEach((g,i)=>{const c=chars[i];if(!g.pc)return;const have=T.filter(t=>t.s===c).length;
+    if(c!==g.ch||have<4){hwAddTpl(T,c,g.pc,g.r);n++;}});
+  if(n)hwSave(T);return n;
+}
+function hwStatus(msg){
+  const n=hwT().length,chars=new Set(hwT().map(t=>t.s)).size;
+  $('#hwSt').textContent=msg||(n?`Offline rozpoznávání · zná ${chars} ${chars===1?'znak':chars<5?'znaky':'znaků'} vašeho písma. Opravy se učí.`:'Offline zatím zná jen číslice a + − × ÷ ( ). Písmena a symboly naučíte tlačítkem Aa, nebo opravou výsledku před vložením.');
+}
 async function hwRecognize(){
-  clearTimeout(HW.timer);if(!HW.strokes.length)return;const id=++HW.busy,st=$('#hwSt');
-  const sf=await getSample();
-  if(!sf){const L=recognizeLocal(HW.strokes.map(s=>s.map(q=>[q[0],q[1]])));if(id!==HW.busy)return;$('#hwOut').value=L.text.replace(/\*/g,'·');
-    st.textContent='Vestavěné rozpoznávání umí jen číslice a + − × ÷ ( ). Písmena a vzorce rozpozná Claude (v aplikaci na claude.ai). Symboly vložíte z řady nahoře.';return;}
-  st.textContent='Rozpoznávám…';
+  clearTimeout(HW.timer);if(HW.train){hwTrainStep();return;}if(!HW.strokes.length)return;
+  const id=++HW.busy;const L=hwLocal(HW.strokes);HW.last=L;$('#hwOut').value=L.text;hwStatus();
+  if(!S.hwClaude)return;
+  const sf=await getSample();if(id!==HW.busy)return;if(!sf){hwStatus('Offline (Claude teď není dostupný).');return;}
+  $('#hwSt').textContent='Offline hotovo, zpřesňuji Claudem…';
   try{const img=await hwImage();
     const r=await sf.json('Na obrázku je ručně psaný obsah jedné buňky tabulky (český Excel) – text, číslo, vzorec nebo matematický výraz. Přepiš ho přesně. Odpověz pouze JSON {"text":"..."}. Pravidla: řecká písmena, indexy, mocniny a matematické symboly zapiš Unicode znaky (α, β, Δ, x², x₁, √, ≤, ±, ∞, °). '+
       'Desetinná čárka zůstává čárkou. Pokud jde o vzorec Excelu (začíná „=“), použij české názvy funkcí jako v českém Excelu (SUMA, PRŮMĚR, ODMOCNINA, MOCNINA, KDYŽ, POČET, MIN, MAX, ZAOKROUHLIT, PI) se středníkem jako oddělovačem argumentů, odkazy na buňky velkými písmeny (A1, B2:B10), mocninu jako ^ a násobení jako *. Nic nevysvětluj.',{images:[img],modelTier:'default'});
-    if(id!==HW.busy)return;const t=r&&typeof r==='object'?String(r.text??''):String(r||'');$('#hwOut').value=t;st.textContent=t?'Rozpoznal Claude – případně opravte a klepněte na Vložit.':'Nepodařilo se přečíst – zkuste psát větší.';}
-  catch(e){if(id!==HW.busy)return;const L=recognizeLocal(HW.strokes.map(s=>s.map(q=>[q[0],q[1]])));$('#hwOut').value=L.text;st.textContent=e&&e.code==='not_granted'?'Claude není povolen – použito vestavěné rozpoznávání (jen čísla a operátory).':'Claude teď není dostupný – použito vestavěné rozpoznávání.';}
+    if(id!==HW.busy)return;const t=r&&typeof r==='object'?String(r.text??''):String(r||'');if(t){$('#hwOut').value=t;hwStatus('Zpřesnil Claude. Při vložení se z toho offline rozpoznávání naučí.');}}
+  catch(e){if(id===HW.busy)hwStatus(e&&e.code==='not_granted'?'Offline (Claude není povolen).':'Offline (Claude teď není dostupný).');}
 }
-function hwClear(){HW.strokes=[];HW.cur=null;HW.busy++;clearTimeout(HW.timer);$('#hwOut').value='';$('#hwSt').textContent='';hwDraw();}
+function hwClear(keepHist){if(!keepHist&&HW.strokes.length)hwHist();HW.strokes=[];HW.cur=null;HW.busy++;HW.last=null;clearTimeout(HW.timer);$('#hwOut').value='';if(!HW.train)hwStatus();hwDraw();}
+/* trénink písma */
+const HW_SETS=[['Malá písmena a–z','abcdefghijklmnopqrstuvwxyz'],['Velká písmena A–Z','ABCDEFGHIJKLMNOPQRSTUVWXYZ'],['Číslice a znaky','0123456789+×:=()%/<>'],['Česká písmena','áčďéěíňóřšťúůýž'],['Řecká písmena','αβγδεθλμπρσφωΔΣΩ'],['Symboly','√∞≈≠≤≥±°∫∑²³']];
+function hwLearnMenu(anchor){
+  const n=hwT().length;
+  menuPop(anchor,HW_SETS.map(([l,ch])=>['abc','Naučit: '+l,()=>hwTrainStart(Array.from(ch))]).concat([['edit','Naučit vlastní znaky…',async()=>{const v=await modal('Vlastní znaky',b=>{const f=el('label',{class:'field'},'<span>Znaky, které chcete naučit</span>');f.append(el('input',{type:'text',value:'',autofocus:''}));b.append(f);},[{label:'Zrušit'},{label:'Začít',cls:'primary',value:b=>b.querySelector('input').value}]);const a=v?Array.from(new Set(Array.from(v.replace(/\s+/g,'')))):[];if(a.length)hwTrainStart(a);}],'-',
+    ['check','Zpřesňovat Claudem (online): '+(S.hwClaude?'zapnuto':'vypnuto'),()=>{S.hwClaude=!S.hwClaude;saveS();toast(S.hwClaude?'Po offline rozpoznání se výsledek zpřesní Claudem (je-li dostupný).':'Rozpoznávání jen offline.');}],
+    ['trash','Zapomenout naučené písmo ('+n+')',async()=>{const ok=await modal('Zapomenout písmo?',b=>b.append(el('p',{},'Smažou se všechny naučené vzory vašeho písma.')),[{label:'Zrušit'},{label:'Smazat',cls:'danger',value:true}]);if(ok){hwSave([]);hwStatus();}},'danger']]));
+}
+function hwTrainStart(chars){HW.train={chars,i:0,rep:0,per:2,n:0};hwClear(true);HW.hist=[];$('#hwOut').value='';$('#hwOut').disabled=true;$('#hwIns').textContent='Ukončit učení';hwTrainUI();}
+function hwTrainUI(){const t=HW.train,box=$('#hwTr');if(!t){box.hidden=true;return;}box.hidden=false;
+  box.innerHTML=`<span>Napište</span><b>${esc(t.chars[t.i])}</b><span>${t.rep+1}. ze ${t.per} · znak ${t.i+1}/${t.chars.length}</span>`;
+  $('#hwSt').textContent='Pište znak tak, jak píšete běžně. Po chvilce se uloží a přejde se dál. Špatný pokus smažte gumou.';hwDraw();}
+function hwTrainStep(){const t=HW.train;if(!t||!HW.strokes.length)return;
+  const padH=$('#hwC').getBoundingClientRect().height||200,b=bbOf(HW.strokes);const T=hwT();hwAddTpl(T,t.chars[t.i],pcloud(HW.strokes),b.h/padH);hwSave(T);t.n++;
+  HW.strokes=[];HW.hist=[];t.rep++;if(t.rep>=t.per){t.rep=0;t.i++;}
+  if(t.i>=t.chars.length){const n=t.n;hwTrainEnd();toast('Hotovo – uloženo '+n+' vzorů vašeho písma');return;}
+  hwTrainUI();}
+function hwTrainEnd(){HW.train=null;$('#hwTr').hidden=true;$('#hwOut').disabled=false;$('#hwIns').textContent='Vložit do buňky';hwClear(true);HW.hist=[];hwStatus();}
 (function(){
   const c=$('#hwC');let pid=null;
   const pt=e=>{const r=c.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top,e.pointerType==='pen'?(e.pressure||0.5):0.5];};
-  c.addEventListener('pointerdown',e=>{if(pid!==null)return;e.preventDefault();pid=e.pointerId;try{c.setPointerCapture(pid);}catch(_){}clearTimeout(HW.timer);HW.cur=[pt(e)];hwDraw();});
-  c.addEventListener('pointermove',e=>{if(e.pointerId!==pid||!HW.cur)return;let ev=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!ev.length)ev=[e];ev.forEach(q=>HW.cur.push(pt(q)));hwDraw();});
-  const end=e=>{if(e.pointerId!==pid)return;pid=null;if(HW.cur){HW.strokes.push(HW.cur);HW.cur=null;}hwDraw();clearTimeout(HW.timer);HW.timer=setTimeout(hwRecognize,1100);};
+  const isEr=e=>HW.mode==='eraser'||(e.buttons&32)||e.button===5;
+  c.addEventListener('pointerdown',e=>{if(pid!==null)return;e.preventDefault();pid=e.pointerId;try{c.setPointerCapture(pid);}catch(_){}clearTimeout(HW.timer);
+    if(isEr(e)){HW.erasing=true;hwHist();const p=pt(e);HW.ept=p;hwEraseAt(p[0],p[1]);hwDraw();return;}
+    hwHist();HW.cur=[pt(e)];hwDraw();});
+  c.addEventListener('pointermove',e=>{
+    if(e.pointerId!==pid){if(pid===null&&HW.mode==='eraser'&&e.pointerType!=='touch'){HW.ept=pt(e);hwDraw();}return;}
+    let ev=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!ev.length)ev=[e];
+    if(HW.erasing){ev.forEach(q=>{const p=pt(q);hwEraseAt(p[0],p[1]);HW.ept=p;});hwDraw();return;}
+    if(!HW.cur)return;ev.forEach(q=>HW.cur.push(pt(q)));hwDraw();});
+  const end=e=>{if(e.pointerId!==pid)return;pid=null;
+    if(HW.erasing){HW.erasing=false;HW.ept=null;hwDraw();if(HW.hist.length&&HW.hist[HW.hist.length-1].length===HW.strokes.length)HW.hist.pop();clearTimeout(HW.timer);if(!HW.train){if(HW.strokes.length)HW.timer=setTimeout(hwRecognize,700);else{$('#hwOut').value='';HW.last=null;}}return;}
+    if(HW.cur){HW.strokes.push(HW.cur);HW.cur=null;}hwDraw();clearTimeout(HW.timer);HW.timer=setTimeout(hwRecognize,HW.train?850:1100);};
   c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
-  [['hwUndo','undo',()=>{HW.strokes.pop();hwDraw();if(HW.strokes.length){clearTimeout(HW.timer);HW.timer=setTimeout(hwRecognize,600);}else hwClear();}],['hwClear','trash',hwClear],['hwRec','check',hwRecognize],['hwClose','close',()=>xlHwToggle(false)]].forEach(([id,i,fn])=>{const b=$('#'+id);b.innerHTML=ic(i);b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=fn;});
+  c.addEventListener('pointerleave',()=>{if(pid===null&&HW.ept){HW.ept=null;hwDraw();}});
+  [['hwUndo','undo',()=>{if(!HW.hist.length)return;HW.strokes=HW.hist.pop();hwDraw();clearTimeout(HW.timer);if(HW.train)return;if(HW.strokes.length)HW.timer=setTimeout(hwRecognize,500);else{$('#hwOut').value='';HW.last=null;}}],
+   ['hwEr','eraser',()=>hwSetMode(HW.mode==='eraser'?'pen':'eraser')],
+   ['hwClear','trash',()=>hwClear()],['hwRec','check',hwRecognize],['hwLearn','abc',e=>hwLearnMenu(e.currentTarget)],['hwClose','close',()=>xlHwToggle(false)]].forEach(([id,i,fn])=>{const b=$('#'+id);b.innerHTML=ic(i);b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=fn;});
   $('#hwIns').addEventListener('pointerdown',e=>{if(XL.edit)e.preventDefault();});
-  $('#hwIns').onclick=()=>{const t=$('#hwOut').value;if(!t.trim()){toast('Nejdřív napište něco perem.');return;}xlInsertText(t,!XL.edit);hwClear();};
+  $('#hwIns').onclick=()=>{if(HW.train){hwTrainEnd();return;}const t=$('#hwOut').value;if(!t.trim()){toast('Nejdřív napište něco perem.');return;}
+    const n=hwLearn(HW.last,t);xlInsertText(t,!XL.edit);hwClear(true);HW.hist=[];if(n)hwStatus('Vloženo · naučeno '+n+' '+(n===1?'nový vzor':n<5?'nové vzory':'nových vzorů')+' vašeho písma.');};
   $('#hwOut').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('#hwIns').click();});
   addEventListener('resize',()=>{if(!$('#xlHw').hidden)hwSize();});
 })();
@@ -3270,7 +3372,7 @@ function openHelp(){
 <li><b>Rovnice a grafy:</b> do kalkulačky (orámovaný příklad nebo menu ⋯ → Kalkulačka a grafy funkcí) napište rovnici s x, např. x^2 − 5x + 6 = 0, a vyřeší ji. Funkci y = … vykreslí jako graf, který vložíte do stránky.</li>
 <li><b>Vyšší matematika:</b> int(x^2;0;1) – určitý integrál (i do inf), der(x^3;2) – derivace v bodě (der(f;a;2) druhá), sum(1/x^2;1;100) – součet, lim(sin(x)/x;0) – limita. Proměnná je vždy x.</li>
 <li><b>Tabulka a rozvrh:</b> menu ⋯ → Vložit tabulku nakreslí mřížku do stránky. V Pozadí stránky najdete šablony Rozvrh hodin a Týdenní plán.</li>
-<li><b>Psaní rukou v tabulce:</b> tlačítko s perem v liště tabulky otevře dole panel. Napište perem text nebo vzorec (např. =SUMA(A1:A5) nebo α = 0,05), po chvilce se převede na znaky a Vložit do buňky ho zapíše a posune se o řádek níž. Nad panelem je řada speciálních znaků (řecká písmena, matematika, indexy ², ₁, jednotky) – klepnutím se přidají do buňky.</li>
+<li><b>Psaní rukou v tabulce:</b> tlačítko s perem v liště tabulky otevře dole panel. Napište perem text nebo vzorec (např. =SUMA(A1:A5) nebo α = 0,05), po chvilce se převede na znaky a Vložit do buňky ho zapíše a posune se o řádek níž. Rozpoznávání běží offline a učí se vaše písmo: tlačítkem Aa naučíte písmena a znaky, a každá oprava výsledku před vložením se uloží jako nový vzor. Guma (nebo tlačítko na peru) maže celé tahy. Nad panelem je řada speciálních znaků (řecká písmena, matematika, indexy ², ₁, jednotky) – klepnutím se přidají do buňky.</li>
 <li><b>Obrázky v tabulce:</b> v tabulce tlačítko s obrázkem vloží fotku z galerie nebo z fotoaparátu. Táhnutím ji přesunete, za kulatý roh zvětšíte. Graf z označených dat jde vložit přímo do listu.</li>
 <li><b>Záloha všeho:</b> v knihovně tlačítko ⋯ → Zálohovat celou knihovnu uloží všechny sešity, tabulky, složky i kategorie do jednoho souboru.</li>
 <li><b>Lepicí poznámky a nahrávky:</b> menu ⋯ → Lepicí poznámka vloží barevný papírek s textem. Nahrát zvuk spustí nahrávání přednášky, nahrávky najdete v menu ⋯ → Nahrávky.</li>

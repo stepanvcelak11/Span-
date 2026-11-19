@@ -13,7 +13,7 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - Sešity s obálkami (na výšku i na šířku), stránky (linky, čtverečky, tečky, Cornell, úkoly, noty; 6 barev papíru), panel stránek s náhledy, záložky.
 - **Tabulky jako v Excelu**: české vzorce (=SUMA, =PRŮMĚR, =KDYŽ… přes HyperFormula), více listů, formáty čísel, vyplňování táhlem, řazení, grafy, import/export .xlsx a .csv.
 - **Kalkulačka rukopisu**: orámujte příklad (nebo laso) → „Spočítat“; rozpoznává Claude (v claude.ai) nebo vestavěný rozpoznávač, který se učí z oprav. Řeší rovnice s neznámou x, kreslí grafy funkcí (y = …) a počítá integrály, derivace, sumy a limity.
-- **Psaní rukou v tabulce** (převod na text/vzorec) a řada speciálních znaků α β Δ ² ₁ √ ≤ °.
+- **Psaní rukou v tabulce** (převod na text/vzorec, offline rozpoznávání, které se učí vaše písmo, guma) a řada speciálních znaků α β Δ ² ₁ √ ≤ °.
 - **Obrázky a grafy přímo v listu tabulky** (přesun, změna velikosti, vrácení zpět).
 - **Tabulka do stránky**, šablony **Rozvrh hodin** a **Týdenní plán**, **záloha celé knihovny** do jednoho souboru.
 - **Lepicí poznámky** v šesti barvách a **nahrávání zvuku** (nahrávky uložené v sešitě, přehrávání s posuvníkem).
