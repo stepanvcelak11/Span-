@@ -299,6 +299,28 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .xl-img-h{position:absolute;right:-11px;bottom:-11px;width:22px;height:22px;border-radius:50%;background:var(--xl);border:3px solid var(--surface);box-sizing:border-box;cursor:nwse-resize;touch-action:none}
 .xl-img-bar{position:absolute;left:0;top:-50px;display:flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
 .xl-img-bar .ib{width:38px;height:38px}.xl-img-bar .ib.del{color:var(--danger)}
+.xl-hw{flex:none;height:min(300px,38vh);display:flex;flex-direction:column;border-top:1px solid var(--line);background:var(--surface-2)}
+.xl-hw[hidden]{display:none}
+.hw-sym{display:flex;flex-direction:column;gap:4px;padding:6px 10px 4px;padding-left:max(10px,env(safe-area-inset-left,0px))}
+.hw-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.hw-tab{height:28px;padding:0 12px;border:0;border-radius:14px;background:transparent;font:600 12.5px var(--f-body);color:var(--muted);flex:none}
+.hw-tab[aria-pressed="true"]{background:color-mix(in srgb,var(--xl) 16%,transparent);color:var(--xl)}
+.hw-keys{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.hw-keys::-webkit-scrollbar,.hw-tabs::-webkit-scrollbar{display:none}
+.hw-key{min-width:40px;height:40px;padding:0 8px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font:500 18px var(--f-body);color:var(--ink);flex:none}
+.hw-key:active{background:color-mix(in srgb,var(--xl) 18%,var(--surface))}
+.hw-main{flex:1;min-height:0;display:flex;gap:10px;padding:4px 10px 10px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.hw-pad{flex:1;min-width:0;position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hw-pad canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.hw-ph{position:absolute;left:16px;right:16px;top:50%;transform:translateY(-50%);text-align:center;color:#8A90A0;font-size:14px;pointer-events:none;line-height:1.45}
+.hw-side{width:min(280px,36%);display:flex;flex-direction:column;gap:6px}
+#hwOut{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:500 18px var(--f-body);padding:0 10px;box-sizing:border-box;width:100%}
+#hwOut:focus{outline:2px solid var(--xl);outline-offset:-1px}
+.hw-st{font-size:12px;color:var(--muted);line-height:1.35;min-height:16px;overflow:hidden}
+.hw-btns{display:flex;align-items:center;gap:2px;margin-top:auto}.hw-btns .grow{flex:1}.hw-btns .ib{width:40px;height:40px}
+#hwIns{justify-content:center;background:var(--xl);border-color:var(--xl)}
+#xlHwB[aria-pressed="true"]{background:color-mix(in srgb,var(--xl) 18%,transparent);color:var(--xl)}
+@media (max-width:640px){.hw-main{flex-direction:column}.hw-side{width:auto}.hw-btns{margin-top:0}}
 /* kalkulačka */
 .calc{position:absolute;z-index:8;width:min(340px,calc(100vw - 24px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
 .calc-h{display:flex;align-items:center;gap:8px;font-size:15px}.calc-h .grow{flex:1}.calc-h .ib{width:34px;height:34px}.calc-h>svg{color:var(--accent-2)}
@@ -452,6 +474,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="ib" id="xlFn" title="Vložit funkci" aria-label="Vložit funkci"></button>
       <button class="ib" id="xlChart" title="Graf z označených dat" aria-label="Graf"></button>
       <button class="ib" id="xlImgB" title="Vložit obrázek" aria-label="Vložit obrázek"></button>
+      <button class="ib" id="xlHwB" title="Psát rukou a speciální znaky (α, ², √ …)" aria-label="Psát rukou"></button>
       <span class="vsep2"></span>
       <button class="ib" id="xlBd" title="Ohraničení" aria-label="Ohraničení"></button>
       <button class="ib" id="xlFz" title="Ukotvit řádky a sloupce" aria-label="Ukotvit"></button>
@@ -476,6 +499,18 @@ input[type=range]{accent-color:var(--accent)}
         <div class="xl-fillbox" id="xlFillBox" hidden></div>
         <div id="xlImgs"></div>
         <input class="xl-ed" id="xlEd" type="text" autocomplete="off" spellcheck="false" hidden aria-label="Úprava buňky">
+      </div>
+    </div>
+    <div class="xl-hw" id="xlHw" hidden aria-label="Psaní rukou">
+      <div class="hw-sym"><div class="hw-tabs" id="hwTabs"></div><div class="hw-keys" id="hwKeys"></div></div>
+      <div class="hw-main">
+        <div class="hw-pad"><canvas id="hwC"></canvas><span class="hw-ph" id="hwPh">Pište sem perem – text, číslo nebo vzorec (např. =SUMA(A1:A5), α = 0,05)</span></div>
+        <div class="hw-side">
+          <input id="hwOut" type="text" autocomplete="off" spellcheck="false" aria-label="Rozpoznaný text" placeholder="Rozpoznaný text">
+          <div class="hw-st" id="hwSt"></div>
+          <div class="hw-btns"><button class="ib" id="hwUndo" title="Zpět poslední tah" aria-label="Zpět poslední tah"></button><button class="ib" id="hwClear" title="Smazat vše" aria-label="Smazat vše"></button><button class="ib" id="hwRec" title="Rozpoznat" aria-label="Rozpoznat"></button><span class="grow"></span><button class="ib" id="hwClose" title="Zavřít" aria-label="Zavřít"></button></div>
+          <button class="btn primary" id="hwIns">Vložit do buňky</button>
+        </div>
       </div>
     </div>
     <nav class="xl-tabs" id="xlTabs" aria-label="Listy"></nav>
@@ -2933,6 +2968,67 @@ async function xlInsertImage(file){
   }catch(e){toast('Obrázek se nepodařilo načíst.');}
 }
 
+/* ---------- psaní rukou a speciální znaky v tabulce ---------- */
+const HW_SYM={'Řecká':'α β γ δ ε ζ η θ ι κ λ μ ν ξ π ρ σ τ υ φ χ ψ ω Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω','Matematika':'± × ÷ · √ ∛ ∞ ≈ ≠ ≤ ≥ ∑ ∏ ∫ ∂ Δ ∇ ∈ ∉ ⊂ ∪ ∩ ∀ ∃ → ⇒ ⇔ ∠ ⊥ ∥ ‰ ° ′ ″','Indexy':'⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁿ ˣ ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₊ ₋ ₙ ₓ ₘ','Jednotky':'°C Kč € $ £ % µ Ω m² m³ cm² cm³ km/h m/s m/s² kg/m³ N·m kWh ‰'};
+const HW={strokes:[],cur:null,timer:0,tab:'Řecká',busy:0};
+function xlHwToggle(on){
+  const p=$('#xlHw');on=on===undefined?p.hidden:on;p.hidden=!on;$('#xlHwB').setAttribute('aria-pressed',String(on));
+  if(on){hwTabs();requestAnimationFrame(hwSize);}
+}
+function hwTabs(){
+  const t=$('#hwTabs');t.replaceChildren();Object.keys(HW_SYM).forEach(k=>{const b=el('button',{class:'hw-tab','aria-pressed':String(k===HW.tab)},esc(k));b.onclick=()=>{HW.tab=k;hwTabs();};t.append(b);});
+  const K=$('#hwKeys');K.replaceChildren();HW_SYM[HW.tab].split(' ').forEach(sy=>{const b=el('button',{class:'hw-key'},esc(sy));b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=()=>xlInsertText(sy,false);K.append(b);});
+}
+function xlInsertText(txt,replace){
+  const ed=XL.edit?(XL.edit.src==='fx'?$('#xlFx'):$('#xlEd')):null;
+  if(ed){const a=ed.selectionStart??ed.value.length,b=ed.selectionEnd??a;ed.value=ed.value.slice(0,a)+txt+ed.value.slice(b);try{ed.setSelectionRange(a+txt.length,a+txt.length);}catch(e){}
+    if(XL.edit.src!=='fx')$('#xlFx').value=ed.value;return;}
+  const r=XL.sel.r,c=XL.sel.c,v=replace?txt:rawText(r,c)+txt;
+  if(setCell(r,c,v)){if(replace)xlSelect(Math.min(r+1,SH().rows-1),c);else xlRender();}
+}
+function hwSize(){const c=$('#hwC'),r=c.getBoundingClientRect();if(!r.width)return;const d=Math.min(devicePixelRatio||1,2);c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);hwDraw();}
+function hwDraw(){
+  const c=$('#hwC'),g=c.getContext('2d'),d=c.width/(c.getBoundingClientRect().width||1);g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);g.scale(d,d);
+  const W2=c.width/d,H2=c.height/d;g.strokeStyle='rgba(30,113,69,.25)';g.setLineDash([6,6]);g.lineWidth=1;g.beginPath();g.moveTo(16,H2*0.68);g.lineTo(W2-16,H2*0.68);g.stroke();g.setLineDash([]);
+  g.strokeStyle='#1B2232';g.lineCap='round';g.lineJoin='round';
+  g.lineWidth=3;HW.strokes.concat(HW.cur?[HW.cur]:[]).forEach(st=>{if(st.length>1){g.beginPath();g.moveTo(st[0][0],st[0][1]);for(let i=1;i<st.length-1;i++){const mx=(st[i][0]+st[i+1][0])/2,my=(st[i][1]+st[i+1][1])/2;g.quadraticCurveTo(st[i][0],st[i][1],mx,my);}g.lineTo(st[st.length-1][0],st[st.length-1][1]);g.stroke();}
+    if(st.length===1){g.beginPath();g.arc(st[0][0],st[0][1],2,0,Math.PI*2);g.fillStyle='#1B2232';g.fill();}});
+  $('#hwPh').hidden=!!(HW.strokes.length||HW.cur);
+}
+function hwImage(){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;HW.strokes.forEach(st=>st.forEach(q=>{x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}));
+  const pad=24,k=Math.min(3,1400/Math.max(40,x1-x0+pad*2)),c=document.createElement('canvas');c.width=Math.round((x1-x0+pad*2)*k);c.height=Math.round((y1-y0+pad*2)*k);
+  const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.scale(k,k);g.translate(pad-x0,pad-y0);g.strokeStyle='#000';g.lineCap='round';g.lineJoin='round';g.lineWidth=3;
+  HW.strokes.forEach(st=>{g.beginPath();st.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));if(st.length===1)g.lineTo(st[0][0]+.5,st[0][1]);g.stroke();});
+  return new Promise(res=>c.toBlob(res,'image/png'));
+}
+async function hwRecognize(){
+  clearTimeout(HW.timer);if(!HW.strokes.length)return;const id=++HW.busy,st=$('#hwSt');
+  const sf=await getSample();
+  if(!sf){const L=recognizeLocal(HW.strokes.map(s=>s.map(q=>[q[0],q[1]])));if(id!==HW.busy)return;$('#hwOut').value=L.text.replace(/\*/g,'·');
+    st.textContent='Vestavěné rozpoznávání umí jen číslice a + − × ÷ ( ). Písmena a vzorce rozpozná Claude (v aplikaci na claude.ai). Symboly vložíte z řady nahoře.';return;}
+  st.textContent='Rozpoznávám…';
+  try{const img=await hwImage();
+    const r=await sf.json('Na obrázku je ručně psaný obsah jedné buňky tabulky (český Excel) – text, číslo, vzorec nebo matematický výraz. Přepiš ho přesně. Odpověz pouze JSON {"text":"..."}. Pravidla: řecká písmena, indexy, mocniny a matematické symboly zapiš Unicode znaky (α, β, Δ, x², x₁, √, ≤, ±, ∞, °). '+
+      'Desetinná čárka zůstává čárkou. Pokud jde o vzorec Excelu (začíná „=“), použij české názvy funkcí jako v českém Excelu (SUMA, PRŮMĚR, ODMOCNINA, MOCNINA, KDYŽ, POČET, MIN, MAX, ZAOKROUHLIT, PI) se středníkem jako oddělovačem argumentů, odkazy na buňky velkými písmeny (A1, B2:B10), mocninu jako ^ a násobení jako *. Nic nevysvětluj.',{images:[img],modelTier:'default'});
+    if(id!==HW.busy)return;const t=r&&typeof r==='object'?String(r.text??''):String(r||'');$('#hwOut').value=t;st.textContent=t?'Rozpoznal Claude – případně opravte a klepněte na Vložit.':'Nepodařilo se přečíst – zkuste psát větší.';}
+  catch(e){if(id!==HW.busy)return;const L=recognizeLocal(HW.strokes.map(s=>s.map(q=>[q[0],q[1]])));$('#hwOut').value=L.text;st.textContent=e&&e.code==='not_granted'?'Claude není povolen – použito vestavěné rozpoznávání (jen čísla a operátory).':'Claude teď není dostupný – použito vestavěné rozpoznávání.';}
+}
+function hwClear(){HW.strokes=[];HW.cur=null;HW.busy++;clearTimeout(HW.timer);$('#hwOut').value='';$('#hwSt').textContent='';hwDraw();}
+(function(){
+  const c=$('#hwC');let pid=null;
+  const pt=e=>{const r=c.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top,e.pointerType==='pen'?(e.pressure||0.5):0.5];};
+  c.addEventListener('pointerdown',e=>{if(pid!==null)return;e.preventDefault();pid=e.pointerId;try{c.setPointerCapture(pid);}catch(_){}clearTimeout(HW.timer);HW.cur=[pt(e)];hwDraw();});
+  c.addEventListener('pointermove',e=>{if(e.pointerId!==pid||!HW.cur)return;let ev=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!ev.length)ev=[e];ev.forEach(q=>HW.cur.push(pt(q)));hwDraw();});
+  const end=e=>{if(e.pointerId!==pid)return;pid=null;if(HW.cur){HW.strokes.push(HW.cur);HW.cur=null;}hwDraw();clearTimeout(HW.timer);HW.timer=setTimeout(hwRecognize,1100);};
+  c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
+  [['hwUndo','undo',()=>{HW.strokes.pop();hwDraw();if(HW.strokes.length){clearTimeout(HW.timer);HW.timer=setTimeout(hwRecognize,600);}else hwClear();}],['hwClear','trash',hwClear],['hwRec','check',hwRecognize],['hwClose','close',()=>xlHwToggle(false)]].forEach(([id,i,fn])=>{const b=$('#'+id);b.innerHTML=ic(i);b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=fn;});
+  $('#hwIns').addEventListener('pointerdown',e=>{if(XL.edit)e.preventDefault();});
+  $('#hwIns').onclick=()=>{const t=$('#hwOut').value;if(!t.trim()){toast('Nejdřív napište něco perem.');return;}xlInsertText(t,!XL.edit);hwClear();};
+  $('#hwOut').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('#hwIns').click();});
+  addEventListener('resize',()=>{if(!$('#xlHw').hidden)hwSize();});
+})();
+
 /* ---------- import a export .xlsx / .csv ---------- */
 function nfToZ(f){if(!f||!f.nf)return f&&f.dp!=null?'0'+(f.dp?'.'+'0'.repeat(f.dp):''):undefined;const d=f.dp!=null?f.dp:2,dec=d?'.'+'0'.repeat(d):'';return {num2:'#,##0'+dec,int:'#,##0',pct:'0'+(f.dp?'.'+'0'.repeat(f.dp):'')+'%',czk:'#,##0'+dec+' "Kč"',date:'d.m.yyyy',datetime:'d.m.yyyy h:mm',time:'h:mm'}[f.nf];}
 function zToNf(z){if(!z||z==='General')return null;if(/%/.test(z))return {nf:'pct'};if(/Kč|CZK|€|\$/.test(z))return {nf:'czk'};if(/[dy]/i.test(z)&&!/[h]/i.test(z))return {nf:'date'};if(/h/i.test(z)&&/[dy]/i.test(z))return {nf:'datetime'};if(/h/i.test(z))return {nf:'time'};const m=/0\.(0+)/.exec(z);if(m)return {nf:'num2',dp:m[1].length};return null;}
@@ -3091,7 +3187,7 @@ function fillDown(){const s=selN();if(s.r2===s.r1){toast('Označte oblast, do kt
   set('xlB','bold',()=>xlFmt({b:!curFmt().b}));set('xlI','italic',()=>xlFmt({i:!curFmt().i}));
   set('xlAL','alignL',()=>xlFmt({al:'left'}));set('xlAC','alignC',()=>xlFmt({al:'center'}));set('xlAR','alignR',()=>xlFmt({al:'right'}));
   set('xlBg','fill',e=>xlColorPop(e.currentTarget,'bg'));set('xlFc','fcolor',e=>xlColorPop(e.currentTarget,'fc'));
-  set('xlSum','sigma',autoSum);set('xlImgB','image',e=>menuPop(e.currentTarget,[['image','Obrázek z galerie',()=>$('#fXlImg').click()],['camera','Vyfotit',()=>{const f=$('#fXlImg');f.setAttribute('capture','environment');f.click();setTimeout(()=>f.removeAttribute('capture'),1500);}]]));
+  set('xlSum','sigma',autoSum);set('xlHwB','pen',()=>xlHwToggle());set('xlImgB','image',e=>menuPop(e.currentTarget,[['image','Obrázek z galerie',()=>$('#fXlImg').click()],['camera','Vyfotit',()=>{const f=$('#fXlImg');f.setAttribute('capture','environment');f.click();setTimeout(()=>f.removeAttribute('capture'),1500);}]]));
   $('#fXlImg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)xlInsertImage(f);};
   grid().addEventListener('pointerdown',()=>{if(xlImgSel){xlImgSel=null;xlImgs();}});set('xlFn','fx',e=>fxMenu(e.currentTarget));set('xlChart','chart',xlChart);
   set('xlRowIns','rowsPlus',()=>xlRows('ins'));set('xlBd','border',e=>xlBorderMenu(e.currentTarget));set('xlFz','freeze',e=>xlFreezeMenu(e.currentTarget));set('xlFindB','search',xlFind);set('xlColIns','colsPlus',()=>xlCols('ins'));
@@ -3174,6 +3270,7 @@ function openHelp(){
 <li><b>Rovnice a grafy:</b> do kalkulačky (orámovaný příklad nebo menu ⋯ → Kalkulačka a grafy funkcí) napište rovnici s x, např. x^2 − 5x + 6 = 0, a vyřeší ji. Funkci y = … vykreslí jako graf, který vložíte do stránky.</li>
 <li><b>Vyšší matematika:</b> int(x^2;0;1) – určitý integrál (i do inf), der(x^3;2) – derivace v bodě (der(f;a;2) druhá), sum(1/x^2;1;100) – součet, lim(sin(x)/x;0) – limita. Proměnná je vždy x.</li>
 <li><b>Tabulka a rozvrh:</b> menu ⋯ → Vložit tabulku nakreslí mřížku do stránky. V Pozadí stránky najdete šablony Rozvrh hodin a Týdenní plán.</li>
+<li><b>Psaní rukou v tabulce:</b> tlačítko s perem v liště tabulky otevře dole panel. Napište perem text nebo vzorec (např. =SUMA(A1:A5) nebo α = 0,05), po chvilce se převede na znaky a Vložit do buňky ho zapíše a posune se o řádek níž. Nad panelem je řada speciálních znaků (řecká písmena, matematika, indexy ², ₁, jednotky) – klepnutím se přidají do buňky.</li>
 <li><b>Obrázky v tabulce:</b> v tabulce tlačítko s obrázkem vloží fotku z galerie nebo z fotoaparátu. Táhnutím ji přesunete, za kulatý roh zvětšíte. Graf z označených dat jde vložit přímo do listu.</li>
 <li><b>Záloha všeho:</b> v knihovně tlačítko ⋯ → Zálohovat celou knihovnu uloží všechny sešity, tabulky, složky i kategorie do jednoho souboru.</li>
 <li><b>Lepicí poznámky a nahrávky:</b> menu ⋯ → Lepicí poznámka vloží barevný papírek s textem. Nahrát zvuk spustí nahrávání přednášky, nahrávky najdete v menu ⋯ → Nahrávky.</li>
