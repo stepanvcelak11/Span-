@@ -14,24 +14,25 @@
 <meta name="theme-color" content="#2D5BD3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&family=Caveat:wght@500;600&family=Lora:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&family=Caveat:wght@500;600&family=Lora:wght@400;500;600&display=swap">
 <style>
 /* Layout: knihovna sešitů (mřížka obálek) → celoobrazovkový editor: horní lišta, plátno se stránkami, kolečko nástrojů u hrotu pera */
 :root{
-  --desk:#E4E8EE; --surface:#FFFFFF; --surface-2:#F2F4F8; --ink:#161C29; --muted:#5D6678;
-  --line:#D4DAE4; --accent:#2D5BD3; --accent-soft:#E2E9FB; --accent-ink:#FFFFFF; --danger:#C2253A;
-  --shadow:0 12px 36px rgba(18,28,56,.18);
-  --f-display:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --desk:#EDEDF0; --surface:#FFFFFF; --surface-2:#F1F1F4; --ink:#151517; --muted:#6B6B73;
+  --line:#E1E1E6; --accent:#D9603F; --accent-2:#1593A8; --accent-soft:#FBE7E1; --accent-ink:#FFFFFF; --danger:#C2253A;
+  --bar:#262628; --bar-2:#3D3D42; --bar-ink:#ECECEF;
+  --shadow:0 12px 36px rgba(0,0,0,.18);
+  --f-display:"Lora", Georgia, "Times New Roman", serif;
   --f-body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --desk:#111318; --surface:#1B1E25; --surface-2:#242832; --ink:#E7EAF0; --muted:#9AA2B2;
-  --line:#313744; --accent:#88A7FF; --accent-soft:#25304E; --accent-ink:#0C1430; --danger:#FF7083;
-  --shadow:0 12px 36px rgba(0,0,0,.55); color-scheme:dark } }
+  --desk:#000000; --surface:#1C1C1E; --surface-2:#2A2A2D; --ink:#F2F2F4; --muted:#9C9CA3;
+  --line:#2F2F33; --accent:#E3735C; --accent-2:#3EC3DB; --accent-soft:#3A2520; --accent-ink:#FFFFFF; --danger:#FF6B7D;
+  --shadow:0 12px 36px rgba(0,0,0,.6); color-scheme:dark } }
 :root[data-theme="dark"]{
-  --desk:#111318; --surface:#1B1E25; --surface-2:#242832; --ink:#E7EAF0; --muted:#9AA2B2;
-  --line:#313744; --accent:#88A7FF; --accent-soft:#25304E; --accent-ink:#0C1430; --danger:#FF7083;
-  --shadow:0 12px 36px rgba(0,0,0,.55); color-scheme:dark }
+  --desk:#000000; --surface:#1C1C1E; --surface-2:#2A2A2D; --ink:#F2F2F4; --muted:#9C9CA3;
+  --line:#2F2F33; --accent:#E3735C; --accent-2:#3EC3DB; --accent-soft:#3A2520; --accent-ink:#FFFFFF; --danger:#FF6B7D;
+  --shadow:0 12px 36px rgba(0,0,0,.6); color-scheme:dark }
 
 html,body{height:100%}
 body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:14px;
@@ -42,122 +43,127 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
 /* ---------- knihovna ---------- */
-#lib{height:100%;display:flex}
+#lib{height:100%;display:flex;background:var(--desk);position:relative}
 #lib[hidden]{display:none}
-.side{width:250px;flex:none;background:var(--surface);border-right:1px solid var(--line);overflow-y:auto;padding-block:24px 30px;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:14px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px}
-.side .brand{padding:0 8px}
-#sideNav{display:flex;flex-direction:column;gap:2px}
-.nav-h{display:flex;align-items:center;justify-content:space-between;font:700 11.5px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 10px 6px}
-.nav-h:first-child{padding-top:0}
-.nav-h .ib{width:30px;height:30px;border-radius:8px}
-.nav-h .ib svg{width:18px;height:18px}
-.nav-it{display:flex;align-items:center;gap:11px;border:0;background:transparent;border-radius:10px;padding:0 6px 0 10px;height:42px;text-align:left;font-weight:500;width:100%}
-.nav-it:hover{background:var(--surface-2)}
-.nav-it[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
-.nav-it .lbl2{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav-it .cnt{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:20px;text-align:right}
-.nav-it .cdot2{width:12px;height:12px;border-radius:4px;flex:none;margin:0 5px}
-.nav-row{display:flex;align-items:center}
-.nav-row .nav-it{flex:1;min-width:0}
-.nav-row .ib{width:32px;height:32px;border-radius:8px;opacity:.55}
-.nav-row .ib:hover{opacity:1}
-.nav-row .ib svg{width:18px;height:18px}
-.lib-main{flex:1;min-width:0;overflow-y:auto;padding-block:26px 60px;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));box-sizing:border-box}
-.lib-in{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-.lib-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.crumbs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-right:auto;min-width:0;font:700 22px/1.2 var(--f-display);letter-spacing:-.01em}
-.crumbs button{border:0;background:transparent;padding:4px 6px;border-radius:8px;font:inherit;color:var(--muted)}
-.crumbs button:hover{background:var(--surface-2);color:var(--ink)}
-.crumbs .here{padding:4px 6px;display:inline-flex;align-items:center;gap:10px}
-.crumbs .sepc{color:var(--muted);font-weight:500}
-.crumbs .cdot2{width:14px;height:14px;border-radius:5px}
-.lib-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.sort{display:flex;align-items:center;gap:8px;margin-left:auto;color:var(--muted);font-size:13px}
-.sort select{height:40px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;padding:0 10px}
-.empty{grid-column:1/-1;border:1.5px dashed var(--line);border-radius:16px;padding:28px;color:var(--muted);text-align:center;line-height:1.55}
-.folder{position:relative;aspect-ratio:3/4;max-width:100%;border-radius:14px;border:1px solid color-mix(in srgb,var(--fc) 35%,var(--line));background:color-mix(in srgb,var(--fc) 13%,var(--surface));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--fc);padding:12px}
-.folder svg{width:64px;height:64px;stroke-width:1.4}
-.folder .fcount{font-size:12px;color:var(--muted);font-weight:500;text-align:center}
-.folder:active{transform:scale(.98)}
-.fav-badge{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;color:#E8A400}
+.side{width:320px;flex:none;background:var(--surface);overflow-y:auto;padding-block:24px 40px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:18px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;border-right:1px solid var(--line)}
+#lib.noside .side{display:none}
+.brand-t{font:600 36px/1.1 var(--f-display);letter-spacing:-.015em;margin:6px 8px 8px}
+#sideNav{display:flex;flex-direction:column;gap:4px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;height:92px;padding:14px 14px 13px;border-radius:14px;border:0;background:var(--surface-2);text-align:left;font-weight:500;font-size:15px;box-sizing:border-box}
+.tile svg{color:var(--c)}
+.tile[aria-current="true"]{background:var(--accent);color:#fff}
+.tile[aria-current="true"] svg{color:#fff}
+.sec{display:flex;align-items:center;gap:2px;padding:14px 2px 6px 8px}
+.sec h3{margin:0;font:600 24px/1.2 var(--f-display);flex:1;min-width:0}
+.sec h3 button{border:0;background:transparent;padding:0;font:inherit;color:inherit;text-align:left}
+.sec .ib{width:38px;height:38px;color:var(--accent-2)}
+.sec .chev svg{transition:transform .2s}
+.sec.closed .chev svg{transform:rotate(-90deg)}
+.fit{display:flex;align-items:center;gap:14px;min-height:54px;border:0;background:transparent;border-radius:27px;padding:0 20px;text-align:left;font-weight:600;font-size:15.5px;width:100%;box-sizing:border-box}
+.fit:hover{background:var(--surface-2)}
+.fit[aria-current="true"]{background:var(--accent);color:#fff}
+.fit .lbl2{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fit .cnt{font-size:14px;font-variant-numeric:tabular-nums;opacity:.85}
+.fit .cdot2{width:14px;height:14px;border-radius:5px;flex:none;margin:0 4px}
+.fit.sub{min-height:46px;font-weight:500}
+.side-empty{color:var(--muted);font-size:13px;padding:2px 20px 8px;line-height:1.5}
+.lib-main{flex:1;min-width:0;overflow-y:auto;padding-block:16px 60px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));box-sizing:border-box}
+.lib-in{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.topbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.topbar .grow{flex:1}
+.ib.acc{color:var(--accent-2)}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px;height:44px;min-width:0;flex:0 1 280px;color:var(--accent-2)}
+.search input{border:0;background:transparent;outline:none;font:inherit;color:var(--ink);width:100%;min-width:0}
+.sortsel{height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit;padding:0 10px;max-width:190px}
+.crumbs{display:flex;align-items:center;gap:2px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.crumbs:empty{display:none}
+.crumbs button{border:0;background:transparent;padding:4px 6px;border-radius:8px;font:inherit;color:var(--accent-2);font-weight:600}
+.ltitle{margin:0 0 4px;font:600 42px/1.15 var(--f-display);letter-spacing:-.015em;text-wrap:balance;display:flex;align-items:center;gap:14px}
+.ltitle .cdot2{width:18px;height:18px;border-radius:6px;flex:none}
+.quick{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.quick:empty{display:none}
+.qa{display:flex;align-items:center;gap:16px;min-height:86px;padding:0 22px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:16px;text-align:left;box-sizing:border-box}
+.qa:hover{background:var(--surface-2)}
+.qa .qi{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:10px}
+.qa .qi svg{width:28px;height:28px}
+.qa.danger{color:var(--danger)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:34px 26px;margin-top:12px}
+.tcard{display:flex;flex-direction:column;gap:12px;min-width:0;position:relative}
+.fthumb{width:100%;aspect-ratio:.72;border:0;border-radius:14px;background:var(--surface-2);padding:14px;box-sizing:border-box;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;max-width:100%}
+.fthumb>img,.fthumb>canvas{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:3px;display:block;min-height:0;min-width:0;background:#fff}
+.fthumb>.ph{border-radius:3px;background:var(--surface);opacity:.6}
+.nthumb{position:relative;width:100%;aspect-ratio:.72;border:0;padding:0;border-radius:4px 10px 10px 4px;overflow:hidden;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.1),0 8px 20px rgba(0,0,0,.22);max-width:100%}
+.nthumb>img,.nthumb>canvas{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.nthumb::before{content:"";position:absolute;left:0;top:0;bottom:0;width:9px;background:var(--cv);z-index:1}
+.fthumb:active,.nthumb:active{transform:scale(.98)}
+.cap{display:flex;align-items:flex-start;gap:8px;justify-content:center;min-width:0}
+.cap>svg{flex:none;margin-top:1px}
+.cap .ct{min-width:0;text-align:center}
+.cap .t{font-weight:600;font-size:16px;line-height:1.3;word-break:break-word}
+.cap .s{color:var(--accent-2);font-size:14px;margin-top:3px;font-variant-numeric:tabular-nums}
+.tcard .more{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:10px;background:rgba(20,20,22,.6);color:#fff;opacity:0;transition:opacity .15s;z-index:2}
+.tcard:hover .more,.tcard .more:focus-visible{opacity:1}
+@media (pointer:coarse){.tcard .more{display:none}}
+.fav-badge{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center;color:#E8A400;z-index:1}
 .fav-badge svg{width:16px;height:16px;fill:currentColor}
 .cat-tag{display:inline-flex;align-items:center;gap:5px}
 .cat-tag i{width:8px;height:8px;border-radius:3px;display:inline-block}
-.snip{font-size:12px;color:var(--muted);margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.snip{font-size:12.5px;color:var(--muted);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .snip mark{background:#FFE58A;color:#1B2232;border-radius:3px;padding:0 2px}
+.empty{grid-column:1/-1;border:1.5px dashed var(--line);border-radius:16px;padding:28px;color:var(--muted);text-align:center;line-height:1.55}
 .tree{display:flex;flex-direction:column;gap:2px;max-height:50vh;overflow-y:auto}
-.tree button{display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:10px;height:42px;text-align:left;font-weight:500;padding-right:10px}
+.tree button{display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:10px;min-height:44px;text-align:left;font-weight:500;padding-right:10px}
 .tree button:hover{background:var(--surface-2)}
 .tree button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
 .tree button:disabled{opacity:.4}
-@media (max-width:760px){
-  #lib{flex-direction:column}
-  .side{width:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px max(14px,env(safe-area-inset-left,0px)) 10px;gap:10px;overflow:visible}
-  #sideNav{flex-direction:row;overflow-x:auto;gap:6px;scrollbar-width:none;padding-bottom:4px}
-  .nav-h{display:none}
-  .nav-row,.nav-it{flex:none;width:auto}
-  .nav-row .ib{display:none}
-  .nav-it{border:1px solid var(--line);height:38px;padding:0 12px;white-space:nowrap}
-  .nav-it .lbl2{overflow:visible}
-  .sort{margin-left:0}
-  .crumbs{font-size:19px}
-}
-.brand{display:flex;align-items:center;gap:10px}
-.only-m{display:none!important}
-@media (max-width:760px){.only-m{display:flex!important}}
-#app{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-#app input,#app textarea,#app select{user-select:text;-webkit-user-select:text}
-.lib-main,.side,.pages-list,.modal-body{overscroll-behavior:contain}
-.pop .sizes{display:flex}
-@media (max-width:900px){ #tb .sizes,#bImage{display:none} .tb-title{max-width:130px} .tb-title button{max-width:120px} .tb-tools{margin:0} }
-@media (pointer:coarse){ .ib{width:46px;height:46px} .nav-it{height:46px} .menu button{padding:13px 12px} .chip{height:40px} }
-.brand-mark{width:38px;height:38px;border-radius:11px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
-.brand h1{font:800 24px/1 var(--f-display);margin:0;letter-spacing:-.02em;text-wrap:balance}
-.brand small{display:block;font:500 12px/1.2 var(--f-body);color:var(--muted);letter-spacing:.02em;margin-top:3px}
-.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px;height:42px;min-width:0;flex:0 1 260px}
-.search input{border:0;background:transparent;outline:none;font:inherit;color:var(--ink);width:100%;min-width:0}
-.btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
-.btn:hover{filter:brightness(.97)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:26px 22px}
-.card{display:flex;flex-direction:column;gap:9px;min-width:0}
-.cover{position:relative;aspect-ratio:3/4;border-radius:6px 14px 14px 6px;border:0;padding:0;background:var(--cv);box-shadow:0 2px 0 rgba(0,0,0,.08),0 10px 22px rgba(18,28,56,.16);overflow:hidden;text-align:left;max-width:100%}
-.cover::before{content:"";position:absolute;inset:0 auto 0 0;width:14px;background:linear-gradient(90deg,rgba(0,0,0,.22),rgba(0,0,0,.05) 70%,rgba(255,255,255,.08))}
-.cover .lbl{position:absolute;left:24px;right:14px;top:22%;background:rgba(255,255,255,.92);color:#1b2130;border-radius:6px;padding:9px 10px;font:700 13px/1.25 var(--f-display);word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.cover:active{transform:scale(.98)}
-.cover.new{background:transparent;border:2px dashed var(--line);box-shadow:none;display:grid;place-items:center;color:var(--muted)}
-.cover.new::before{display:none}
-.cover.new span{display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600}
-.card-meta{display:flex;align-items:flex-start;gap:6px}
-.card-meta>div{flex:1;min-width:0}
-.card-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-date{color:var(--muted);font-size:12px;margin-top:2px;font-variant-numeric:tabular-nums}
 .lib-note{color:var(--muted);font-size:12.5px;line-height:1.5;max-width:70ch}
+.side-shade{display:none}
+@media (max-width:1100px){.side{width:280px}}
+@media (max-width:760px){
+  .side{position:absolute;inset:0 auto 0 0;z-index:20;box-shadow:var(--shadow);width:min(300px,86vw)}
+  #lib:not(.noside) .side-shade{display:block;position:absolute;inset:0;z-index:19;background:rgba(0,0,0,.35)}
+  .ltitle{font-size:32px} .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:24px 16px}
+  .quick{gap:10px} .qa{min-height:68px;padding:0 14px;font-size:14.5px} .sortsel{display:none}
+}
 
-/* ---------- editor ---------- */
-#editor{height:100%;display:flex;flex-direction:column}
-.tb{display:flex;align-items:center;gap:3px;padding-block:6px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;flex:none;position:relative;z-index:5}
-.tb::-webkit-scrollbar{display:none}
-.ib{width:42px;height:42px;border-radius:11px;border:0;background:transparent;display:grid;place-items:center;flex:none;position:relative}
-.ib:hover{background:var(--surface-2)}
-.ib[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
-.ib:disabled{opacity:.35;cursor:default}
-.ib .dot{position:absolute;bottom:5px;right:7px;width:6px;height:6px;border-radius:50%}
-.sep{width:1px;height:26px;background:var(--line);margin:0 5px;flex:none}
-.tb-title{display:flex;flex-direction:column;min-width:0;max-width:200px;padding:0 6px;flex:none}
-.tb-title button{border:0;background:transparent;padding:0;font:700 15px/1.2 var(--f-display);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
-.tb-title span{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-.tb-title span button{font:inherit;color:inherit;display:inline;max-width:none}
-.tb-tools{display:flex;align-items:center;gap:2px;margin:0 auto}
-.swatch-btn span{width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.6),0 0 0 1px var(--line)}
-.sizes{display:flex;gap:1px}
+/* ---------- editor (plovoucí tmavé lišty jako v Noteshelf) ---------- */
+#editor{height:100%;position:relative;overflow:hidden}
+#editor[hidden]{display:none}
+.stage{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;background:var(--desk)}
+.stage canvas{position:absolute;left:0;top:0;touch-action:none}
+.fbar{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:2px;padding:5px;background:var(--bar);color:var(--bar-ink);border-radius:12px;box-shadow:0 6px 22px rgba(0,0,0,.28);z-index:5}
+.fbar .ib{color:var(--bar-ink);width:46px;height:46px}
+.fbar .ib:hover{background:var(--bar-2)}
+.fbar .ib[aria-pressed="true"]{background:var(--bar-2)}
+.fbar .ib[aria-pressed="true"] svg{color:var(--tool-c,#fff)}
+.fbar .ib:disabled{opacity:.35}
+.fl{left:max(12px,env(safe-area-inset-left,0px))}
+.fr{right:max(12px,env(safe-area-inset-right,0px))}
+.fc{left:50%;transform:translateX(-50%)}
+@media (max-width:880px){.fc{top:calc(70px + env(safe-area-inset-top,0px))} .fbar .ib{width:42px;height:42px}}
+.vpal{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);z-index:5;background:var(--bar);border-radius:28px;padding:10px 7px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.vpal[hidden]{display:none}
+.vdot{width:34px;height:34px;border-radius:50%;border:0;padding:0;flex:none}
+.vdot[aria-pressed="true"]{box-shadow:0 0 0 3px var(--bar),0 0 0 5.5px #fff}
+.vadd{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:var(--bar-ink);display:grid;place-items:center;padding:0;flex:none}
+.vadd svg{width:18px;height:18px}
+.vsep{width:30px;height:1px;background:rgba(255,255,255,.15);margin:2px 0;flex:none}
+.vsz{width:44px;height:40px;border:0;background:transparent;border-radius:20px;display:grid;place-items:center;padding:0;flex:none}
+.vsz i{display:block;width:22px;border-radius:3px;background:rgba(255,255,255,.55)}
+.vsz[aria-pressed="true"]{background:var(--bar-ink)}
+.vsz[aria-pressed="true"] i{background:var(--bar)}
+@media (max-height:640px){.vdot,.vadd{width:28px;height:28px}.vsz{height:32px}.vpal{gap:6px}}
+.pgchip{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--bar);color:var(--bar-ink);padding:8px 14px;border-radius:20px;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5}
+.pgchip.show{opacity:.92}
 .sz{width:34px;height:42px;border:0;background:transparent;border-radius:9px;display:grid;place-items:center}
 .sz i{display:block;border-radius:50%;background:var(--ink)}
 .sz[aria-pressed="true"]{background:var(--accent-soft)}
 .sz[aria-pressed="true"] i{background:var(--accent)}
-.stage{flex:1;position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;background:var(--desk)}
-.stage canvas{position:absolute;left:0;top:0;touch-action:none}
+.sep{width:1px;height:26px;background:rgba(255,255,255,.15);margin:0 4px;flex:none}
 #radial{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 #radial .rg{transform-origin:0 0;animation:pop .16s cubic-bezier(.2,.9,.3,1.2)}
 @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
@@ -175,12 +181,13 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .r-center.hot{fill:var(--surface-2)}
 .r-lab{fill:var(--ink)}
 .r-labt{fill:var(--surface);font:600 12.5px var(--f-body)}
-.selbar{position:absolute;display:flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:4;align-items:center}
+.selbar{position:absolute;display:flex;gap:2px;padding:4px;background:var(--bar);color:var(--bar-ink);border:0;border-radius:14px;box-shadow:var(--shadow);z-index:4;align-items:center}
 .selbar .ib{width:38px;height:38px}
-.selbar .cdot{width:20px;height:20px;border-radius:50%;border:0;margin:0 2px;box-shadow:0 0 0 1px var(--line);flex:none;padding:0}
+.selbar .ib{color:var(--bar-ink)} .selbar .ib:hover{background:var(--bar-2)}
+.selbar .cdot{width:22px;height:22px;border-radius:50%;border:0;margin:0 3px;box-shadow:0 0 0 1.5px rgba(255,255,255,.35);flex:none;padding:0}
 .selbar .ib.del{color:var(--danger)}
 #ta{position:absolute;z-index:3;border:1.5px dashed var(--accent);background:transparent;outline:none;resize:none;overflow:hidden;padding:0;margin:0;line-height:1.3;white-space:pre-wrap;word-wrap:break-word;box-sizing:content-box}
-.pages{position:absolute;top:0;right:0;bottom:0;width:230px;background:var(--surface);border-left:1px solid var(--line);z-index:6;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .2s ease;box-shadow:var(--shadow);padding-right:env(safe-area-inset-right,0px)}
+.pages{position:absolute;top:0;right:0;bottom:0;width:240px;padding-top:env(safe-area-inset-top,0px);background:var(--surface);border-left:1px solid var(--line);z-index:6;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .2s ease;box-shadow:var(--shadow);padding-right:env(safe-area-inset-right,0px)}
 .pages.open{transform:none}
 .pages-head{display:flex;align-items:center;gap:6px;padding:10px 10px 6px 16px;font:700 15px var(--f-display)}
 .pages-head span{margin-right:auto}
@@ -195,6 +202,19 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .pg-row .ib.marked{color:#E8A400}
 .pages-foot{padding:10px 16px 14px;border-top:1px solid var(--line)}
 .pages-foot .btn{width:100%;justify-content:center}
+.brand{display:flex;align-items:center;gap:10px}
+.only-m{display:none!important}
+@media (max-width:760px){.only-m{display:flex!important}}
+#app{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#app input,#app textarea,#app select{user-select:text;-webkit-user-select:text}
+.lib-main,.side,.pages-list,.modal-body{overscroll-behavior:contain}
+.pop .sizes{display:flex}
+.ib{width:42px;height:42px;border-radius:11px;border:0;background:transparent;display:grid;place-items:center;flex:none;position:relative}
+.ib:hover{background:var(--surface-2)}
+.ib[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.ib:disabled{opacity:.35;cursor:default}
+.ib .dot{position:absolute;bottom:5px;right:7px;width:6px;height:6px;border-radius:50%}
+@media (pointer:coarse){ .ib{width:46px;height:46px} .nav-it{height:46px} .menu button{padding:13px 12px} .chip{height:40px} }
 
 /* ---------- popovery, dialogy, toast ---------- */
 .pop{position:fixed;z-index:50;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px;max-width:min(340px,calc(100vw - 24px));box-sizing:border-box}
@@ -229,60 +249,101 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .help b{font-weight:600}
 .kbd{font:600 11px var(--f-body);background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
 #toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:11px 18px;border-radius:12px;font-weight:500;z-index:80;box-shadow:var(--shadow);max-width:calc(100vw - 40px);text-align:center}
-@media (max-width:700px){ .tb-title{max-width:120px} .tb-title button{max-width:110px} .sizes .sz:nth-child(4){display:none} }
+/* ---------- tabulky (Excel) ---------- */
+#sheet{height:100%;display:flex;flex-direction:column;background:var(--surface);--xl:#1E7145}
+#sheet[hidden]{display:none}
+.xl-top{display:flex;align-items:center;gap:4px;padding-block:6px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));background:var(--xl);color:#fff;flex:none}
+.xl-top .ib{color:#fff}.xl-top .ib:hover{background:rgba(255,255,255,.14)}.xl-top .ib:disabled{opacity:.4}
+.xl-title{border:0;background:transparent;color:#fff;font:600 19px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:60vw;padding:4px 8px;border-radius:8px}
+.xl-top .grow{flex:1}
+.xl-tools{display:flex;align-items:center;gap:2px;padding-block:4px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;flex:none}
+.xl-tools::-webkit-scrollbar{display:none}
+.xl-tools .ib{width:40px;height:40px;flex:none}
+.xl-tools .ib[aria-pressed="true"]{background:color-mix(in srgb,var(--xl) 18%,transparent);color:var(--xl)}
+.xl-tools select{height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);font:inherit;padding:0 6px;flex:none}
+.xl-dec{font:600 12px var(--f-body);width:46px!important}
+.vsep2{width:1px;height:24px;background:var(--line);margin:0 5px;flex:none}
+.xl-fbar{display:flex;align-items:center;gap:8px;padding-block:6px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line);flex:none}
+#xlName{width:96px;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);font:600 13px var(--f-body);padding:0 8px;text-align:center;box-sizing:border-box;flex:none}
+.xl-fx{font:italic 600 16px Georgia,serif;color:var(--muted);padding:0 2px}
+#xlFx{flex:1;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);font:15px var(--f-body);padding:0 10px;box-sizing:border-box}
+#xlFx:focus,#xlName:focus{outline:2px solid var(--xl);outline-offset:-1px}
+.xl-grid{flex:1;overflow:auto;position:relative;background:var(--surface);touch-action:none;overscroll-behavior:contain;user-select:none;-webkit-user-select:none}
+.xl-inner{position:relative}
+.xl-ch{position:sticky;top:0;z-index:3;display:flex;height:30px;background:var(--surface-2);width:max-content}
+.xl-corner{position:sticky;left:0;z-index:4;background:var(--surface-2);border-right:1px solid var(--line);border-bottom:1px solid var(--line);flex:none;box-sizing:border-box}
+.xh{flex:none;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body);color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line);position:relative;box-sizing:border-box}
+.xh.on,.xrh.on{background:color-mix(in srgb,var(--xl) 20%,var(--surface-2));color:var(--xl)}
+.xh .grip{position:absolute;right:-7px;top:0;bottom:0;width:14px;cursor:col-resize;z-index:2;touch-action:none}
+.xr{position:absolute;left:0;display:flex;height:32px}
+.xrh{position:sticky;left:0;z-index:2;flex:none;background:var(--surface-2);border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body);color:var(--muted);box-sizing:border-box;font-variant-numeric:tabular-nums}
+.xc{flex:none;box-sizing:border-box;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0 6px;line-height:31px;font-size:14px;white-space:nowrap;overflow:hidden;color:var(--ink)}
+.xc.n{text-align:right;font-variant-numeric:tabular-nums}
+.xc.err{color:var(--danger);font-weight:600}
+.xl-selbox{position:absolute;border:2px solid var(--xl);box-sizing:border-box;pointer-events:none;z-index:1;background:color-mix(in srgb,var(--xl) 9%,transparent)}
+.xl-fill{position:absolute;right:-7px;bottom:-7px;width:12px;height:12px;background:var(--xl);border:2px solid var(--surface);border-radius:2px;pointer-events:auto;touch-action:none;cursor:crosshair}
+@media (pointer:coarse){.xl-fill{width:20px;height:20px;right:-12px;bottom:-12px;border-radius:50%}}
+.xl-fillbox{position:absolute;border:2px dashed var(--xl);box-sizing:border-box;pointer-events:none;z-index:1}
+.xl-ed{position:absolute;z-index:5;border:2px solid var(--xl);box-sizing:border-box;font:14px var(--f-body);padding:0 5px;background:var(--surface);color:var(--ink);outline:none;box-shadow:var(--shadow)}
+.xl-tabs{display:flex;align-items:center;gap:4px;padding-top:5px;padding-bottom:max(5px,env(safe-area-inset-bottom,0px));padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));background:var(--surface-2);border-top:1px solid var(--line);overflow-x:auto;flex:none}
+.xtab{height:36px;padding:0 16px;border:0;border-radius:8px;background:transparent;font-weight:600;color:var(--muted);white-space:nowrap;flex:none}
+.xtab[aria-current="true"]{background:var(--surface);color:var(--xl);box-shadow:inset 0 -3px 0 var(--xl)}
+.xl-tabs .ib{width:36px;height:36px;color:var(--xl)}
+/* kalkulačka */
+.calc{position:absolute;z-index:8;width:min(340px,calc(100vw - 24px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.calc-h{display:flex;align-items:center;gap:8px;font-size:15px}.calc-h .grow{flex:1}.calc-h .ib{width:34px;height:34px}.calc-h>svg{color:var(--accent-2)}
+.calc-l{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#calcIn{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);font:500 18px var(--f-body);padding:0 12px;width:100%;box-sizing:border-box}
+.calc-r{font:600 30px/1.2 Caveat, var(--f-body);color:var(--accent-2);min-height:36px;word-break:break-word}
+.calc-r.err{font:500 13.5px var(--f-body);color:var(--danger)}
+.calc-st{font-size:12px;color:var(--muted);line-height:1.4}
+.calc-a{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.calc-a .btn:disabled{opacity:.45}
+.calc-chip{position:absolute;z-index:7;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;border-radius:18px;border:0;background:var(--accent-2);color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.25);animation:pop .18s ease-out}
+.calc-chip svg{width:18px;height:18px}
+/* kompaktní HUD v sešitu */
+.fbar{top:calc(8px + env(safe-area-inset-top,0px));padding:3px;border-radius:10px;gap:1px;transition:opacity .25s}
+.fbar .ib{width:38px;height:38px;border-radius:8px}
+.fbar .ib svg{width:19px;height:19px}
+.fl{left:max(8px,env(safe-area-inset-left,0px))} .fr{right:max(8px,env(safe-area-inset-right,0px))}
+@media (max-width:880px){.fc{top:calc(54px + env(safe-area-inset-top,0px))} .fbar .ib{width:36px;height:36px}}
+.vpal{left:max(8px,env(safe-area-inset-left,0px));padding:7px 5px;gap:6px;border-radius:22px;transition:opacity .25s}
+.vdot,.vadd{width:26px;height:26px}
+.vadd svg{width:15px;height:15px}
+.vdot[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--bar),0 0 0 4.5px #fff}
+.vsz{width:34px;height:30px;border-radius:15px}
+.vsz i{width:16px}
+.vsep{width:22px}
+#editor.drawing .fbar,#editor.drawing .vpal{opacity:.15;pointer-events:none}
 </style>
 
 <div id="app">
   <section id="lib" aria-label="Knihovna sešitů">
-    <aside class="side">
-      <div class="brand">
-        <div class="brand-mark"><svg class="i" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 6l3 3"/></svg></div>
-        <div><h1>Span</h1><small>Ručně psané poznámky</small></div>
-      </div>
-      <nav id="sideNav" aria-label="Kategorie a filtry"></nav>
+    <aside class="side" id="side">
+      <h1 class="brand-t">Span</h1>
+      <nav id="sideNav" aria-label="Knihovna, složky a kategorie"></nav>
     </aside>
+    <div class="side-shade" id="sideShade"></div>
     <main class="lib-main">
       <div class="lib-in">
-        <div class="lib-head">
-          <div class="crumbs" id="crumbs"></div>
+        <div class="topbar">
+          <button class="ib acc" id="bSide" title="Boční panel" aria-label="Zobrazit nebo skrýt boční panel"></button>
+          <span class="grow"></span>
           <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="q" type="text" placeholder="Hledat v názvech i textu" aria-label="Hledat"></label>
+          <select id="sort" class="sortsel" aria-label="Řazení"><option value="updated">Naposledy upravené</option><option value="title">Podle názvu</option><option value="created">Nejnovější</option></select>
+          <button class="ib acc" id="bLibAdd" title="Vytvořit" aria-label="Vytvořit"></button>
+          <button class="ib acc" id="bLibMore" title="Další" aria-label="Další volby"></button>
         </div>
-        <div class="lib-actions">
-          <button class="btn primary" id="bNew"></button>
-          <button class="btn" id="bNewFolder"></button>
-          <button class="btn" id="bImpPdf"></button>
-          <button class="btn" id="bImpBak"></button>
-          <label class="sort"><span>Řadit</span><select id="sort" aria-label="Řazení"><option value="updated">Naposledy upravené</option><option value="title">Podle názvu</option><option value="created">Nejnovější</option></select></label>
-          <button class="ib" id="bLibSettings" title="Nastavení" aria-label="Nastavení"></button>
-        </div>
+        <div class="crumbs" id="crumbs"></div>
+        <h2 class="ltitle" id="ltitle">Všechny poznámky</h2>
+        <div class="quick" id="quick"></div>
         <div class="grid" id="grid"></div>
-        <p class="lib-note">Sešity se ukládají v tomto prohlížeči na tomto zařízení. Důležité sešity si občas zálohujte (menu sešitu → Záloha) nebo exportujte do PDF.</p>
+        <p class="lib-note">Sešity se ukládají v tomto prohlížeči na tomto zařízení. Důležité sešity si občas zálohujte (podržte sešit → Záloha) nebo exportujte do PDF.</p>
       </div>
     </main>
   </section>
 
   <section id="editor" hidden aria-label="Editor">
-    <header class="tb" id="tb">
-      <button class="ib" id="bBack" title="Zpět do knihovny" aria-label="Zpět do knihovny"></button>
-      <div class="tb-title"><button id="nbTitle" title="Přejmenovat">Sešit</button><span><span id="pageInd">1 / 1</span> · <button id="zoomInd" title="Přizpůsobit šířce">100 %</button></span></div>
-      <div class="tb-tools" role="toolbar" aria-label="Nástroje">
-        <button class="ib" data-tool="pen" title="Pero (P)" aria-label="Pero"></button>
-        <button class="ib" data-tool="hl" title="Zvýrazňovač (H)" aria-label="Zvýrazňovač"></button>
-        <button class="ib" data-tool="eraser" title="Guma (E)" aria-label="Guma"></button>
-        <button class="ib" data-tool="lasso" title="Laso – výběr a přesun (L)" aria-label="Laso"></button>
-        <button class="ib" data-tool="shape" title="Tvary (S)" aria-label="Tvary"></button>
-        <button class="ib" data-tool="text" title="Text (T)" aria-label="Text"></button>
-        <button class="ib" data-tool="laser" title="Laserové ukazovátko (K)" aria-label="Laser"></button>
-        <span class="sep"></span>
-        <button class="ib swatch-btn" id="bColor" title="Barva" aria-label="Barva"><span></span></button>
-        <div class="sizes" id="sizes"></div>
-      </div>
-      <button class="ib" id="bUndo" title="Zpět (Ctrl+Z)" aria-label="Zpět"></button>
-      <button class="ib" id="bRedo" title="Znovu (Ctrl+Y)" aria-label="Znovu"></button>
-      <button class="ib" id="bImage" title="Vložit obrázek" aria-label="Vložit obrázek"></button>
-      <button class="ib" id="bPages" title="Stránky" aria-label="Stránky"></button>
-      <button class="ib" id="bMore" title="Další" aria-label="Další volby"></button>
-    </header>
     <div class="stage" id="stage">
       <canvas id="board"></canvas>
       <canvas id="live"></canvas>
@@ -295,9 +356,80 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
         <div class="pages-foot"><button class="btn primary" id="bAddPage"></button></div>
       </aside>
     </div>
+    <div class="fbar fl">
+      <button class="ib" id="bBack" title="Knihovna" aria-label="Zpět do knihovny"></button>
+      <button class="ib" id="bPages" title="Stránky" aria-label="Stránky"></button>
+      <button class="ib" id="bUndo" title="Zpět (Ctrl+Z)" aria-label="Zpět"></button>
+      <button class="ib" id="bRedo" title="Znovu (Ctrl+Y)" aria-label="Znovu"></button>
+    </div>
+    <div class="fbar fc" role="toolbar" aria-label="Nástroje">
+      <button class="ib" data-tool="eraser" title="Guma (E)" aria-label="Guma"></button>
+      <button class="ib" data-tool="pen" title="Pero (P)" aria-label="Pero"></button>
+      <button class="ib" data-tool="hl" title="Zvýrazňovač (H)" aria-label="Zvýrazňovač"></button>
+      <button class="ib" data-tool="shape" title="Tvary (S)" aria-label="Tvary"></button>
+      <button class="ib" data-tool="lasso" title="Laso – výběr a přesun (L)" aria-label="Laso"></button>
+      <button class="ib" data-tool="text" title="Text (T)" aria-label="Text"></button>
+      <button class="ib" id="bImage" title="Vložit obrázek" aria-label="Vložit obrázek"></button>
+      <button class="ib" id="bRuler" title="Pravítko (R)" aria-label="Pravítko"></button>
+    </div>
+    <div class="fbar fr">
+      <button class="ib" id="bAddPg" title="Přidat stránku" aria-label="Přidat stránku"></button>
+      <button class="ib" id="bFinger" title="Kreslení prstem" aria-label="Kreslení prstem"></button>
+      <button class="ib" id="bMore" title="Další" aria-label="Další volby"></button>
+    </div>
+    <div class="vpal" id="vpal" aria-label="Barvy a tloušťky"></div>
+    <div class="pgchip" id="pgChip" aria-live="polite"></div>
+  </section>
+  <section id="sheet" hidden aria-label="Tabulka">
+    <header class="xl-top">
+      <button class="ib" id="xlBack" title="Knihovna" aria-label="Zpět do knihovny"></button>
+      <button class="xl-title" id="xlTitle" title="Přejmenovat">Tabulka</button>
+      <span class="grow"></span>
+      <button class="ib" id="xlUndo" title="Zpět (Ctrl+Z)" aria-label="Zpět"></button>
+      <button class="ib" id="xlRedo" title="Znovu (Ctrl+Y)" aria-label="Znovu"></button>
+      <button class="ib" id="xlMore" title="Další" aria-label="Další volby"></button>
+    </header>
+    <div class="xl-tools" role="toolbar" aria-label="Formát">
+      <button class="ib" id="xlB" title="Tučně (Ctrl+B)" aria-label="Tučně"></button>
+      <button class="ib" id="xlI" title="Kurzíva (Ctrl+I)" aria-label="Kurzíva"></button>
+      <button class="ib" id="xlAL" title="Zarovnat vlevo" aria-label="Zarovnat vlevo"></button>
+      <button class="ib" id="xlAC" title="Zarovnat na střed" aria-label="Zarovnat na střed"></button>
+      <button class="ib" id="xlAR" title="Zarovnat vpravo" aria-label="Zarovnat vpravo"></button>
+      <button class="ib" id="xlBg" title="Barva výplně" aria-label="Barva výplně"></button>
+      <button class="ib" id="xlFc" title="Barva písma" aria-label="Barva písma"></button>
+      <span class="vsep2"></span>
+      <select id="xlNf" aria-label="Formát čísla" title="Formát čísla"><option value="">Obecný</option><option value="num2">Číslo</option><option value="int">Celé číslo</option><option value="pct">Procenta</option><option value="czk">Měna (Kč)</option><option value="date">Datum</option><option value="time">Čas</option></select>
+      <button class="ib xl-dec" id="xlDecM" title="Méně desetinných míst" aria-label="Méně desetinných míst">,0←</button>
+      <button class="ib xl-dec" id="xlDecP" title="Více desetinných míst" aria-label="Více desetinných míst">,00→</button>
+      <span class="vsep2"></span>
+      <button class="ib" id="xlSum" title="Automatický součet" aria-label="Automatický součet"></button>
+      <button class="ib" id="xlFn" title="Vložit funkci" aria-label="Vložit funkci"></button>
+      <button class="ib" id="xlChart" title="Graf z označených dat" aria-label="Graf"></button>
+      <span class="vsep2"></span>
+      <button class="ib" id="xlRowIns" title="Vložit řádek" aria-label="Vložit řádek"></button>
+      <button class="ib" id="xlColIns" title="Vložit sloupec" aria-label="Vložit sloupec"></button>
+      <button class="ib" id="xlExt" title="Rozšířit výběr (klepněte na poslední buňku)" aria-label="Rozšířit výběr" aria-pressed="false"></button>
+      <button class="ib" id="xlCopy" title="Kopírovat" aria-label="Kopírovat"></button>
+      <button class="ib" id="xlPaste" title="Vložit" aria-label="Vložit"></button>
+    </div>
+    <div class="xl-fbar">
+      <input id="xlName" type="text" aria-label="Adresa buňky" title="Adresa – napište např. B4 a Enter">
+      <span class="xl-fx">fx</span>
+      <input id="xlFx" type="text" autocomplete="off" spellcheck="false" aria-label="Obsah buňky nebo vzorec" placeholder="Hodnota nebo vzorec, např. =SUMA(A1:A5)">
+    </div>
+    <div class="xl-grid" id="xlGrid">
+      <div class="xl-inner" id="xlInner">
+        <div class="xl-ch" id="xlCH"></div>
+        <div class="xl-body" id="xlBody"></div>
+        <div class="xl-selbox" id="xlSel"><i class="xl-fill" id="xlFill"></i></div>
+        <div class="xl-fillbox" id="xlFillBox" hidden></div>
+        <input class="xl-ed" id="xlEd" type="text" autocomplete="off" spellcheck="false" hidden aria-label="Úprava buňky">
+      </div>
+    </div>
+    <nav class="xl-tabs" id="xlTabs" aria-label="Listy"></nav>
   </section>
   <input type="file" id="fImg" accept="image/*" hidden>
-  <input type="file" id="fPdf" accept="application/pdf,.pdf" hidden>
+  <input type="file" id="fPdf" accept="application/pdf,.pdf,.json,application/json,.xlsx,.xls,.ods,.csv" hidden>
   <input type="file" id="fBak" accept=".json,application/json" hidden>
   <div id="toast" hidden role="status"></div>
 </div>
@@ -360,6 +492,26 @@ const IC={
  tag:'<path d="M3.5 12.5V4.5a1 1 0 011-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.4"/>',
  book:'<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h11"/>',
  inbox:'<path d="M4 13l2.5-8h11L20 13v6H4z"/><path d="M4 13h5l1 2h4l1-2h5"/>',
+ home:'<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>',
+ grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+ ruler:'<path d="M3.5 16.5L16.5 3.5l4 4-13 13z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/>',
+ hand:'<path d="M8 13V6.5a1.5 1.5 0 013 0V12M11 11V5a1.5 1.5 0 013 0v6M14 11V6.5a1.5 1.5 0 013 0V14a7 7 0 01-7 7h-.5a6 6 0 01-4.6-2.2L3.5 16a1.5 1.5 0 012.3-1.9L8 16"/>',
+ sidebar:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M5.5 8h1.5M5.5 11h1.5"/>',
+ quick:'<path d="M5 4h14v10l-6 6H5z" fill="currentColor" fill-opacity=".9"/><path d="M13 20v-6h6" stroke="#fff"/>',
+ table:'<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M3.5 9h17M3.5 14.5h17M9.5 4v16"/>',
+ bold:'<path d="M7 5h6a3.5 3.5 0 010 7H7zM7 12h7a3.5 3.5 0 010 7H7z"/>',
+ italic:'<path d="M11 5h7M6 19h7M15 5l-5 14"/>',
+ alignL:'<path d="M4 6h16M4 10h10M4 14h16M4 18h10"/>',
+ alignC:'<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>',
+ alignR:'<path d="M4 6h16M10 10h10M4 14h16M10 18h10"/>',
+ fill:'<path d="M6 13l6-8 7 7-6 6z"/><path d="M19 15s2 2.5 2 3.6a2 2 0 01-4 0c0-1.1 2-3.6 2-3.6z"/><path d="M3 21h11"/>',
+ fcolor:'<path d="M7 17L12 4l5 13M9 12.5h6"/><path d="M4 21h16" stroke-width="3"/>',
+ sigma:'<path d="M17 5H7l6 7-6 7h10"/>',
+ rowsPlus:'<rect x="4" y="4" width="16" height="10" rx="1.5"/><path d="M4 9h16M12 17v4M10 19h4"/>',
+ colsPlus:'<rect x="4" y="4" width="10" height="16" rx="1.5"/><path d="M9 4v16M17 12h4M19 10v4"/>',
+ calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8.5 12h1M11.5 12h1M14.5 12h1M8.5 15h1M11.5 15h1M14.5 15h1M8.5 18h1M11.5 18h4"/>',
+ fx:'<path d="M14 4h-1.5A2.5 2.5 0 0010 6.5v11A2.5 2.5 0 017.5 20H6M7 10h7"/><path d="M15 13l5 5M20 13l-5 5"/>',
+ chart:'<path d="M4 20V4M4 20h16"/><rect x="7" y="12" width="3" height="5"/><rect x="12" y="8" width="3" height="9"/><rect x="17" y="10" width="3" height="7"/>',
  palette:'<path d="M12 3a9 9 0 100 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.7 0-1 .8-1.6 1.8-1.6H17a4 4 0 004-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/>'
 };
 const ic=(n,cls='i')=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
@@ -377,8 +529,9 @@ const DB={db:null,mem:new Map(),
 };
 
 /* ---------- nastavení a nástroje ---------- */
-const S=Object.assign({theme:'light',holdMs:450,radial:true,afterHold:'shape',finger:'auto',twoTapUndo:true,tpl:'lined',paper:'white',penSeen:false},store.get('settings',{}));
+const S=Object.assign({calcFrames:true,theme:'dark',holdMs:450,radial:true,afterHold:'shape',finger:'auto',twoTapUndo:true,tpl:'lined',paper:'white',penSeen:false},store.get('settings',{}));
 const saveS=()=>store.set('settings',S);
+if(!S.v3){S.v3=true;S.theme='dark';store.set('settings',S);}
 const hostTheme=document.documentElement.getAttribute('data-theme');
 function applyTheme(){const r=document.documentElement,want=S.theme==='system'?hostTheme:S.theme;if(want){if(r.getAttribute('data-theme')!==want)r.setAttribute('data-theme',want);}else if(r.hasAttribute('data-theme'))r.removeAttribute('data-theme');deskCol=null;if(typeof scheduleRender==='function'&&nb)scheduleRender();}
 new MutationObserver(()=>{if(S.theme!=='system')applyTheme();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
@@ -390,6 +543,7 @@ const T=Object.assign({
   text:{color:'#1B2232',size:26,font:'sans'},
   eraser:{size:24,mode:'stroke',hlOnly:false},
   fav:['#1B2232','#2D5BD3','#D6336C','#2F9E44','#F08C00','#7048E8','#FFD43B','#E03131'],
+  hlFav:['#FFD43B','#8CE99A','#FFA8C5','#74C0FC','#FFC078','#D0BFFF','#99E9F2','#FFEC99'],
   favUse:{}
 },store.get('tools',{}));
 const saveT=()=>store.set('tools',T);
@@ -605,12 +759,12 @@ function resize(){
 new ResizeObserver(()=>resize()).observe(stage);
 function fitWidth(keepCenter){
   const cy=keepCenter?(H/2-oy)/z:null;
-  z=clamp((W-28)/maxPW,0.2,1.3); ox=W/2;
-  oy=cy==null?16:H/2-cy*z; clampView();
+  z=clamp(W/maxPW,0.2,3); ox=W/2;
+  oy=cy==null?0:H/2-cy*z; clampView();
 }
 function clampView(){
-  const cw=maxPW*z; if(cw<=W-20)ox=W/2; else ox=clamp(ox,W-cw/2-30,cw/2+30);
-  const ch=docH*z; oy=clamp(oy,Math.min(16,H-100-ch),100);
+  const cw=maxPW*z; if(cw<=W+1)ox=W/2; else ox=clamp(ox,W-cw/2-30,cw/2+30);
+  const ch=docH*z; oy=clamp(oy,Math.min(0,H-100-ch),100);
 }
 function zoomAt(sx,sy,nz){nz=clamp(nz,0.2,6);ox=sx-(sx-ox)*nz/z;oy=sy-(sy-oy)*nz/z;z=nz;clampView();scheduleRender();}
 function pageAtWorld(wx,wy,strict=true){
@@ -649,7 +803,7 @@ function render(){
     drawPage(c,p,{vis:[-m[4]/z,-m[5]/z,(W-m[4])/z,(H-m[5])/z],exclude:sel&&sel.page===p?sel.ids:null,editId:editing&&editing.page===p?editing.id:null});
     c.restore();
   }
-  drawOverlay(); updatePageInd(); if(editing)positionTA(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
+  drawOverlay(); updatePageInd(); if(editing)positionTA(); if(calcState)positionCalc(); if($('#calcChip'))hideCalcChip(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
 }
 let deskCol=null; function getDesk(){if(!deskCol)deskCol=getComputedStyle(document.documentElement).getPropertyValue('--desk').trim()||'#E4E8EE';return deskCol;}
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{deskCol=null;scheduleRender();});
@@ -687,6 +841,7 @@ function drawOverlay(){
     }
   }
   if(hoverPt&&!act&&T.tool==='eraser'){c.setTransform(dpr,0,0,dpr,0,0);c.beginPath();c.arc(hoverPt[0],hoverPt[1],T.eraser.size/2,0,Math.PI*2);c.lineWidth=1.5;c.strokeStyle='rgba(30,40,60,.45)';c.setLineDash([4,3]);c.stroke();c.setLineDash([]);}
+  if(ruler.on)drawRuler(c);
   if(laser.length)drawLaser(c);
 }
 const holdable=a=>['draw','shape','erase','lasso','text','none'].includes(a.type);
@@ -784,6 +939,7 @@ function touchDown(sx,sy,e){
   if(touches.size===1){
     if(editing){commitText();return;}
     if(sel){const h=selHit(sx,sy);if(h){startSelDrag(h,sx,sy,e);return;}}
+    const rh=rulerHit(sx,sy);if(rh){act=startRulerAct(rh,sx,sy,e);return;}
     gest={type:'pan',lx:sx,ly:sy,moved:false,vx:0,vy:0,lt:performance.now()};
     clearTimeout(lpTimer);lpTimer=setTimeout(()=>longPress(sx,sy,e.pointerId),480);
   }else if(touches.size===2){
@@ -842,6 +998,7 @@ function beginAct(e,sx,sy){
   if((ptype==='mouse'&&e.button===2)||(ptype==='pen'&&(e.buttons&2))){   // pravé tlačítko / boční tlačítko pera
     openRadial(sx,sy);act={type:'radial',pointerId:e.pointerId,ptype,sx0:sx,sy0:sy,moved:false,far:true};return;
   }
+  const rh=rulerHit(sx,sy);if(rh){act=startRulerAct(rh,sx,sy,e);return;}
   const base={pointerId:e.pointerId,ptype,sx0:sx,sy0:sy,t0:performance.now(),far:false};
   if(sel){const h=selHit(sx,sy);if(h){startSelDrag(h,sx,sy,e);return;}clearSel();
     if(T.tool!=='lasso'){act=Object.assign(base,{type:'none'});armHold();return;}}
@@ -853,7 +1010,9 @@ function beginAct(e,sx,sy){
   const [x,y]=toLocal(sx,sy,page), pr=pressureOf(e);
   switch(tool){
     case 'pen':case 'hl':{const cfg=T[tool];const k=tool==='hl'?'hl':(cfg.style==='marker'?'mk':'pen');
-      act=Object.assign(base,{type:'draw',it:{t:'s',id:uid(),k,c:cfg.color,w:cfg.size,ps:cfg.style,p:[[x,y,pr]]},stillAt:[sx,sy],straight:tool==='hl'&&cfg.straight});
+      const edge=rulerEdge(sx,sy);
+      act=Object.assign(base,{type:'draw',it:{t:'s',id:uid(),k,c:cfg.color,w:cfg.size,ps:cfg.style,p:[]},stillAt:[sx,sy],straight:tool==='hl'&&cfg.straight&&edge==null,snap:edge,far:edge!=null});
+      if(edge!=null){const q=snapPt(act,sx,sy);const L=toLocal(q[0],q[1],page);act.it.p.push([L[0],L[1],0.5]);}else act.it.p.push([x,y,pr]);
       if(k==='hl'&&!isDark(page))live.style.mixBlendMode='multiply';break;}
     case 'shape':act=Object.assign(base,{type:'shape',a:[x,y],b:[x,y],raw:[[x,y,pr]],kind:T.shape.kind});break;
     case 'eraser':act=Object.assign(base,{type:'erase',before:page.items,changed:false,last:[x,y],cur:[x,y]});eraseSeg(act,x,y);break;
@@ -861,7 +1020,10 @@ function beginAct(e,sx,sy){
     case 'text':act=Object.assign(base,{type:'text',x,y});break;
   }
   armHold(); drawOverlay();
+  clearTimeout(fadeT);fadeT=setTimeout(()=>{if(act&&['draw','shape','erase','lasso'].includes(act.type))$('#editor').classList.add('drawing');},220);
 }
+let fadeT=0;
+function unfade(){clearTimeout(fadeT);$('#editor').classList.remove('drawing');}
 function armHold(){
   clearTimeout(holdTimer); if(!S.radial)return;
   holdTimer=setTimeout(onHold,S.holdMs);
@@ -873,14 +1035,14 @@ function onHold(){
   if(!act||act.far||!holdable(act))return;
   const a=act;
   if(a.type==='erase'&&a.changed){a.page.items=a.before;render();}
-  live.style.mixBlendMode='';
+  live.style.mixBlendMode='';unfade();
   openRadial(a.sx0,a.sy0); vibrate(10);
   act={type:'radial',pointerId:a.pointerId,ptype:a.ptype,sx0:a.sx0,sy0:a.sy0,moved:false,far:true};
   drawOverlay();
 }
 function armStill(){
   clearTimeout(stillTimer);
-  if(S.afterHold==='off'||!act||act.type!=='draw'||act.shaped)return;
+  if(S.afterHold==='off'||!act||act.type!=='draw'||act.shaped||act.snap!=null)return;
   stillTimer=setTimeout(onStill,Math.max(S.holdMs,520));
 }
 function onStill(){
@@ -905,6 +1067,7 @@ function moveAct(e,sx,sy){
       if(act.shaped)break;
       const it=act.it;
       if(act.straight){const[x,y]=toLocal(sx,sy,act.page);it.p=[it.p[0],[x,y,0.5]];pathCache.delete(it);}
+      else if(act.snap!=null){for(const ev of list){const[px,py]=sp(ev);const q=snapPt(act,px,py);addPoint(act,q[0],q[1],0.5);}act.pred=null;}
       else{for(const ev of list){const[px,py]=sp(ev);addPoint(act,px,py,pressureOf(ev));}
         const pr=e.getPredictedEvents?e.getPredictedEvents():[];act.pred=pr.slice(0,3).map(ev=>{const[px,py]=sp(ev);const q=toLocal(px,py,act.page);return [q[0],q[1],it.p[it.p.length-1][2]];});}
       if(Math.hypot(sx-act.stillAt[0],sy-act.stillAt[1])>4){act.stillAt=[sx,sy];if(act.far)armStill();}
@@ -913,9 +1076,11 @@ function moveAct(e,sx,sy){
     case 'erase':{for(const ev of list){const[px,py]=sp(ev);const[x,y]=toLocal(px,py,act.page);eraseSeg(act,x,y);}if(act.changed)scheduleRender();else drawOverlay();break;}
     case 'lasso':{const[x,y]=toLocal(sx,sy,act.page);const l=act.poly[act.poly.length-1];if(dist([x,y],l)*z>2)act.poly.push([x,y]);drawOverlay();break;}
     case 'seldrag':selDragMove(sx,sy);break;
+    case 'ruler':rulerDrag(act,sx,sy);break;
     case 'laser':for(const ev of list){const[px,py]=sp(ev);laserAdd(px,py);}break;
   }
 }
+function snapPt(a,sx,sy){const[lx]=rulerLocal(sx,sy);const off=a.snap+(a.snap<0?-1:1)*(a.it.w*z/2);return rulerToScreen(lx,off);}
 function addPoint(a,px,py,pr){
   const[x,y]=toLocal(px,py,a.page);const p=a.it.p,l=p[p.length-1];
   if(Math.hypot(x-l[0],y-l[1])*z<0.7)return;
@@ -923,9 +1088,9 @@ function addPoint(a,px,py,pr){
 }
 function endAct(e){
   clearTimeout(holdTimer);clearTimeout(stillTimer);cancelAnimationFrame(holdRAF);
-  const a=act; act=null; live.style.mixBlendMode='';
+  const a=act; act=null; live.style.mixBlendMode=''; unfade();
   switch(a.type){
-    case 'radial':{const[sx,sy]=sp(e);if(a.moved){const h=radialHit(sx,sy);if(h&&h.item)radialApply(h);closeRadial();}else{radial.pinned=true;renderRadial();}break;}
+    case 'radial':{const[sx,sy]=sp(e);if(a.moved){const h=radialHit(sx,sy);if(h&&h.item)radialApply(h);closeRadial();}else{radial.pinned=true;updateRadialHover();}break;}
     case 'draw':commitDraw(a);break;
     case 'shape':commitShape(a);break;
     case 'erase':if(a.changed){pushUndo({k:'items',pid:a.page.id,items:a.before});changed();}render();break;
@@ -938,7 +1103,7 @@ function endAct(e){
 function abortAct(){
   if(!act)return;
   clearTimeout(holdTimer);clearTimeout(stillTimer);cancelAnimationFrame(holdRAF);
-  const a=act;act=null;live.style.mixBlendMode='';
+  const a=act;act=null;live.style.mixBlendMode='';unfade();
   if(a.type==='erase'&&a.changed){a.page.items=a.before;render();}
   if(a.type==='seldrag'&&sel){sel.m=I();H_.undo.pop();updUndo();showSelBar();}
   if(a.type==='radial')closeRadial();
@@ -948,12 +1113,14 @@ function commitDraw(a){
   let it=a.it; if(!a.shaped&&!a.straight)it.p=processPts(it.p);
   it=finalize(Object.assign({},it)); delete it.ps_;
   snapItems(a.page); a.page.items=a.page.items.concat([it]); drawOnMain(a.page,it); changed();
+  if(it.k==='sh')checkFrame(a.page,it);
 }
 function commitShape(a){
   let pts=a.kind==='auto'?(recognize(a.raw)||(a.raw.length>1&&dist(a.a,a.b)>4?genShape('line',a.a,a.b):null)):(dist(a.a,a.b)>3?genShape(a.kind,a.a,a.b):null);
   if(!pts)return;
   const it=finalize({t:'s',id:uid(),k:'sh',c:T.shape.color,w:T.shape.size,p:pts});
   snapItems(a.page);a.page.items=a.page.items.concat([it]);drawOnMain(a.page,it);changed();
+  checkFrame(a.page,it);
 }
 
 /* ---------- guma ---------- */
@@ -1074,6 +1241,7 @@ function buildSelBar(){
   selbar.innerHTML='';
   T.fav.slice(0,5).forEach(c=>{const d=document.createElement('button');d.className='cdot';d.style.background=c;d.title='Obarvit';d.setAttribute('aria-label','Obarvit');d.onclick=()=>recolorSel(c);selbar.append(d);});
   selbar.append(b('palette','Další barvy',e=>openColorPop(e.currentTarget,c=>recolorSel(c))));
+  if(selItems().some(it=>it.t==='s'&&it.k!=='hl'))selbar.append(b('calc','Spočítat příklad',()=>{const pg=sel.page,its=selItems();clearSel();calcState=null;calcItems(pg,its);}));
   selbar.append(b('dup','Duplikovat',dupSel),b('copy','Kopírovat',()=>copySel(false)),b('cut','Vyjmout',()=>copySel(true)),b('front','Do popředí',()=>orderSel(1)),b('backl','Do pozadí',()=>orderSel(-1)),b('trash','Smazat',delSel,'del'),b('check','Hotovo',clearSel));
 }
 function recolorSel(c){if(!sel)return;snapItems(sel.page);sel.page.items=sel.page.items.map(it=>sel.ids.has(it.id)&&it.t!=='i'?Object.assign({},it,{c}):it);bumpFav(c);changed();render();}
@@ -1140,7 +1308,7 @@ function openRadial(x,y){
   inner.push({kind:'undo',label:'Zpět',icon:'undo'},{kind:'redo',label:'Znovu',icon:'redo'});
   if(clip&&clip.length)inner.push({kind:'paste',label:'Vložit',icon:'paste'});
   radial.inner=inner;
-  radial.outer=T.fav.map(c=>({kind:'color',c,label:'Barva'})).concat(SIZES[sizeTool()].map((v,i)=>({kind:'size',v,i,label:'Tloušťka '+(i+1)})));
+  radial.outer=favList().map(c=>({kind:'color',c,label:'Barva'})).concat(SIZES[sizeTool()].map((v,i)=>({kind:'size',v,i,label:'Tloušťka '+(i+1)})));
   renderRadial();
 }
 function closeRadial(){radial.open=false;radial.hover=null;renderRadial();}
@@ -1153,7 +1321,7 @@ function radialHit(x,y){
   if(d<=R3+40)return pick(radial.outer,'outer');
   return null;
 }
-function radialHover(sx,sy){const h=radialHit(sx,sy);const k=h?(h.center?'c':h.ring+h.idx):'';const o=radial.hover;const ko=o?(o.center?'c':o.ring+o.idx):'';if(k!==ko){radial.hover=h;renderRadial();}}
+function radialHover(sx,sy){const h=radialHit(sx,sy);const k=h?(h.center?'c':h.ring+h.idx):'';const o=radial.hover;const ko=o?(o.center?'c':o.ring+o.idx):'';if(k!==ko){radial.hover=h;updateRadialHover();}}
 function radialTap(sx,sy){const h=radialHit(sx,sy);if(h&&h.item)radialApply(h);closeRadial();}
 function radialApply(h){
   const it=h.item;
@@ -1165,20 +1333,31 @@ function radialApply(h){
   vibrate(6);
 }
 function renderRadial(){
+  // Kolečko se sestaví jen jednou při otevření; při pohybu pera se mění jen zvýraznění (žádné problikávání).
   if(!radial.open){radialSvg.innerHTML='';return;}
-  const hv=radial.hover; let s=`<g transform="translate(${radial.cx.toFixed(1)} ${radial.cy.toFixed(1)})"><g class="rg"><circle r="${R3+6}" class="r-bg"/>`;
+  let s=`<g transform="translate(${radial.cx.toFixed(1)} ${radial.cy.toFixed(1)})"><g class="rg"><circle r="${R3+6}" class="r-bg"/>`;
   const inn=radial.inner,ni=inn.length,di=2*Math.PI/ni,ai=-Math.PI/2-di/2;
-  inn.forEach((it,i)=>{const a=ai+i*di,b=a+di,on=it.kind==='tool'&&it.id===T.tool,hot=hv&&hv.ring==='inner'&&hv.idx===i;
-    s+=`<path d="${sector(R0,R1,a+0.014,b-0.014)}" class="r-sec${on?' on':''}${hot?' hot':''}"/>`;
-    const m=(a+b)/2,rr=(R0+R1)/2;s+=`<svg x="${(Math.cos(m)*rr-12).toFixed(1)}" y="${(Math.sin(m)*rr-12).toFixed(1)}" width="24" height="24" viewBox="0 0 24 24" class="r-ic${on?' on':''}${hot?' hot':''}">${IC[it.icon]}</svg>`;});
+  inn.forEach((it,i)=>{const a=ai+i*di,b=a+di,on=it.kind==='tool'&&it.id===T.tool;
+    s+=`<path d="${sector(R0,R1,a+0.014,b-0.014)}" class="r-sec${on?' on':''}" data-k="inner-${i}"/>`;
+    const m=(a+b)/2,rr=(R0+R1)/2;s+=`<svg x="${(Math.cos(m)*rr-12).toFixed(1)}" y="${(Math.sin(m)*rr-12).toFixed(1)}" width="24" height="24" viewBox="0 0 24 24" class="r-ic${on?' on':''}" data-k="inner-${i}">${IC[it.icon]}</svg>`;});
   const out=radial.outer,no=out.length,d=2*Math.PI/no,ao=-Math.PI/2-d/2;
-  out.forEach((it,i)=>{const a=ao+i*d,b=a+d,hot=hv&&hv.ring==='outer'&&hv.idx===i,r1=hot?R3+10:R3;
-    if(it.kind==='color'){const on=it.c.toLowerCase()===curColor().toLowerCase();s+=`<path d="${sector(R2,r1,a+0.02,b-0.02)}" fill="${it.c}" class="r-col${on?' on':''}"/>`;}
-    else{const on=Math.abs(it.v-curSize())<0.01;s+=`<path d="${sector(R2,r1,a+0.02,b-0.02)}" class="r-sec${on?' on':''}${hot?' hot':''}"/>`;const m=(a+b)/2,rr=(R2+R3)/2;s+=`<circle cx="${(Math.cos(m)*rr).toFixed(1)}" cy="${(Math.sin(m)*rr).toFixed(1)}" r="${2+it.i*2.3}" class="r-dot" style="${hot?'fill:var(--accent-ink)':''}"/>`;}});
-  s+=`<circle r="${RC}" class="r-center${hv&&hv.center?' hot':''}"/><circle r="9" fill="${curColor()}" stroke="var(--line)"/>`;
+  out.forEach((it,i)=>{const a=ao+i*d,b=a+d,d0=sector(R2,R3,a+0.02,b-0.02),d1=sector(R2,R3+10,a+0.02,b-0.02);
+    if(it.kind==='color'){const on=it.c.toLowerCase()===curColor().toLowerCase();s+=`<path d="${d0}" data-d0="${d0}" data-d1="${d1}" fill="${it.c}" class="r-col${on?' on':''}" data-k="outer-${i}"/>`;}
+    else{const on=Math.abs(it.v-curSize())<0.01;s+=`<path d="${d0}" data-d0="${d0}" data-d1="${d1}" class="r-sec${on?' on':''}" data-k="outer-${i}"/>`;const m=(a+b)/2,rr=(R2+R3)/2;s+=`<circle cx="${(Math.cos(m)*rr).toFixed(1)}" cy="${(Math.sin(m)*rr).toFixed(1)}" r="${2+it.i*2.3}" class="r-dot" data-k="outer-${i}"/>`;}});
+  s+=`<circle r="${RC}" class="r-center" id="rCenter"/><circle r="9" fill="${curColor()}" stroke="var(--line)"/>`;
+  s+=`<g id="rLab" transform="translate(0 ${-(R3+24)})" visibility="hidden"><rect id="rLabR" y="-14" height="28" rx="14" class="r-lab"/><text id="rLabT" text-anchor="middle" y="4.5" class="r-labt"></text></g>`;
+  s+='</g></g>'; radialSvg.innerHTML=s; updateRadialHover();
+}
+function updateRadialHover(){
+  if(!radial.open)return;
+  const hv=radial.hover,key=hv&&!hv.center?hv.ring+'-'+hv.idx:'';
+  radialSvg.querySelectorAll('[data-k]').forEach(n=>{const on=n.getAttribute('data-k')===key;n.classList.toggle('hot',on);const d1=n.getAttribute('data-d1');if(d1)n.setAttribute('d',on?d1:n.getAttribute('data-d0'));});
+  const c=radialSvg.querySelector('#rCenter');if(c)c.classList.toggle('hot',!!(hv&&hv.center));
   const lab=hv&&hv.item?(hv.item.kind==='color'?'Barva':hv.item.label):(hv&&hv.center?'Zavřít':(radial.pinned?'Klepněte na volbu':''));
-  if(lab){const w=Math.round(lab.length*7.3+28);s+=`<g transform="translate(0 ${-(R3+24)})"><rect x="${-w/2}" y="-14" width="${w}" height="28" rx="14" class="r-lab"/><text text-anchor="middle" y="4.5" class="r-labt">${esc(lab)}</text></g>`;}
-  s+='</g></g>'; radialSvg.innerHTML=s;
+  const g=radialSvg.querySelector('#rLab');if(!g)return;
+  if(!lab){g.setAttribute('visibility','hidden');return;}
+  const w=Math.round(lab.length*7.3+28),r=radialSvg.querySelector('#rLabR');r.setAttribute('x',String(-w/2));r.setAttribute('width',String(w));
+  radialSvg.querySelector('#rLabT').textContent=lab;g.setAttribute('visibility','visible');
 }
 
 /* =========================================================
@@ -1191,18 +1370,59 @@ function setTool(t){
 }
 function setColor(c){const t=['pen','hl','shape','text'].includes(T.tool)?T.tool:'pen';T[t].color=c;bumpFav(c);saveT();updateToolbar();if(sel)recolorSel(c);}
 function setSize(v){T[sizeTool()].size=v;saveT();updateToolbar();}
+const favList=()=>T.tool==='hl'?T.hlFav:T.fav;
 function bumpFav(c){
-  c=c.toUpperCase(); T.favUse[c]=Date.now();
-  if(!T.fav.map(x=>x.toUpperCase()).includes(c)){let mi=0,mt=Infinity;T.fav.forEach((f,i)=>{const u=T.favUse[f.toUpperCase()]||0;if(u<mt){mt=u;mi=i;}});T.fav[mi]=c;}
+  c=c.toUpperCase(); T.favUse[c]=Date.now(); const L=favList();
+  if(!L.map(x=>x.toUpperCase()).includes(c)){let mi=0,mt=Infinity;L.slice(0,7).forEach((f,i)=>{const u=T.favUse[f.toUpperCase()]||0;if(u<mt){mt=u;mi=i;}});L[mi]=c;}
   saveT();
 }
+const lum=hex=>{const h=hex.replace('#','');if(h.length<6)return 1;const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255;return 0.2126*r+0.7152*g+0.0722*b;};
 function updateToolbar(){
-  document.querySelectorAll('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tool===T.tool)));
-  $('#bColor span').style.background=curColor();
-  const st=sizeTool(), sz=$('#sizes'); sz.innerHTML='';
-  SIZES[st].forEach((v,i)=>{const b=document.createElement('button');b.className='sz';b.setAttribute('aria-pressed',String(Math.abs(v-T[st].size)<0.01));b.title='Tloušťka '+(i+1);b.setAttribute('aria-label','Tloušťka '+(i+1));const d=4+i*3.4;b.innerHTML=`<i style="width:${d}px;height:${d}px"></i>`;b.onclick=()=>setSize(v);sz.append(b);});
+  const col=['pen','hl','shape','text'].includes(T.tool)?curColor():'#FFFFFF',tc=lum(col)<0.32?'#FFFFFF':col;
+  document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===T.tool;b.setAttribute('aria-pressed',String(on));b.style.setProperty('--tool-c',on?tc:'#fff');});
+  $('#bRuler').setAttribute('aria-pressed',String(ruler.on));$('#bFinger').setAttribute('aria-pressed',String(fingerDraws()));
+  renderPal();
 }
-function updatePageInd(){if(!nb)return;$('#pageInd').textContent=`${curPageIndex()+1} / ${nb.pages.length}`;$('#zoomInd').textContent=Math.round(z*100)+' %';}
+function renderPal(){
+  const pal=$('#vpal'),t=T.tool,hasC=['pen','hl','shape','text'].includes(t),hasS=!!SIZES[t];
+  pal.hidden=!(hasC||hasS);pal.innerHTML='';
+  if(hasC){
+    favList().slice(0,6).forEach((c,i)=>{const b=el('button',{class:'vdot','aria-pressed':String(c.toUpperCase()===curColor().toUpperCase()),'aria-label':'Barva '+c,title:'Klepnutí vybere, podržení změní barvu'});b.style.background=c;
+      b.onclick=()=>setColor(c);onLong(b,()=>openColorPop(b,nc=>{const L=favList();L[i]=nc.toUpperCase();saveT();setColor(nc);}));pal.append(b);});
+    const a=el('button',{class:'vadd','aria-label':'Další barvy',title:'Další barvy'},ic('plus'));a.onclick=()=>openColorPop(a,c=>setColor(c));pal.append(a);
+    if(hasS)pal.append(el('span',{class:'vsep'}));
+  }
+  if(hasS)SIZES[t].forEach((v,i)=>{const b=el('button',{class:'vsz','aria-pressed':String(Math.abs(v-T[t].size)<0.01),'aria-label':'Tloušťka '+(i+1),title:'Tloušťka '+(i+1)},`<i style="height:${2+i*2.6}px"></i>`);b.onclick=()=>setSize(v);pal.append(b);});
+}
+let chipT=0,lastPI='';
+function updatePageInd(){if(!nb)return;const t=`${curPageIndex()+1} / ${nb.pages.length} · ${Math.round(z*100)} %`;if(t===lastPI)return;lastPI=t;const c=$('#pgChip');c.textContent=t;c.classList.add('show');clearTimeout(chipT);chipT=setTimeout(()=>c.classList.remove('show'),1300);}
+
+/* ---------- pravítko ---------- */
+const ruler={on:false,cx:0,cy:0,ang:0,len:760,h:84};
+function rulerLocal(sx,sy){const dx=sx-ruler.cx,dy=sy-ruler.cy,c=Math.cos(ruler.ang),s=Math.sin(ruler.ang);return [dx*c+dy*s,-dx*s+dy*c];}
+function rulerToScreen(lx,ly){const c=Math.cos(ruler.ang),s=Math.sin(ruler.ang);return [ruler.cx+lx*c-ly*s,ruler.cy+lx*s+ly*c];}
+function rulerHit(sx,sy){if(!ruler.on)return null;const[lx,ly]=rulerLocal(sx,sy);if(Math.hypot(lx-(ruler.len/2-30),ly)<26)return 'rotate';if(Math.abs(lx)<=ruler.len/2&&Math.abs(ly)<=ruler.h/2-6)return 'move';return null;}
+function rulerEdge(sx,sy){if(!ruler.on)return null;const[lx,ly]=rulerLocal(sx,sy),H2=ruler.h/2;if(Math.abs(lx)>ruler.len/2+30)return null;if(ly<=-H2+6&&ly>-H2-40)return -H2;if(ly>=H2-6&&ly<H2+40)return H2;return null;}
+function toggleRuler(){ruler.on=!ruler.on;if(ruler.on){ruler.len=Math.min(W*0.8,900);ruler.cx=W/2;ruler.cy=H*0.55;ruler.ang=0;}updateToolbar();drawOverlay();}
+function drawRuler(c){
+  c.setTransform(dpr,0,0,dpr,0,0);c.save();c.translate(ruler.cx,ruler.cy);c.rotate(ruler.ang);
+  const L=ruler.len,Hh=ruler.h;c.fillStyle='rgba(38,38,40,.82)';c.beginPath();if(c.roundRect)c.roundRect(-L/2,-Hh/2,L,Hh,8);else c.rect(-L/2,-Hh/2,L,Hh);c.fill();
+  const mm=PW/210*z,step=mm>=4?1:5,lab=10*mm<24?50:10;
+  c.strokeStyle='rgba(255,255,255,.75)';c.lineWidth=1;c.beginPath();
+  for(let i=0;i*mm<=L-20;i+=step){const x=-L/2+10+i*mm,l=i%10===0?16:(i%5===0?11:6);c.moveTo(x,-Hh/2);c.lineTo(x,-Hh/2+l);c.moveTo(x,Hh/2);c.lineTo(x,Hh/2-l);}c.stroke();
+  c.fillStyle='rgba(255,255,255,.85)';c.font='600 10px Inter, sans-serif';c.textAlign='center';
+  for(let i=0;i*mm<=L-20;i+=lab)c.fillText(String(i/10),-L/2+10+i*mm,-Hh/2+28);
+  c.font='600 13px Inter, sans-serif';c.fillText(Math.round(((ruler.ang*180/Math.PI)%360+360)%360)+'°',0,10);
+  c.beginPath();c.arc(L/2-30,0,14,0,Math.PI*2);c.fillStyle='rgba(255,255,255,.16)';c.fill();
+  c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=1.6;c.beginPath();c.arc(L/2-30,0,7,0.5,Math.PI*1.8);c.stroke();
+  c.restore();
+}
+function rulerDrag(a,sx,sy){
+  if(a.mode==='move'){ruler.cx=a.cx0+(sx-a.sx0);ruler.cy=a.cy0+(sy-a.sy0);}
+  else{let ang=a.a0+Math.atan2(sy-ruler.cy,sx-ruler.cx)-a.ang0;const sn=Math.round(ang/(Math.PI/4))*(Math.PI/4);if(Math.abs(ang-sn)<0.05)ang=sn;ruler.ang=ang;}
+  drawOverlay();
+}
+const startRulerAct=(mode,sx,sy,e)=>({type:'ruler',mode,pointerId:e.pointerId,ptype:e.pointerType,sx0:sx,sy0:sy,cx0:ruler.cx,cy0:ruler.cy,a0:ruler.ang,ang0:Math.atan2(sy-ruler.cy,sx-ruler.cx),far:true});
 
 /* ---------- popovery ---------- */
 let pop=null;
@@ -1212,6 +1432,7 @@ function openPop(anchor,build){
   if(pop&&pop._anchor===anchor){closePops();return;}
   closePops(); pop=document.createElement('div');pop.className='pop';pop._anchor=anchor;build(pop);document.body.append(pop);
   const r=anchor.getBoundingClientRect(),pw=pop.offsetWidth,ph=pop.offsetHeight;
+  if(anchor.closest('.vpal')){pop.style.left=Math.min(r.right+14,innerWidth-pw-8)+'px';pop.style.top=clamp(r.top+r.height/2-ph/2,8,innerHeight-ph-8)+'px';return;}
   let top=r.bottom+8; if(top+ph>innerHeight-8)top=Math.max(8,r.top-ph-8);
   pop.style.left=clamp(r.left+r.width/2-pw/2,8,innerWidth-pw-8)+'px';pop.style.top=top+'px';
 }
@@ -1266,7 +1487,7 @@ function toast(msg,stay){const t=$('#toast');t.textContent=msg;t.hidden=false;cl
    Stránky
    ========================================================= */
 const newPage=(tpl,paper,land)=>({id:uid(),w:land?PH:PW,h:land?PW:PH,tpl:tpl||S.tpl,paper:paper||S.paper,bg:null,items:[],mark:false});
-function goToPage(i){const p=nb.pages[clamp(i,0,nb.pages.length-1)];oy=16-p._top*z;clampView();render();}
+function goToPage(i){const p=nb.pages[clamp(i,0,nb.pages.length-1)];oy=-p._top*z;clampView();render();}
 function addPage(at){const cur=nb.pages[curPageIndex()];snapPages();const p=newPage(cur&&!cur.bg?cur.tpl:S.tpl,cur?cur.paper:S.paper);if(cur&&!cur.bg){p.w=cur.w;p.h=cur.h;}const i=at==null?curPageIndex()+1:at;nb.pages=nb.pages.slice(0,i).concat([p],nb.pages.slice(i));layoutPages();changed();goToPage(i);if(pagesOpen())renderPanel();toast('Stránka přidána');}
 function delPage(i){if(nb.pages.length<2){toast('Sešit musí mít alespoň jednu stránku');return;}clearSel();snapPages();nb.pages=nb.pages.filter((_,k)=>k!==i);layoutPages();clampView();changed();render();renderPanel();}
 function dupPage(i){snapPages();const src=nb.pages[i];const p=Object.assign({},src,{id:uid(),items:src.items.map(it=>Object.assign({},it,{id:uid()}))});nb.pages=nb.pages.slice(0,i+1).concat([p],nb.pages.slice(i+1));layoutPages();changed();render();renderPanel();}
@@ -1324,7 +1545,7 @@ async function saveFile(name,blob){
   let dl=null; try{if(window.claude&&window.claude.use)dl=await window.claude.use('downloads');}catch(e){}
   if(dl){try{await dl.save({filename:name,data:blob});toast('Soubor uložen');}catch(e){if(e&&e.code!=='declined')toast('Soubor se nepodařilo uložit ('+(e.code||'chyba')+').');}return;}
   if(window.claude&&window.claude.use){toast('Stahování zde není povoleno. Otevřete aplikaci přes odkaz z GitHub Pages.');return;}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},3000);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();toast('Soubor stažen');setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},3000);
 }
 const safeName=s=>(s||'sesit').replace(/[\\/:*?"<>|]+/g,'').trim().slice(0,80)||'sesit';
 function preload(p){const srcs=[p.bg].concat(p.items.filter(i=>i.t==='i').map(i=>i.src)).filter(Boolean);return Promise.all(srcs.map(s=>{const im=getImg(s);return im.complete&&im.naturalWidth?0:new Promise(r=>{im.addEventListener('load',r,{once:true});im.addEventListener('error',r,{once:true});});}));}
@@ -1367,117 +1588,164 @@ async function importPDF(file,into){
 }
 
 /* =========================================================
-   Knihovna – složky, kategorie, oblíbené
+   Knihovna – dlaždice, složky s náhledy, kategorie, koš
    ========================================================= */
 let lib={id:'lib',folders:[],cats:[]};
-const LV=Object.assign({view:'all',folder:null,sort:'updated'},store.get('libview',{}));
-const saveLV=()=>store.set('libview',{view:LV.view,folder:LV.folder,sort:LV.sort});
+const LV=Object.assign({view:'all',folder:null,sort:'updated',side:innerWidth>=760,foldOpen:true,catOpen:true},store.get('libview',{}));
+if(!['all','fav','unfiled','trash','folders','folder'].includes(LV.view)&&!/^cat:./.test(LV.view)||LV.view==='cat:none')LV.view='all';
+const saveLV=()=>store.set('libview',{view:LV.view,folder:LV.folder,sort:LV.sort,side:LV.side,foldOpen:LV.foldOpen,catOpen:LV.catOpen});
 const saveLib=()=>DB.putMeta(lib);
 const CAT_COLORS=['#2D5BD3','#1F7A5C','#D9822B','#B23A48','#6C4AB6','#3A86A8','#C2255C','#8A6D3B','#2F9E44','#495057'];
 const fmtDate=t=>new Date(t).toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric'});
 const plural=n=>n===1?'1 strana':(n>=2&&n<=4?n+' strany':n+' stran');
-const countTxt=(n,s)=>{const a=[n===1?'1 sešit':(n>=2&&n<=4?n+' sešity':n+' sešitů')];if(s)a.push(s===1?'1 složka':(s<=4?s+' složky':s+' složek'));return a.join(' · ');};
+const items=n=>n===1?'1 položka':(n>=2&&n<=4?n+' položky':n+' položek');
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 const catById=id=>id?lib.cats.find(c=>c.id===id):null;
 const folderById=id=>id?lib.folders.find(f=>f.id===id):null;
+const liveNbs=()=>notebooks.filter(n=>!n.trashed);
 function folderPath(id){const out=[];let f=folderById(id),g=0;while(f&&g++<60){out.unshift(f);f=folderById(f.parent);}return out;}
 function descendants(id){const out=new Set([id]);let ch=true;while(ch){ch=false;for(const f of lib.folders)if(f.parent&&out.has(f.parent)&&!out.has(f.id)){out.add(f.id);ch=true;}}return out;}
-const nbText=n=>n.pages.map(p=>p.items.filter(i=>i.t==='x').map(i=>i.text).join(' ')).join(' ');
+const nbText=n=>n.kind==='sheet'?(n.sheets||[]).map(sh=>(sh.data||[]).map(r=>r.filter(v=>typeof v==='string'&&v[0]!=='=').join(' ')).join(' ')).join(' '):n.pages.map(p=>p.items.filter(i=>i.t==='x').map(i=>i.text).join(' ')).join(' ');
 const sortNbs=a=>a.sort(LV.sort==='title'?(x,y)=>x.title.localeCompare(y.title,'cs'):LV.sort==='created'?(x,y)=>(y.created||0)-(x.created||0):(x,y)=>y.updated-x.updated);
-const goView=(view,folder=null)=>{LV.view=view;LV.folder=folder;$('#q').value='';saveLV();renderLib();$('.lib-main').scrollTop=0;};
+function goView(view,folder=null){LV.view=view;LV.folder=folder;$('#q').value='';if(innerWidth<760)LV.side=false;saveLV();renderLib();$('.lib-main').scrollTop=0;}
+function currentPlace(){return {folder:LV.view==='folder'?LV.folder:null,cat:/^cat:/.test(LV.view)?LV.view.slice(4):null};}
+
+/* dlouhé podržení = kontextové menu (na tabletu místo pravého tlačítka) */
+function onLong(elm,fn){
+  let t=0,fired=false,x0=0,y0=0;
+  elm.addEventListener('pointerdown',e=>{fired=false;x0=e.clientX;y0=e.clientY;clearTimeout(t);t=setTimeout(()=>{fired=true;vibrate(10);fn(elm);},520);});
+  elm.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-x0,e.clientY-y0)>10)clearTimeout(t);});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>elm.addEventListener(ev,()=>clearTimeout(t)));
+  elm.addEventListener('click',e=>{if(fired){e.stopImmediatePropagation();e.preventDefault();fired=false;}},true);
+  elm.addEventListener('contextmenu',e=>{e.preventDefault();clearTimeout(t);if(!fired)fn(elm);});
+}
+
+/* náhledy první stránky */
+const thumbs=new Map();
+function thumbEl(n){
+  if(n.kind==='sheet'){const key=n.id+':'+n.updated,c=thumbs.get(n.id);if(c&&c.key===key){const im=new Image();im.alt='';im.src=c.url;return im;}const cv=sheetThumb(n);try{thumbs.set(n.id,{key,url:cv.toDataURL('image/png')});}catch(e){}return cv;}
+  const p=n.pages[0];if(!p)return el('span',{class:'ph'});
+  const key=n.id+':'+n.updated+':'+n.pages.length,c=thumbs.get(n.id);
+  if(c&&c.key===key){const im=new Image();im.alt='';im.src=c.url;return im;}
+  const w=240,s=w/p.w,cv=document.createElement('canvas');cv.width=w;cv.height=Math.round(p.h*s);
+  const draw=()=>{const x=cv.getContext('2d');x.setTransform(s,0,0,s,0,0);drawPage(x,p,{});};
+  draw();preload(p).then(()=>{draw();try{thumbs.set(n.id,{key,url:cv.toDataURL('image/jpeg',0.82)});}catch(e){}});
+  return cv;
+}
 
 function renderSide(){
   const nav=$('#sideNav');nav.innerHTML='';const searching=!!$('#q').value.trim();
-  const head=(t,btn)=>{const h=el('div',{class:'nav-h'},`<span>${esc(t)}</span>`);if(btn)h.append(btn);nav.append(h);};
-  const item=(view,iconHtml,label,count,menuFn)=>{
-    const b=el('button',{class:'nav-it','aria-current':String(!searching&&LV.view===view&&(view!=='all'||!LV.folder||true))},`${iconHtml}<span class="lbl2">${esc(label)}</span><span class="cnt">${count}</span>`);
-    b.onclick=()=>goView(view);
-    if(!menuFn){nav.append(b);return;}
-    const row=el('div',{class:'nav-row'}),m=el('button',{class:'ib',title:'Upravit kategorii','aria-label':'Možnosti kategorie '+label},ic('more'));
-    m.onclick=()=>catMenu(menuFn,m);row.append(b,m);nav.append(row);
+  const tiles=el('div',{class:'tiles'});
+  [['all','home','Všechny poznámky','#E3735C'],['fav','star','Oblíbené','#E8A400'],['unfiled','inbox','Nezařazené','#3EC3DB'],['trash','trash','Koš','#9C9CA3']].forEach(([v,i,l,c])=>{
+    const b=el('button',{class:'tile','aria-current':String(!searching&&LV.view===v)},ic(i)+`<span>${l}</span>`);b.style.setProperty('--c',c);b.onclick=()=>goView(v);tiles.append(b);});
+  nav.append(tiles);
+  const section=(title,open,onToggle,onTitle,onAdd,addLabel)=>{
+    const h=el('div',{class:'sec'+(open?'':' closed')});const t=el('h3');const tb=el('button',{},esc(title));tb.onclick=onTitle;t.append(tb);h.append(t);
+    const add=el('button',{class:'ib',title:addLabel,'aria-label':addLabel},ic('plus'));add.onclick=onAdd;
+    const ch=el('button',{class:'ib chev',title:open?'Sbalit':'Rozbalit','aria-label':open?'Sbalit':'Rozbalit'},ic('dn'));ch.onclick=onToggle;
+    h.append(add,ch);nav.append(h);
   };
-  head('Knihovna');
-  item('all',ic('book'),'Všechny sešity',notebooks.length);
-  item('fav',ic('star'),'Oblíbené',notebooks.filter(n=>n.fav).length);
-  item('recent',ic('clock'),'Nedávné',Math.min(12,notebooks.length));
-  const add=el('button',{class:'ib',title:'Nová kategorie','aria-label':'Nová kategorie'},ic('plus'));add.onclick=()=>editCategory();
-  head('Kategorie',add);
-  lib.cats.forEach(c=>item('cat:'+c.id,`<i class="cdot2" style="background:${c.color}"></i>`,c.name,notebooks.filter(n=>n.cat===c.id).length,c));
-  item('cat:none',ic('inbox'),'Bez kategorie',notebooks.filter(n=>!catById(n.cat)).length);
-  const addM=el('button',{class:'nav-it only-m'},ic('plus')+'<span class="lbl2">Kategorie</span>');addM.onclick=()=>editCategory();nav.append(addM);
+  const live=liveNbs();
+  section('Složky',LV.foldOpen,()=>{LV.foldOpen=!LV.foldOpen;saveLV();renderSide();},()=>goView('folders'),()=>editFolder(),'Nová složka');
+  if(LV.foldOpen){
+    const walk=(parent,d)=>lib.folders.filter(f=>(f.parent||null)===parent).sort((a,b)=>a.name.localeCompare(b.name,'cs')).forEach(f=>{
+      const cnt=live.filter(n=>n.folder===f.id).length+lib.folders.filter(x=>x.parent===f.id).length;
+      const b=el('button',{class:'fit'+(d?' sub':''),'aria-current':String(!searching&&LV.view==='folder'&&LV.folder===f.id)},`${ic('folder')}<span class="lbl2">${esc(f.name)}</span><span class="cnt">${cnt}</span>`);
+      b.style.paddingLeft=(20+d*22)+'px';b.onclick=()=>goView('folder',f.id);onLong(b,()=>folderMenu(f,b));nav.append(b);walk(f.id,d+1);});
+    walk(null,0);
+    if(!lib.folders.length)nav.append(el('div',{class:'side-empty'},'Zatím žádné složky. Vytvořte je tlačítkem +.'));
+  }
+  section('Kategorie',LV.catOpen,()=>{LV.catOpen=!LV.catOpen;saveLV();renderSide();},()=>{},()=>editCategory(),'Nová kategorie');
+  if(LV.catOpen){
+    lib.cats.forEach(c=>{const b=el('button',{class:'fit','aria-current':String(!searching&&LV.view==='cat:'+c.id)},`<i class="cdot2" style="background:${c.color}"></i><span class="lbl2">${esc(c.name)}</span><span class="cnt">${live.filter(n=>n.cat===c.id).length}</span>`);
+      b.onclick=()=>goView('cat:'+c.id);onLong(b,()=>catMenu(c,b));nav.append(b);});
+    if(!lib.cats.length)nav.append(el('div',{class:'side-empty'},'Zatím žádné kategorie.'));
+  }
 }
+function qa(icon,label,color,fn,cls=''){const b=el('button',{class:'qa '+cls},`<span class="qi" style="color:${color}">${ic(icon)}</span><span>${esc(label)}</span>`);b.onclick=fn;return b;}
 function renderLib(){
-  if(LV.folder&&!folderById(LV.folder))LV.folder=null;
-  if(LV.view.startsWith('cat:')&&LV.view!=='cat:none'&&!catById(LV.view.slice(4)))LV.view='all';
-  $('#sort').value=LV.sort; renderSide();
-  const qRaw=$('#q').value.trim(),q=norm(qRaw),g=$('#grid'),cr=$('#crumbs');g.innerHTML='';cr.innerHTML='';
-  let folders=[],list=[],showNew=false,empty='';
-  const here=h=>cr.append(el('span',{class:'here'},h));
-  if(q){
-    here(`Hledání „${esc(qRaw)}“`);
-    folders=lib.folders.filter(f=>norm(f.name).includes(q));
-    list=notebooks.filter(n=>norm(n.title).includes(q)||norm(nbText(n)).includes(q));
-    empty='Nic nenalezeno. Hledá se v názvech sešitů, složek i v napsaném textu.';
-  }else if(LV.view==='all'){
-    const path=folderPath(LV.folder);
-    if(path.length){const r=el('button',{},'Všechny sešity');r.onclick=()=>goView('all');cr.append(r);
-      path.forEach((f,i)=>{cr.append(el('span',{class:'sepc'},'›'));if(i===path.length-1)here(esc(f.name));else{const b=el('button',{},esc(f.name));b.onclick=()=>goView('all',f.id);cr.append(b);}});}
-    else here('Všechny sešity');
-    folders=lib.folders.filter(f=>(f.parent||null)===LV.folder);
-    list=notebooks.filter(n=>(folderById(n.folder)?n.folder:null)===LV.folder);
-    showNew=true; if(LV.folder)empty='Složka je prázdná. Vytvořte v ní sešit, nebo sem přesuňte existující (menu sešitu → Přesunout do složky).';
-  }else if(LV.view==='fav'){here('Oblíbené');list=notebooks.filter(n=>n.fav);empty='Zatím žádné oblíbené sešity. V menu sešitu zvolte „Přidat do oblíbených“.';}
-  else if(LV.view==='recent'){here('Nedávné');list=notebooks.slice().sort((a,b)=>b.updated-a.updated).slice(0,12);}
-  else if(LV.view==='cat:none'){here('Bez kategorie');list=notebooks.filter(n=>!catById(n.cat));showNew=true;}
-  else{const c=catById(LV.view.slice(4));here(`<i class="cdot2" style="background:${c.color}"></i>${esc(c.name)}`);list=notebooks.filter(n=>n.cat===c.id);showNew=true;empty='V této kategorii zatím nic není. Vytvořte nový sešit, nebo existujícímu sešitu nastavte kategorii v jeho menu.';}
-  if(LV.view!=='recent'||q)sortNbs(list);
-  folders.sort((a,b)=>a.name.localeCompare(b.name,'cs'));
-  if(showNew&&!q){const nw=el('div',{class:'card'}),b=el('button',{class:'cover new','aria-label':'Nový sešit'},`<span>${ic('plus')}Nový sešit</span>`);b.onclick=newNotebook;nw.append(b);g.append(nw);}
-  folders.forEach(f=>g.append(folderCard(f)));
-  list.forEach(n=>g.append(nbCard(n,q)));
+  if(LV.view==='folder'&&!folderById(LV.folder)){LV.view='all';LV.folder=null;}
+  if(/^cat:/.test(LV.view)&&!catById(LV.view.slice(4)))LV.view='all';
+  $('#lib').classList.toggle('noside',!LV.side);$('#sort').value=LV.sort;renderSide();
+  const qRaw=$('#q').value.trim(),q=norm(qRaw),g=$('#grid'),cr=$('#crumbs'),tt=$('#ltitle'),qk=$('#quick');
+  g.innerHTML='';cr.innerHTML='';qk.innerHTML='';
+  const live=liveNbs();let folders=[],list=[],empty='',title='';
+  if(q){title=`Hledání „${esc(qRaw)}“`;folders=lib.folders.filter(f=>norm(f.name).includes(q));list=live.filter(n=>norm(n.title).includes(q)||norm(nbText(n)).includes(q));empty='Nic nenalezeno. Hledá se v názvech sešitů, složek i v napsaném textu.';}
+  else switch(LV.view){
+    case 'fav':title='Oblíbené';list=live.filter(n=>n.fav);empty='Zatím žádné oblíbené. Podržte prst na sešitu a zvolte „Přidat do oblíbených“.';break;
+    case 'unfiled':title='Nezařazené';list=live.filter(n=>!folderById(n.folder));empty='Všechny sešity jsou ve složkách.';break;
+    case 'trash':title='Koš';list=notebooks.filter(n=>n.trashed);empty='Koš je prázdný. Smazané sešity tu zůstanou 30 dní.';break;
+    case 'folders':title='Složky';folders=lib.folders.filter(f=>!f.parent);empty='Zatím žádné složky. Vytvořte první tlačítkem „Nová složka“.';break;
+    case 'folder':{const path=folderPath(LV.folder),f=path[path.length-1];title=esc(f.name);
+      const r=el('button',{},'Složky');r.onclick=()=>goView('folders');cr.append(r);
+      path.slice(0,-1).forEach(x=>{cr.append(el('span',{},'›'));const b=el('button',{},esc(x.name));b.onclick=()=>goView('folder',x.id);cr.append(b);});
+      folders=lib.folders.filter(x=>x.parent===f.id);list=live.filter(n=>n.folder===f.id);empty='Složka je prázdná. Vytvořte v ní sešit, nebo sem přesuňte existující (podržte sešit → Přesunout do složky).';break;}
+    default:if(/^cat:/.test(LV.view)){const c=catById(LV.view.slice(4));title=`<i class="cdot2" style="background:${c.color}"></i>${esc(c.name)}`;list=live.filter(n=>n.cat===c.id);empty='V této kategorii zatím nic není. Vytvořte nový sešit, nebo sešitu nastavte kategorii (podržte sešit → Kategorie).';}
+      else{title='Všechny poznámky';list=live;empty='Zatím žádné sešity. Začněte rychlou poznámkou nebo novým sešitem.';}
+  }
+  tt.innerHTML=title;
+  if(!q){if(LV.view==='trash'){if(list.length)qk.append(qa('trash','Vysypat koš','var(--danger)',emptyTrash,'danger'));}
+    else qk.append(qa('quick','Rychlá poznámka','#F5C518',quickNote),qa('book','Sešit','#3EC3DB',newNotebook),qa('table','Tabulka (Excel)','#2FA36B',newSheetDoc),qa('down','Importovat soubor','var(--accent-2)',importAny),qa('folderPlus','Nová složka','var(--accent)',()=>editFolder()));}
+  sortNbs(list);folders.sort((a,b)=>a.name.localeCompare(b.name,'cs'));
+  folders.forEach(f=>g.append(folderCard(f)));list.forEach(n=>g.append(nbCard(n,q)));
   if(!folders.length&&!list.length&&empty)g.append(el('div',{class:'empty'},esc(empty)));
 }
 $('#q').addEventListener('input',renderLib);
 $('#sort').addEventListener('change',e=>{LV.sort=e.target.value;saveLV();renderLib();});
+$('#sideShade').addEventListener('click',()=>{LV.side=false;saveLV();renderLib();});
+function cardMore(card,fn){const m=el('button',{class:'ib more',title:'Možnosti','aria-label':'Možnosti'},ic('more'));m.onclick=e=>{e.stopPropagation();fn(m);};card.append(m);}
 function folderCard(f){
-  const card=el('div',{class:'card'});
-  const sub=lib.folders.filter(x=>x.parent===f.id).length,cnt=notebooks.filter(n=>n.folder===f.id).length;
-  const b=el('button',{class:'folder','aria-label':'Otevřít složku '+f.name},ic('folder')+`<span class="fcount">${countTxt(cnt,sub)}</span>`);
-  b.style.setProperty('--fc',f.color||'#2D5BD3');b.onclick=()=>goView('all',f.id);card.append(b);
-  const meta=el('div',{class:'card-meta'}),info=el('div');info.append(el('div',{class:'card-name'},esc(f.name)),el('div',{class:'card-date'},'Složka'));
-  const mb=el('button',{class:'ib',title:'Možnosti','aria-label':'Možnosti složky'},ic('more'));mb.onclick=()=>folderMenu(f,mb);meta.append(info,mb);card.append(meta);return card;
+  const card=el('div',{class:'tcard'}),th=el('button',{class:'fthumb','aria-label':'Otevřít složku '+f.name});
+  const ds=descendants(f.id),inside=liveNbs().filter(n=>ds.has(n.folder)).sort((a,b)=>b.updated-a.updated).slice(0,4);
+  for(let i=0;i<4;i++)th.append(inside[i]?thumbEl(inside[i]):el('span',{class:'ph'}));
+  th.onclick=()=>goView('folder',f.id);onLong(th,()=>folderMenu(f,th));card.append(th);
+  const cnt=liveNbs().filter(n=>n.folder===f.id).length+lib.folders.filter(x=>x.parent===f.id).length;
+  card.append(el('div',{class:'cap'},`<span style="color:${f.color||'currentColor'};display:flex">${ic('folder')}</span><div class="ct"><div class="t">${esc(f.name)}</div><div class="s">${items(cnt)}</div></div>`));
+  cardMore(card,a=>folderMenu(f,a));return card;
 }
 function nbCard(n,q){
-  const card=el('div',{class:'card'}),cv=el('button',{class:'cover','aria-label':'Otevřít '+n.title});cv.style.setProperty('--cv',n.cover||COVERS[0]);
-  cv.append(el('span',{class:'lbl'},esc(n.title)));if(n.fav)cv.append(el('span',{class:'fav-badge'},ic('star')));cv.onclick=()=>openNotebook(n);card.append(cv);
-  const meta=el('div',{class:'card-meta'}),info=el('div'),c=catById(n.cat);
-  info.append(el('div',{class:'card-name'},esc(n.title)),el('div',{class:'card-date'},`${c?`<span class="cat-tag"><i style="background:${c.color}"></i>${esc(c.name)}</span> · `:''}${plural(n.pages.length)} · ${fmtDate(n.updated)}`));
-  if(q&&!norm(n.title).includes(q)){const t=nbText(n),i=norm(t).indexOf(q);if(i>=0){const a=Math.max(0,i-28);info.append(el('div',{class:'snip'},(a?'…':'')+esc(t.slice(a,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length,i+q.length+50))+'…'));}}
-  if(q||LV.view!=='all'){const fp=folderPath(n.folder).map(f=>f.name).join(' › ');if(fp)info.append(el('div',{class:'snip'},'Složka: '+esc(fp)));}
-  const mb=el('button',{class:'ib',title:'Možnosti','aria-label':'Možnosti sešitu'},ic('more'));mb.onclick=()=>nbMenu(n,mb);meta.append(info,mb);card.append(meta);return card;
+  const card=el('div',{class:'tcard'}),th=el('button',{class:'nthumb','aria-label':(n.trashed?'Možnosti ':'Otevřít ')+n.title});
+  th.style.setProperty('--cv',n.cover||COVERS[0]);th.append(thumbEl(n));if(n.fav)th.append(el('span',{class:'fav-badge'},ic('star')));
+  const menu=a=>n.trashed?trashMenu(n,a):nbMenu(n,a);
+  th.onclick=()=>n.trashed?trashMenu(n,th):openDoc(n);onLong(th,()=>menu(th));card.append(th);
+  const c=catById(n.cat),ct=el('div',{class:'ct'});
+  ct.append(el('div',{class:'t'},esc(n.title)),el('div',{class:'s'},`${c?`<span class="cat-tag"><i style="background:${c.color}"></i>${esc(c.name)}</span> · `:''}${n.kind==='sheet'?'Tabulka · ':''}${n.trashed?'v koši':fmtDate(n.updated)}`));
+  if(q&&!norm(n.title).includes(q)){const t=nbText(n),i=norm(t).indexOf(q);if(i>=0){const a=Math.max(0,i-28);ct.append(el('div',{class:'snip'},(a?'…':'')+esc(t.slice(a,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length,i+q.length+50))+'…'));}}
+  if(q||LV.view!=='folder'){const fp=folderPath(n.folder).map(f=>f.name).join(' › ');if(fp)ct.append(el('div',{class:'snip'},esc(fp)));}
+  const cap=el('div',{class:'cap'});cap.append(ct);card.append(cap);cardMore(card,menu);return card;
 }
-function menuPop(anchor,items){openPop(anchor,p=>{const m=el('div',{class:'menu'});items.forEach(x=>{if(x==='-'){m.append(el('hr'));return;}const b=el('button',{class:x[3]||''},ic(x[0])+esc(x[1]));b.onclick=()=>{closePops();x[2]();};m.append(b);});p.append(m);});}
+function menuPop(anchor,list){openPop(anchor,p=>{const m=el('div',{class:'menu'});list.forEach(x=>{if(x==='-'){m.append(el('hr'));return;}const b=el('button',{class:x[3]||''},ic(x[0])+esc(x[1]));b.onclick=()=>{closePops();x[2]();};m.append(b);});p.append(m);});}
 function nbMenu(n,anchor){
   menuPop(anchor,[
     ['star',n.fav?'Odebrat z oblíbených':'Přidat do oblíbených',async()=>{n.fav=!n.fav;await DB.put(n);renderLib();}],
-    ['move','Přesunout do složky…',async()=>{const r=await pickFolder('Přesunout sešit',null,n.folder);if(r){n.folder=r.id;await DB.put(n);renderLib();toast(r.id?'Přesunuto do složky '+folderById(r.id).name:'Přesunuto do knihovny');}}],
-    ['tag','Kategorie…',()=>pickCategory(n)],
-    '-',
-    ['edit','Přejmenovat',()=>renameNb(n)],['palette','Barva obálky',()=>coverNb(n)],
-    ['dup','Duplikovat',async()=>{const c=JSON.parse(JSON.stringify(n));c.id=uid();c.title=n.title+' (kopie)';c.updated=c.created=Date.now();await DB.put(c);notebooks.push(c);renderLib();}],
-    '-',['file','Exportovat PDF',()=>exportPDF(n)],['down','Záloha (.json)',()=>exportBackup(n)],'-',
-    ['trash','Smazat',async()=>{const ok=await modal('Smazat sešit?',b=>b.append(el('p',{},`Sešit „${esc(n.title)}“ se trvale smaže z tohoto zařízení. Tuto akci nelze vrátit.`)),[{label:'Zrušit'},{label:'Smazat',cls:'danger',value:true}]);if(ok){await DB.del(n.id);notebooks=notebooks.filter(x=>x!==n);renderLib();toast('Sešit smazán');}},'danger']
+    ['move','Přesunout do složky…',async()=>{const r=await pickFolder('Přesunout sešit',null,n.folder);if(r){n.folder=r.id;await DB.put(n);renderLib();toast(r.id?'Přesunuto do složky '+folderById(r.id).name:'Přesunuto mezi nezařazené');}}],
+    ['tag','Kategorie…',()=>pickCategory(n)],'-',
+    ['edit','Přejmenovat',()=>renameNb(n)],['palette','Barva hřbetu',()=>coverNb(n)],
+    ['dup','Duplikovat',async()=>{const c=JSON.parse(JSON.stringify(n));c.id=uid();c.title=n.title+' (kopie)';c.updated=c.created=Date.now();await DB.put(c);notebooks.push(c);renderLib();}],'-',
+    ...(n.kind==='sheet'?[['down','Exportovat Excel (.xlsx)',()=>exportXlsx(n)],['down','Exportovat CSV',()=>exportCsv(n)]]:[['file','Exportovat PDF',()=>exportPDF(n)]]),['down','Záloha (.json)',()=>exportBackup(n)],'-',
+    ['trash','Přesunout do koše',async()=>{n.trashed=Date.now();await DB.put(n);renderLib();toast('Sešit je v koši (30 dní)');},'danger']
   ]);
+}
+function trashMenu(n,anchor){
+  menuPop(anchor,[
+    ['undo','Obnovit',async()=>{delete n.trashed;await DB.put(n);renderLib();toast('Sešit obnoven');}],'-',
+    ['trash','Smazat trvale',async()=>{const ok=await modal('Smazat trvale?',b=>b.append(el('p',{},`Sešit „${esc(n.title)}“ se nenávratně smaže.`)),[{label:'Zrušit'},{label:'Smazat',cls:'danger',value:true}]);if(ok){await DB.del(n.id);notebooks=notebooks.filter(x=>x!==n);renderLib();}},'danger']
+  ]);
+}
+async function emptyTrash(){
+  const tr=notebooks.filter(n=>n.trashed);if(!tr.length)return;
+  const ok=await modal('Vysypat koš?',b=>b.append(el('p',{},`Trvale se smaže ${tr.length===1?'1 sešit':tr.length+(tr.length<5?' sešity':' sešitů')}. Tuto akci nelze vrátit.`)),[{label:'Zrušit'},{label:'Vysypat',cls:'danger',value:true}]);
+  if(!ok)return;for(const n of tr)await DB.del(n.id);notebooks=notebooks.filter(n=>!n.trashed);renderLib();toast('Koš vysypán');
 }
 function folderMenu(f,anchor){
   menuPop(anchor,[
     ['edit','Upravit název a barvu',()=>editFolder(f)],
-    ['move','Přesunout do…',async()=>{const r=await pickFolder('Přesunout složku',descendants(f.id),f.parent);if(r){f.parent=r.id;await saveLib();renderLib();}}],
-    '-',
+    ['folderPlus','Nová podsložka',()=>editFolder(null,f.id)],
+    ['move','Přesunout do…',async()=>{const r=await pickFolder('Přesunout složku',descendants(f.id),f.parent);if(r){f.parent=r.id;await saveLib();renderLib();}}],'-',
     ['trash','Smazat složku',async()=>{const ok=await modal('Smazat složku?',b=>b.append(el('p',{},`Složka „${esc(f.name)}“ se smaže. Sešity a podsložky v ní se nesmažou – přesunou se o úroveň výš.`)),[{label:'Zrušit'},{label:'Smazat složku',cls:'danger',value:true}]);
       if(!ok)return;const up=f.parent||null;lib.folders.forEach(x=>{if(x.parent===f.id)x.parent=up;});lib.folders=lib.folders.filter(x=>x!==f);
       for(const n of notebooks)if(n.folder===f.id){n.folder=up;await DB.put(n);}
-      await saveLib();if(LV.folder===f.id)LV.folder=up;renderLib();toast('Složka smazána');},'danger']
+      await saveLib();if(LV.folder===f.id){if(up)LV.folder=up;else LV.view='folders';}renderLib();toast('Složka smazána');},'danger']
   ]);
 }
 function catMenu(c,anchor){
@@ -1496,24 +1764,24 @@ function nameColorModal(title,name,color,colors,okLabel){
 }
 async function editCategory(c){
   const r=await nameColorModal(c?'Upravit kategorii':'Nová kategorie',c?c.name:'',c?c.color:CAT_COLORS[lib.cats.length%CAT_COLORS.length],CAT_COLORS,c?'Uložit':'Vytvořit');
-  if(!r)return; if(c)Object.assign(c,r); else{const nc=Object.assign({id:uid()},r);lib.cats.push(nc);}
-  await saveLib();renderLib();
+  if(!r)return;if(c)Object.assign(c,r);else lib.cats.push(Object.assign({id:uid()},r));
+  LV.catOpen=true;await saveLib();renderLib();
 }
-async function editFolder(f){
-  const parent=f?f.parent:(LV.view==='all'?LV.folder:null);
+async function editFolder(f,parentId){
+  const parent=f?f.parent:(parentId!==undefined?parentId:currentPlace().folder);
   const r=await nameColorModal(f?'Upravit složku':'Nová složka',f?f.name:'',f?f.color:COVERS[lib.folders.length%COVERS.length],COVERS,f?'Uložit':'Vytvořit');
-  if(!r)return; if(f)Object.assign(f,r); else{lib.folders.push(Object.assign({id:uid(),parent},r));if(LV.view!=='all'){LV.view='all';LV.folder=parent;saveLV();}}
-  await saveLib();renderLib();
+  if(!r)return;if(f)Object.assign(f,r);else lib.folders.push(Object.assign({id:uid(),parent:parent||null},r));
+  LV.foldOpen=true;await saveLib();renderLib();
 }
 async function pickFolder(title,exclude,cur){
   let chosen=cur&&folderById(cur)?cur:null;
   return modal(title,b=>{
     const t=el('div',{class:'tree'});
-    const mk=(id,label,depth,color)=>{const x=el('button',{'aria-pressed':String(id===chosen)},`${id?`<span style="color:${color}">${ic('folder')}</span>`:ic('book')}<span>${esc(label)}</span>`);x.style.paddingLeft=(10+depth*22)+'px';if(exclude&&id&&exclude.has(id))x.disabled=true;x.onclick=()=>{chosen=id;t.querySelectorAll('button').forEach(y=>y.setAttribute('aria-pressed',String(y===x)));};t.append(x);};
-    mk(null,'Knihovna (bez složky)',0);
+    const mk=(id,label,depth,color)=>{const x=el('button',{'aria-pressed':String(id===chosen)},`${id?`<span style="color:${color};display:flex">${ic('folder')}</span>`:ic('inbox')}<span>${esc(label)}</span>`);x.style.paddingLeft=(10+depth*22)+'px';if(exclude&&id&&exclude.has(id))x.disabled=true;x.onclick=()=>{chosen=id;t.querySelectorAll('button').forEach(y=>y.setAttribute('aria-pressed',String(y===x)));};t.append(x);};
+    mk(null,'Nezařazené (bez složky)',0);
     const walk=(parent,d)=>lib.folders.filter(f=>(f.parent||null)===parent).sort((a,c)=>a.name.localeCompare(c.name,'cs')).forEach(f=>{mk(f.id,f.name,d,f.color);walk(f.id,d+1);});
-    walk(null,1);
-    if(!lib.folders.length)b.append(el('p',{class:'lib-note'},'Zatím nemáte žádné složky. Vytvoříte je tlačítkem „Nová složka“ v knihovně.'));
+    walk(null,0);
+    if(!lib.folders.length)b.append(el('p',{class:'lib-note'},'Zatím nemáte žádné složky. Vytvoříte je v knihovně tlačítkem „Nová složka“.'));
     b.append(t);
   },[{label:'Zrušit'},{label:'Přesunout',cls:'primary',value:()=>({id:chosen})}]);
 }
@@ -1526,41 +1794,901 @@ async function pickCategory(n){
   let chosen=catById(n.cat)?n.cat:null;
   const r=await modal('Kategorie sešitu',b=>{catChips(b,chosen,v=>chosen=v);const f=el('label',{class:'field'},'<span>Nebo vytvořit novou kategorii</span>');f.append(el('input',{type:'text',id:'newCatName',placeholder:'Např. Matematika'}));b.append(f);},
     [{label:'Zrušit'},{label:'Uložit',cls:'primary',value:b=>({id:chosen,nn:b.querySelector('#newCatName').value.trim()})}]);
-  if(!r)return; let id=r.id;
+  if(!r)return;let id=r.id;
   if(r.nn){const c={id:uid(),name:r.nn,color:CAT_COLORS[lib.cats.length%CAT_COLORS.length]};lib.cats.push(c);await saveLib();id=c.id;}
   n.cat=id;await DB.put(n);renderLib();
 }
-async function renameNb(n){const v=await modal('Přejmenovat sešit',b=>{const f=el('label',{class:'field'},'<span>Název</span>');f.append(el('input',{type:'text',id:'nbName',value:n.title,autofocus:''}));b.append(f);},[{label:'Zrušit'},{label:'Uložit',cls:'primary',value:b=>b.querySelector('input').value.trim()}]);if(v){n.title=v;n.updated=Date.now();await DB.put(n);if(nb===n)$('#nbTitle').textContent=v;if(!nb)renderLib();}}
-async function coverNb(n){let c=n.cover;const v=await modal('Barva obálky',b=>b.append(colorRow(COVERS,c,x=>c=x,44)),[{label:'Zrušit'},{label:'Uložit',cls:'primary',value:()=>c}]);if(v){n.cover=v;await DB.put(n);renderLib();}}
-function currentPlace(){return {folder:LV.view==='all'?LV.folder:null,cat:LV.view.startsWith('cat:')&&LV.view!=='cat:none'?LV.view.slice(4):null};}
+async function renameNb(n){const v=await modal('Přejmenovat sešit',b=>{const f=el('label',{class:'field'},'<span>Název</span>');f.append(el('input',{type:'text',id:'nbName',value:n.title,autofocus:''}));b.append(f);},[{label:'Zrušit'},{label:'Uložit',cls:'primary',value:b=>b.querySelector('input').value.trim()}]);if(v){n.title=v;n.updated=Date.now();await DB.put(n);if(!nb)renderLib();else toast('Přejmenováno');}}
+async function coverNb(n){let c=n.cover;const v=await modal('Barva hřbetu',b=>b.append(colorRow(COVERS,c,x=>c=x,44)),[{label:'Zrušit'},{label:'Uložit',cls:'primary',value:()=>c}]);if(v){n.cover=v;await DB.put(n);renderLib();}}
+function openDoc(n){if(n.kind==='sheet')openSheet(n);else openNotebook(n);}
+async function quickNote(){
+  const pl=currentPlace(),d=new Date();
+  const n={id:uid(),title:'Rychlá poznámka '+d.toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric'})+' '+d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}),cover:'#F5C518',folder:pl.folder,cat:pl.cat,fav:false,created:Date.now(),updated:Date.now(),pages:[newPage(S.tpl,S.paper)]};
+  await DB.put(n);notebooks.push(n);openNotebook(n);
+}
+function importAny(){pdfInto=false;$('#fPdf').click();}
 async function newNotebook(){
   const pl=currentPlace();
-  const st={tpl:S.tpl,paper:S.paper,cover:COVERS[notebooks.length%COVERS.length],cat:pl.cat,land:false};
+  const st={tpl:S.tpl,paper:S.paper,cover:COVERS[notebooks.length%COVERS.length],cat:pl.cat,land:false,folder:pl.folder};
   const title=await modal('Nový sešit',b=>{
     const f=el('label',{class:'field'},'<span>Název</span>');f.append(el('input',{type:'text',id:'newNbName',value:'Sešit '+fmtDate(Date.now()),autofocus:''}));b.append(f);
     const fk=el('div',{class:'field'},'<span>Kategorie</span>');catChips(fk,st.cat,v=>st.cat=v);b.append(fk);
-    const fc=el('div',{class:'field'},'<span>Obálka</span>');fc.append(colorRow(COVERS,st.cover,v=>st.cover=v));b.append(fc);
+    if(lib.folders.length){const ff=el('label',{class:'field'},'<span>Složka</span>');const sel_=el('select',{id:'newNbFolder'});sel_.append(new Option('Nezařazené','',false,!st.folder));
+      const walk=(parent,d)=>lib.folders.filter(x=>(x.parent||null)===parent).sort((a,c)=>a.name.localeCompare(c.name,'cs')).forEach(x=>{sel_.append(new Option('  '.repeat(d)+x.name,x.id,false,x.id===st.folder));walk(x.id,d+1);});walk(null,0);
+      sel_.onchange=()=>st.folder=sel_.value||null;ff.append(sel_);b.append(ff);}
+    const fc=el('div',{class:'field'},'<span>Barva hřbetu</span>');fc.append(colorRow(COVERS,st.cover,v=>st.cover=v));b.append(fc);
     const fo=el('div',{class:'field'},'<span>Orientace stránek</span>');chips(fo,[[false,'Na výšku'],[true,'Na šířku']],false,v=>st.land=v);b.append(fo);
     pickTemplate(b,st);
-    if(pl.folder)b.append(el('p',{class:'lib-note'},'Sešit se vytvoří ve složce „'+esc(folderById(pl.folder).name)+'“.'));
   },[{label:'Zrušit'},{label:'Vytvořit',cls:'primary',value:b=>b.querySelector('#newNbName').value.trim()||'Sešit'}]);
   if(!title)return;
   S.tpl=st.tpl;S.paper=st.paper;saveS();
-  const n={id:uid(),title,cover:st.cover,folder:pl.folder,cat:st.cat,fav:false,created:Date.now(),updated:Date.now(),pages:[newPage(st.tpl,st.paper,st.land)]};
+  const n={id:uid(),title,cover:st.cover,folder:st.folder,cat:st.cat,fav:false,created:Date.now(),updated:Date.now(),pages:[newPage(st.tpl,st.paper,st.land)]};
   await DB.put(n);notebooks.push(n);openNotebook(n);
 }
 let wake=null;
 async function requestWake(){try{if(navigator.wakeLock&&!wake&&document.visibilityState==='visible'){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null;});}}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nb)requestWake();});
 function toggleFullscreen(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>toast('Celá obrazovka tady není dostupná.'));else if(!r)toast('Celá obrazovka tady není dostupná.');}}catch(e){toast('Celá obrazovka tady není dostupná.');}}
-function openNotebook(n){requestWake();pcache.clear();
-  commitText();nb=n;nb.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});
-  H_.undo=[];H_.redo=[];sel=null;act=null;W=0;
-  layoutPages();$('#lib').hidden=true;$('#editor').hidden=false;$('#nbTitle').textContent=n.title;
+function openNotebook(n){
+  requestWake();pcache.clear();commitText();nb=n;nb.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});
+  H_.undo=[];H_.redo=[];sel=null;act=null;W=0;ruler.on=false;
+  layoutPages();$('#lib').hidden=true;$('#editor').hidden=false;
   togglePanel(false);updateToolbar();updUndo();
   requestAnimationFrame(()=>{resize();if(n._lastY!=null){oy=n._lastY;clampView();render();}});
 }
-function closeNotebook(){try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+function closeNotebook(){closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+
+/* =========================================================
+   Kalkulačka ručně psaných příkladů
+   – rámeček (tvar) kolem příkladu nebo laso → „= Spočítat“
+   – rozpozná Claude (je-li k dispozici), jinak vestavěný rozpoznávač, který se učí z oprav
+   ========================================================= */
+/* ---------- výpočet ---------- */
+const CALC_FN={sqrt:Math.sqrt,cbrt:Math.cbrt,sin:Math.sin,cos:Math.cos,tan:Math.tan,cot:x=>1/Math.tan(x),asin:Math.asin,acos:Math.acos,atan:Math.atan,arcsin:Math.asin,arccos:Math.acos,arctan:Math.atan,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,ln:Math.log,log:(x,b)=>b===undefined?Math.log10(x):Math.log(x)/Math.log(b),exp:Math.exp,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,nthroot:(x,n)=>x<0&&n%2===1?-Math.pow(-x,1/n):Math.pow(x,1/n),root:(x,n)=>x<0&&n%2===1?-Math.pow(-x,1/n):Math.pow(x,1/n),max:Math.max,min:Math.min};
+const CALC_CONST={pi:Math.PI,e:Math.E};
+function factorial(n){if(n<0||!Number.isInteger(n))throw new Error('Faktoriál jen pro přirozená čísla');let r=1;for(let i=2;i<=n;i++)r*=i;return r;}
+function calcEval(src){
+  let s=String(src).replace(/[×·⋅]/g,'*').replace(/[÷:]/g,'/').replace(/√/g,'sqrt').replace(/π/g,'pi').replace(/[−–]/g,'-').replace(/\*\*/g,'^');
+  s=s.replace(/(\d),(\d)/g,'$1.$2').replace(/,/g,';').replace(/\s+/g,'').replace(/=+$/,'');
+  if(!s)throw new Error('Prázdný příklad');
+  const tk=[];let i=0;
+  while(i<s.length){const r=s.slice(i);let m;
+    if((m=/^(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?/.exec(r))){tk.push({t:'n',v:parseFloat(m[0])});i+=m[0].length;continue;}
+    if((m=/^[a-zA-Z]+/.exec(r))){let w=m[0].toLowerCase();
+      // rozdělí např. „2pi“ i „sinx“ ne – podporujeme jen známá jména
+      if(!(w in CALC_FN)&&!(w in CALC_CONST)){const k=Object.keys(CALC_FN).concat(Object.keys(CALC_CONST)).sort((a,b)=>b.length-a.length).find(f=>w.startsWith(f));if(!k)throw new Error('Neznámý název „'+m[0]+'“');w=k;}
+      tk.push({t:'id',v:w});i+=w.length;continue;}
+    if('+-*/^()!;'.includes(r[0])){tk.push({t:r[0]});i++;continue;}
+    throw new Error('Neznámý znak „'+r[0]+'“');}
+  let p=0;const peek=()=>tk[p],eat=t=>{if(tk[p]&&tk[p].t===t){p++;return true;}return false;};
+  const expr=()=>{let v=term();for(;;){if(eat('+'))v+=term();else if(eat('-'))v-=term();else return v;}};
+  const startsPrimary=x=>x&&(x.t==='n'||x.t==='id'||x.t==='(');
+  const term=()=>{let v=unary();for(;;){if(eat('*'))v*=unary();else if(eat('/')){const d=unary();v/=d;}else if(startsPrimary(peek()))v*=unary();else return v;}};
+  const unary=()=>{if(eat('-'))return -unary();if(eat('+'))return unary();return power();};
+  const power=()=>{const b=postfix();if(eat('^'))return Math.pow(b,unary());return b;};
+  const postfix=()=>{let v=primary();while(eat('!'))v=factorial(v);return v;};
+  const primary=()=>{const x=tk[p++];if(!x)throw new Error('Neúplný příklad');
+    if(x.t==='n')return x.v;
+    if(x.t==='('){const v=expr();if(!eat(')'))throw new Error('Chybí závorka');return v;}
+    if(x.t==='id'){if(x.v in CALC_CONST&&!(peek()&&peek().t==='('))return CALC_CONST[x.v];
+      const f=CALC_FN[x.v];if(!f)throw new Error('Neznámá funkce');
+      if(eat('(')){const args=[expr()];while(eat(';'))args.push(expr());if(!eat(')'))throw new Error('Chybí závorka');return f(...args);}
+      return f(power());}
+    throw new Error('Nečekaný znak „'+x.t+'“');};
+  const v=expr();if(p<tk.length)throw new Error('Nečekaný znak „'+(tk[p].t==='n'?tk[p].v:tk[p].t)+'“');
+  if(typeof v!=='number'||isNaN(v))throw new Error('Výsledek není číslo');
+  return v;
+}
+function fmtNum(v){if(!isFinite(v))return v>0?'∞':'−∞';const a=Math.abs(v);if(a!==0&&(a>=1e12||a<1e-7))return v.toExponential(6).replace('.',',').replace('e','·10^');return Number(v.toPrecision(12)).toLocaleString('cs-CZ',{maximumFractionDigits:10});}
+
+/* ---------- vestavěný rozpoznávač ($P point-cloud) ---------- */
+const NPT=32;
+function pcloud(strokes){
+  let pts=[];strokes.forEach((s,id)=>s.forEach(q=>pts.push({x:q[0],y:q[1],id})));
+  if(pts.length===1)pts.push({x:pts[0].x+.01,y:pts[0].y,id:0});
+  let L=0;for(let i=1;i<pts.length;i++)if(pts[i].id===pts[i-1].id)L+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);
+  const I=L/(NPT-1)||1e-6,out=[pts[0]];let D=0;
+  for(let i=1;i<pts.length;i++){if(pts[i].id!==pts[i-1].id)continue;const a=pts[i-1],b=pts[i];let d=Math.hypot(b.x-a.x,b.y-a.y);
+    if(D+d>=I){const t=(I-D)/d,q={x:a.x+t*(b.x-a.x),y:a.y+t*(b.y-a.y),id:b.id};out.push(q);pts.splice(i,0,q);D=0;}else D+=d;}
+  while(out.length<NPT)out.push(Object.assign({},pts[pts.length-1]));out.length=NPT;
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;out.forEach(q=>{x0=Math.min(x0,q.x);y0=Math.min(y0,q.y);x1=Math.max(x1,q.x);y1=Math.max(y1,q.y);});
+  const sc=Math.max(x1-x0,y1-y0)||1;let cx=0,cy=0;out.forEach(q=>{q.x=(q.x-x0)/sc;q.y=(q.y-y0)/sc;cx+=q.x;cy+=q.y;});cx/=NPT;cy/=NPT;
+  out.forEach(q=>{q.x-=cx;q.y-=cy;});return out;
+}
+function cloudDist(a,b,start){const m=new Array(NPT).fill(false);let sum=0,i=start;do{let mi=-1,md=Infinity;for(let j=0;j<NPT;j++)if(!m[j]){const d=(a[i].x-b[j].x)**2+(a[i].y-b[j].y)**2;if(d<md){md=d;mi=j;}}m[mi]=true;const w=1-((i-start+NPT)%NPT)/NPT;sum+=w*md;i=(i+1)%NPT;}while(i!==start);return sum;}
+function pMatch(a,b){const step=Math.floor(Math.pow(NPT,0.5));let mn=Infinity;for(let i=0;i<NPT;i+=step)mn=Math.min(mn,cloudDist(a,b,i),cloudDist(b,a,i));return mn;}
+const BASE_TPL=[
+ ['0',[[[.5,0],[.15,.2],[.05,.5],[.15,.85],[.5,1],[.85,.85],[.95,.5],[.85,.15],[.5,0]]]],
+ ['1',[[[.5,0],[.5,1]]]],['1',[[[.2,.28],[.55,0],[.55,1]]]],
+ ['2',[[[.1,.25],[.3,.03],[.65,0],[.88,.2],[.8,.48],[.05,1],[.95,1]]]],
+ ['3',[[[.1,.1],[.45,0],[.8,.12],[.8,.35],[.45,.48],[.85,.62],[.85,.88],[.45,1],[.08,.9]]]],
+ ['4',[[[.65,0],[.05,.68],[.95,.68]],[[.72,.25],[.72,1]]]],['4',[[[.2,0],[.1,.6],[.9,.6]],[[.7,0],[.7,1]]]],
+ ['5',[[[.85,0],[.2,0],[.15,.45],[.55,.38],[.88,.6],[.8,.9],[.45,1],[.1,.9]]]],['5',[[[.2,0],[.15,.45],[.55,.38],[.88,.6],[.8,.9],[.45,1],[.1,.9]],[[.2,0],[.85,0]]]],
+ ['6',[[[.8,.05],[.45,0],[.15,.35],[.1,.7],[.35,1],[.75,.95],[.88,.7],[.65,.5],[.3,.52],[.12,.7]]]],
+ ['7',[[[.05,0],[.95,0],[.4,1]]]],['7',[[[.05,0],[.95,0],[.4,1]],[[.3,.5],[.8,.5]]]],
+ ['8',[[[.8,.15],[.5,0],[.2,.15],[.25,.35],[.75,.6],[.85,.82],[.5,1],[.15,.82],[.25,.6],[.75,.35],[.8,.15]]]],
+ ['9',[[[.85,.25],[.6,.05],[.25,.08],[.15,.3],[.35,.5],[.75,.42],[.85,.25],[.82,.6],[.75,1]]]],
+ ['+',[[[0,.5],[1,.5]],[[.5,0],[.5,1]]]],['+',[[[.5,0],[.5,1]],[[0,.5],[1,.5]]]],
+ ['*',[[[0,0],[1,1]],[[1,0],[0,1]]]],
+ ['(',[[[.75,0],[.3,.3],[.25,.7],[.75,1]]]],[')',[[[.25,0],[.7,.3],[.75,.7],[.25,1]]]],
+ ['/',[[[.9,0],[.1,1]]]]
+];
+let TPLC=null;
+function tplClouds(){if(TPLC)return TPLC;TPLC=BASE_TPL.map(([s,st])=>({s,c:pcloud(st)}));(store.get('calcT',[])||[]).forEach(t=>TPLC.push({s:t.s,c:t.c,u:true}));return TPLC;}
+function bbOf(strokes){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;strokes.forEach(s=>s.forEach(q=>{x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}));return {x0,y0,x1,y1,w:x1-x0,h:y1-y0,cx:(x0+x1)/2,cy:(y0+y1)/2};}
+const median=a=>{const b=a.slice().sort((x,y)=>x-y);return b.length?b[b.length>>1]:0;};
+function classify(g,H){
+  const b=g.bb,n=g.strokes.length,s=Math.max(b.w,b.h);
+  if(s<0.3*H)return {s:'.',d:0};
+  if(n<=2&&b.w>2.6*b.h&&b.h<0.5*H){
+    if(n===2){const[a,c]=g.strokes.map(x=>bbOf([x]));if(Math.abs(a.cy-c.cy)>0.12*H)return {s:'=',d:0};}
+    return {s:'-',d:0};}
+  const pc=pcloud(g.strokes);let best=null,bd=Infinity;
+  for(const t of tplClouds()){let d=pMatch(pc,t.c);if(t.u)d*=0.85;if(d<bd){bd=d;best=t.s;}}
+  if((best==='1'||best==='/')&&n===1){const st=g.strokes[0],top=st.reduce((a,q)=>q[1]<a[1]?q:a),bot=st.reduce((a,q)=>q[1]>a[1]?q:a);best=(top[0]-bot[0])/(b.h||1)>0.35?'/':'1';}
+  return {s:best,d:bd,pc};
+}
+function recognizeLocal(strokes){
+  // strokes: pole tahů [[x,y],...] v souřadnicích stránky
+  const out={text:'',groups:[]};if(!strokes.length)return out;
+  const bbs=strokes.map(s=>bbOf([s]));const Hraw=median(bbs.filter(b=>b.h>b.w*0.4).map(b=>b.h))||median(bbs.map(b=>Math.max(b.w,b.h)))||40;
+  const used=new Set(),pseudo=[];
+  // zlomková čára: dlouhý vodorovný tah s něčím nad i pod
+  strokes.map((s,i)=>i).filter(i=>bbs[i].w>bbs[i].h*4&&bbs[i].w>Hraw*1.1).sort((a,b)=>bbs[b].w-bbs[a].w).forEach(i=>{
+    if(used.has(i))return;const b=bbs[i];
+    const inX=j=>j!==i&&!used.has(j)&&bbs[j].cx>b.x0-Hraw*.1&&bbs[j].cx<b.x1+Hraw*.1;
+    const up=strokes.map((s,j)=>j).filter(j=>inX(j)&&bbs[j].cy<b.cy&&b.cy-bbs[j].y1<Hraw*1.2);
+    const dn=strokes.map((s,j)=>j).filter(j=>inX(j)&&bbs[j].cy>b.cy&&bbs[j].y0-b.cy<Hraw*1.2);
+    if(!up.length||!dn.length)return;
+    [i,...up,...dn].forEach(j=>used.add(j));
+    const N=recognizeLocal(up.map(j=>strokes[j])).text,D=recognizeLocal(dn.map(j=>strokes[j])).text;
+    pseudo.push({x0:b.x0,x1:b.x1,y0:Math.min(...up.map(j=>bbs[j].y0)),y1:Math.max(...dn.map(j=>bbs[j].y1)),text:`(${N})/(${D})`,cy:b.cy});
+  });
+  // odmocnina: široký tah, jehož pravá část vede vodorovně nahoře
+  strokes.forEach((s,i)=>{
+    if(used.has(i))return;const b=bbs[i];if(b.w<Hraw*1.2||b.h<Hraw*0.6)return;
+    const right=s.filter(q=>q[0]>b.x0+b.w*0.45);if(right.length<3)return;
+    if(right.filter(q=>q[1]<b.y0+b.h*0.22).length/right.length<0.75)return;
+    const inside=strokes.map((t,j)=>j).filter(j=>j!==i&&!used.has(j)&&bbs[j].cx>b.x0+b.w*0.25&&bbs[j].cx<b.x1+Hraw*.2&&bbs[j].cy>b.y0);
+    if(!inside.length)return;[i,...inside].forEach(j=>used.add(j));
+    pseudo.push({x0:b.x0,x1:b.x1,y0:b.y0,y1:b.y1,text:`sqrt(${recognizeLocal(inside.map(j=>strokes[j])).text})`,cy:b.cy});
+  });
+  // seskupení zbylých tahů do znaků podle překryvu v ose x
+  const rest=strokes.map((s,i)=>i).filter(i=>!used.has(i)).sort((a,b)=>bbs[a].x0-bbs[b].x0);
+  const groups=[];
+  rest.forEach(i=>{const b=bbs[i],g=groups[groups.length-1];
+    if(g){const ov=Math.min(g.bb.x1,b.x1)-Math.max(g.bb.x0,b.x0),mw=Math.max(1,Math.min(g.bb.w,b.w)),tol=Hraw*0.08;
+      const contains=(b.w<=g.bb.w&&b.cx>=g.bb.x0-tol&&b.cx<=g.bb.x1+tol)||(g.bb.w<=b.w&&g.bb.cx>=b.x0-tol&&g.bb.cx<=b.x1+tol);
+      if(ov>0.35*mw||contains||(ov>-0.1*Hraw&&(b.w<0.35*Hraw&&b.h<0.35*Hraw)&&Math.abs(b.cy-g.bb.cy)<Hraw&&g.strokes.length===1&&g.bb.h>g.bb.w*2)){g.strokes.push(strokes[i]);g.idx.push(i);g.bb=bbOf(g.strokes);return;}}
+    groups.push({strokes:[strokes[i]],idx:[i],bb:b});});
+  const H=median(groups.filter(g=>g.bb.h>g.bb.w*0.4&&Math.max(g.bb.w,g.bb.h)>Hraw*0.3).map(g=>g.bb.h))||Hraw;
+  const syms=groups.map(g=>{const c=classify(g,H);return {x0:g.bb.x0,x1:g.bb.x1,y0:g.bb.y0,y1:g.bb.y1,cy:g.bb.cy,text:c.s,g,pc:c.pc};});
+  // tečka uprostřed výšky = krát
+  const midY=median(syms.filter(s=>/[0-9]/.test(s.text)).map(s=>s.cy));
+  syms.forEach(s=>{if(s.text==='.'&&midY&&Math.abs(s.cy-midY)<H*0.25)s.text='*';});
+  const all=syms.concat(pseudo).sort((a,b)=>a.x0-b.x0);
+  // exponenty: menší znak výš než předchozí
+  let txt='',sup=false,base=null;
+  all.forEach((s,k)=>{
+    const prev=all[k-1];
+    const isSup=prev&&/[0-9)a-z.]$/i.test(prev.text)&&/^[0-9(a-z]/i.test(s.text)&&base&&s.y1<base.y0+(base.y1-base.y0)*0.55&&(s.y1-s.y0)<(base.y1-base.y0)*0.85;
+    if(isSup&&!sup){txt+='^(';sup=true;}else if(!isSup&&sup){txt+=')';sup=false;}
+    if(!sup)base=s;txt+=s.text;
+  });
+  if(sup)txt+=')';
+  out.text=txt.replace(/=+$/,'');out.groups=syms;out.flat=!pseudo.length&&!/\^/.test(txt);
+  return out;
+}
+function learnFrom(groups,corrected){
+  const chars=corrected.replace(/\s+/g,'').replace(/[×·]/g,'*').replace(/=+$/,'').split('');
+  if(chars.length!==groups.length)return false;
+  const T=store.get('calcT',[])||[];let n=0;
+  groups.forEach((g,i)=>{const c=chars[i];if(!/[0-9+*/()]/.test(c)||c===g.text)return;T.push({s:c,c:g.pc||pcloud(g.g.strokes)});n++;});
+  if(!n)return false;while(T.length>300)T.shift();store.set('calcT',T);TPLC=null;return n;
+}
+
+/* ---------- Claude (rozpoznání z obrázku) ---------- */
+let sampleFn;
+async function getSample(){
+  if(sampleFn!==undefined)return sampleFn;
+  try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null;if(sampleFn){const l=await sampleFn.limits().catch(()=>null);if(!l||!l.images)sampleFn=null;}}catch(e){sampleFn=null;}
+  return sampleFn;
+}
+function strokesImage(page,items){
+  let b=[1e9,1e9,-1e9,-1e9];items.forEach(it=>{const g=getBounds(it);b=[Math.min(b[0],g[0]),Math.min(b[1],g[1]),Math.max(b[2],g[2]),Math.max(b[3],g[3])];});
+  const pad=20,w=b[2]-b[0]+pad*2,h=b[3]-b[1]+pad*2,sc=Math.min(3,1100/Math.max(w,h));
+  const c=document.createElement('canvas');c.width=Math.max(8,Math.round(w*sc));c.height=Math.max(8,Math.round(h*sc));
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.setTransform(sc,0,0,sc,(pad-b[0])*sc,(pad-b[1])*sc);
+  items.forEach(it=>drawItem(x,it.t==='s'&&it.k!=='hl'?Object.assign({},it,{c:'#000'}):it,{paper:'white'}));
+  return new Promise(r=>c.toBlob(r,'image/png'));
+}
+
+/* ---------- panel kalkulačky ---------- */
+let calcState=null;
+function calcItems(page,items,frameBB){
+  const strokes=items.filter(it=>it.t==='s'&&it.k!=='hl');
+  if(!strokes.length){toast('V rámečku nevidím žádný příklad.');return;}
+  let b=[1e9,1e9,-1e9,-1e9];strokes.forEach(it=>{const g=it.bb;b=[Math.min(b[0],g[0]),Math.min(b[1],g[1]),Math.max(b[2],g[2]),Math.max(b[3],g[3])];});
+  calcState={page,items:strokes,bb:b,frameBB,src:'local',groups:null};
+  const local=recognizeLocal(strokes.map(it=>it.p.map(q=>[q[0],q[1]])));
+  calcState.groups=local.flat?local.groups:null;calcState.localText=local.text;
+  showCalc(local.text,'local');
+  getSample().then(async sf=>{
+    if(!sf||!calcState||calcState.items!==strokes)return;
+    setCalcStatus('Rozpoznávám rukopis pomocí Clauda…');
+    try{
+      const img=await strokesImage(page,strokes);
+      const r=await sf.json('Na obrázku je ručně psaný matematický příklad (může jít i o vysokoškolskou matematiku). Přepiš ho a spočítej. Odpověz pouze JSON objektem {"expr": "...", "result": "...", "latex": "..."}. '+
+        '"expr" je zápis pro kalkulačku: desetinná tečka, operátory + - * / ^, závorky, funkce sqrt(x), nthroot(x;n), sin cos tan asin acos atan ln log exp abs, konstanty pi a e, faktoriál n!, argumenty odděluj středníkem; zlomek zapiš jako (čitatel)/(jmenovatel). Pokud příklad končí „=“, vynech ho. '+
+        '"result" je výsledek jako krátký text s desetinnou čárkou (u derivací, integrálů, limit apod. i symbolický výsledek). Pokud příklad nejde přečíst, dej expr prázdný.',{images:[img],modelTier:'default'});
+      if(!calcState||calcState.items!==strokes)return;
+      if(r&&typeof r==='object'&&(r.expr||r.result)){calcState.src='claude';calcState.claudeResult=r.result?String(r.result):'';calcState.groups=null;showCalc(String(r.expr||''),'claude');}
+      else setCalcStatus('Claude příklad nepřečetl – použito vestavěné rozpoznávání.');
+    }catch(e){if(calcState&&calcState.items===strokes)setCalcStatus(e&&e.code==='not_granted'?'Vestavěné rozpoznávání (Claude není povolen).':'Vestavěné rozpoznávání (Claude teď není dostupný).');}
+  });
+}
+function setCalcStatus(t){const s=$('#calcSt');if(s)s.textContent=t;}
+function showCalc(expr,src){
+  let p=$('#calcPanel');
+  if(!p){p=el('div',{class:'calc',id:'calcPanel',role:'dialog','aria-label':'Kalkulačka'});$('#editor').append(p);
+    p.innerHTML=`<div class="calc-h">${ic('calc')}<b>Kalkulačka</b><span class="grow"></span><button class="ib" id="calcX" aria-label="Zavřít">${ic('close')}</button></div>
+      <label class="calc-l" for="calcIn">Příklad</label><input id="calcIn" type="text" autocomplete="off" spellcheck="false">
+      <div class="calc-r" id="calcR"></div><div class="calc-st" id="calcSt"></div>
+      <div class="calc-a"><button class="btn" id="calcLearn" hidden>Naučit se z opravy</button><button class="btn primary" id="calcIns">Vložit výsledek</button></div>`;
+    $('#calcX').onclick=closeCalc;$('#calcIn').oninput=updCalc;$('#calcIns').onclick=insertCalc;
+    $('#calcLearn').onclick=()=>{const n=calcState&&calcState.groups&&learnFrom(calcState.groups,$('#calcIn').value);toast(n?`Naučeno (${n} ${n===1?'znak':n<5?'znaky':'znaků'}). Příště to přečtu lépe.`:'Oprava musí mít stejný počet znaků jako napsaný příklad.');$('#calcLearn').hidden=true;};
+    $('#calcIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')insertCalc();if(e.key==='Escape')closeCalc();});
+  }
+  $('#calcIn').value=expr.replace(/\*/g,'·').replace(/(\d)\.(\d)/g,'$1,$2');calcState.shown=$('#calcIn').value;
+  setCalcStatus(src==='claude'?'Rozpoznal Claude – zkontrolujte příklad, případně ho opravte.':'Vestavěné rozpoznávání – pokud je příklad špatně, opravte ho.');
+  updCalc();positionCalc();
+}
+function positionCalc(){
+  const p=$('#calcPanel');if(!p||!calcState)return;const pg=calcState.page,b=calcState.frameBB||calcState.bb;
+  const sx=(pg._left+b[2])*z+ox+16,sy=(pg._top+b[1])*z+oy;const w=p.offsetWidth,h=p.offsetHeight;
+  let left=sx,top=sy;if(left+w>W-8)left=Math.max(8,(pg._left+b[0])*z+ox-w-16);if(left<8)left=W/2-w/2;top=clamp(top,60,Math.max(60,H-h-8));
+  p.style.left=left+'px';p.style.top=top+'px';
+}
+function updCalc(){
+  const v=$('#calcIn').value,r=$('#calcR');calcState.value=null;
+  try{const x=calcEval(v);calcState.value='= '+fmtNum(x);r.textContent=calcState.value;r.classList.remove('err');}
+  catch(e){if(calcState.src==='claude'&&calcState.claudeResult&&v===calcState.shown){calcState.value='= '+calcState.claudeResult;r.textContent=calcState.value+'  (spočítal Claude)';r.classList.remove('err');}else{r.textContent=e.message;r.classList.add('err');}}
+  $('#calcLearn').hidden=!(calcState.groups&&calcState.src==='local'&&v!==calcState.shown);
+  $('#calcIns').disabled=!calcState.value;
+}
+function insertCalc(){
+  if(!calcState||!calcState.value)return;const pg=calcState.page,b=calcState.bb,fr=calcState.frameBB||b;
+  const hh=clamp((b[3]-b[1])*0.75,22,90),col=calcState.items[0]?calcState.items[0].c:T.pen.color;
+  const it={t:'x',id:uid(),x:fr[2]+18,y:(fr[1]+fr[3])/2-hh*0.65,w:520,s:hh,c:lum(col)>0.85?'#1B2232':col,f:'hand',text:calcState.value};
+  if(it.x+120>pg.w){it.x=b[0];it.y=fr[3]+10;}
+  it.w=clamp(pg.w-it.x-20,120,600);
+  snapItems(pg);pg.items=pg.items.concat([it]);changed();render();closeCalc();toast('Výsledek vložen');
+}
+function closeCalc(){const p=$('#calcPanel');if(p)p.remove();calcState=null;hideCalcChip();}
+/* tlačítko „= Spočítat“ po nakreslení rámečku */
+let chipTimer=0;
+function hideCalcChip(){const c=$('#calcChip');if(c)c.remove();clearTimeout(chipTimer);}
+function checkFrame(page,frame){
+  if(!S.calcFrames)return;
+  const p=frame.p;if(p.length<8||dist(p[0],p[p.length-1])>Math.max(12,(frame.bb[2]-frame.bb[0])*0.08))return;
+  const poly=p.map(q=>[q[0],q[1]]);
+  const inside=page.items.filter(it=>it!==frame&&it.t==='s'&&it.k!=='hl'&&it.p.filter((q,i)=>i%3===0).every(q=>inPoly(q[0],q[1],poly)));
+  if(!inside.length)return;
+  hideCalcChip();
+  const c=el('button',{class:'calc-chip',id:'calcChip'},ic('calc')+'Spočítat');
+  const b=frame.bb;c.style.left=((page._left+b[2])*z+ox-8)+'px';c.style.top=((page._top+b[1])*z+oy-18)+'px';
+  c.onclick=()=>{hideCalcChip();calcItems(page,inside,[b[0],b[1],b[2],b[3]]);};
+  $('#editor').append(c);chipTimer=setTimeout(hideCalcChip,9000);
+}
+
+/* =========================================================
+   Tabulky (Excel) – výpočty HyperFormula (české funkce), soubory .xlsx přes SheetJS
+   ========================================================= */
+const HF_URL='https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/hyperformula.full.min.js';
+const HF_CS='https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/languages/csCZ.js';
+const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+const CHART_URL='https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js';
+const XL_CFG={licenseKey:'gpl-v3',language:'csCZ',functionArgSeparator:';',decimalSeparator:',',thousandSeparator:' ',arrayColumnSeparator:';',arrayRowSeparator:'|',dateFormats:['DD.MM.YYYY','DD.MM.YY','D.M.YYYY'],currencySymbol:['Kč'],undoLimit:300};
+const XL={doc:null,hf:null,sheet:0,sel:{r:0,c:0,r2:0,c2:0},edit:null,undo:[],redo:[],clip:null,RH:32,HW:48,CH:30,xs:[],extend:false};
+let hfReady=null;
+function loadHF(){return hfReady||(hfReady=(async()=>{await loadScript(HF_URL);await loadScript(HF_CS);const HF=window.HyperFormula;try{HF.registerLanguage('csCZ',HF.languages.csCZ);}catch(e){}return HF;})().catch(e=>{hfReady=null;throw e;}));}
+const SH=()=>XL.doc.sheets[XL.sheet];
+const sid=()=>XL.hf.getSheetId(SH().name);
+const colName=c=>{let s='';c++;while(c>0){const m=(c-1)%26;s=String.fromCharCode(65+m)+s;c=Math.floor((c-1)/26);}return s;};
+const aName=(r,c)=>colName(c)+(r+1);
+const selN=()=>{const s=XL.sel;return {r1:Math.min(s.r,s.r2),r2:Math.max(s.r,s.r2),c1:Math.min(s.c,s.c2),c2:Math.max(s.c,s.c2)};};
+const A=(r,c)=>({sheet:sid(),row:r,col:c});
+
+/* ---------- překlad vzorců mezi Excelem (anglicky) a českým zápisem ---------- */
+let FN_EN2CS=null,FN_CS2EN=null;
+function fnMaps(){if(FN_EN2CS)return;const d=window.HyperFormula.languages.csCZ.functions;FN_EN2CS={};FN_CS2EN={};for(const k in d){FN_EN2CS[k.toUpperCase()]=d[k];FN_CS2EN[d[k].toUpperCase()]=k;}}
+function xlTranslate(f,toCs){
+  fnMaps();let out='',i=0;const n=f.length;
+  while(i<n){
+    const ch=f[i];
+    if(ch==='"'){let j=i+1;while(j<n){if(f[j]==='"'){if(f[j+1]==='"'){j+=2;continue;}break;}j++;}out+=f.slice(i,j+1);i=j+1;continue;}
+    if(ch==="'"){let j=f.indexOf("'",i+1);if(j<0)j=n-1;out+=f.slice(i,j+1);i=j+1;continue;}
+    const rest=f.slice(i),m=/^[A-Za-z_À-ſ][A-Za-z0-9_.À-ſ]*/.exec(rest);
+    if(m){const w=m[0];if(f[i+w.length]==='('){const up=w.toUpperCase().replace(/^_XLFN\./,'').replace(/^_XLWS\./,'');out+=(toCs?FN_EN2CS[up]:FN_CS2EN[up])||up;}else out+=w;i+=w.length;continue;}
+    if(/[0-9]/.test(ch)){const m2=(toCs?/^\d+(\.\d+)?([eE][-+]?\d+)?/:/^\d+(,\d+)?([eE][-+]?\d+)?/).exec(rest);out+=toCs?m2[0].replace('.',','):m2[0].replace(',','.');i+=m2[0].length;continue;}
+    out+=toCs&&ch===','?';':(!toCs&&ch===';'?',':ch);i++;
+  }
+  return out;
+}
+
+/* ---------- zobrazení hodnot ---------- */
+function xlFmtVal(v,f,dt){
+  if(v===null||v===undefined||v==='')return '';
+  if(typeof v==='object')return v.value||'#CHYBA';
+  if(typeof v==='boolean')return v?'PRAVDA':'NEPRAVDA';
+  if(typeof v==='number'){
+    let nf=f&&f.nf;const dp=f&&f.dp!=null?f.dp:null;
+    if(!nf){if(dt==='NUMBER_DATE')nf='date';else if(dt==='NUMBER_PERCENT')nf='pct';else if(dt==='NUMBER_CURRENCY')nf='czk';else if(dt==='NUMBER_TIME')nf='time';else if(dt==='NUMBER_DATETIME')nf='datetime';}
+    const loc=(x,d)=>x.toLocaleString('cs-CZ',{minimumFractionDigits:d,maximumFractionDigits:d});
+    switch(nf){
+      case 'num2':return loc(v,dp??2);
+      case 'int':return loc(v,0);
+      case 'pct':return loc(v*100,dp??0)+' %';
+      case 'czk':return loc(v,dp??2)+' Kč';
+      case 'date':case 'datetime':{try{const d=XL.hf.numberToDate(v);let s=`${d.day}. ${d.month}. ${d.year}`;if(nf==='datetime'){const t=XL.hf.numberToTime(v%1);s+=` ${t.hours}:${String(t.minutes).padStart(2,'0')}`;}return s;}catch(e){return String(v);}}
+      case 'time':{try{const t=XL.hf.numberToTime(v%1);return `${t.hours}:${String(t.minutes).padStart(2,'0')}`;}catch(e){return String(v);}}
+    }
+    if(dp!=null)return loc(v,dp);
+    const a=Math.abs(v);if(a!==0&&(a>=1e11||a<1e-9))return v.toExponential(4).replace('.',',');
+    return Number(v.toPrecision(11)).toLocaleString('cs-CZ',{maximumFractionDigits:10,useGrouping:false});
+  }
+  return String(v);
+}
+function rawText(r,c){
+  const s=XL.hf.getCellSerialized(A(r,c));
+  if(s===null||s===undefined)return '';
+  if(typeof s==='number')return String(s).replace('.',',');
+  if(typeof s==='boolean')return s?'PRAVDA':'NEPRAVDA';
+  return String(s);
+}
+function parseInput(raw){
+  const s=String(raw==null?'':raw);if(s==='')return {val:null};if(s[0]==='=')return {val:s};
+  const t=s.trim(),num=x=>parseFloat(x.replace(/[\s ]/g,'').replace(',','.'));
+  let m=t.match(/^(-?[\d\s ]*\d(?:,\d+)?)\s?%$/);if(m)return {val:num(m[1])/100,nf:'pct'};
+  m=t.match(/^(-?[\d\s ]*\d(?:,\d+)?)\s?(Kč|,-)$/i);if(m)return {val:num(m[1]),nf:'czk'};
+  if(/^-?\d{1,3}([\s ]\d{3})+(,\d+)?$/.test(t))return {val:num(t)};
+  if(/^-?\d+,\d+$/.test(t))return {val:num(t)};
+  if(/^pravda$/i.test(t))return {val:true};if(/^nepravda$/i.test(t))return {val:false};
+  return {val:s};
+}
+
+/* ---------- historie (obsah přes HyperFormula, formát a šířky sloupců zvlášť) ---------- */
+function xlSnap(hf){XL.undo.push({hf,sheet:XL.sheet,fmt:JSON.stringify(SH().fmt),colW:JSON.stringify(SH().colW),rows:SH().rows,cols:SH().cols});if(XL.undo.length>300)XL.undo.shift();XL.redo=[];xlUndoUI();}
+function xlHist(from,to,isUndo){
+  xlCancel();const e=from.pop();if(!e){toast(isUndo?'Není co vrátit':'Není co opakovat');return;}
+  if(e.sheet!==XL.sheet)xlSwitch(e.sheet,true);
+  to.push({hf:e.hf,n:e.n,sheet:e.sheet,fmt:JSON.stringify(SH().fmt),colW:JSON.stringify(SH().colW),rows:SH().rows,cols:SH().cols});
+  if(e.hf){for(let i=0;i<(e.n||1);i++){try{isUndo?XL.hf.undo():XL.hf.redo();}catch(err){}}}
+  Object.assign(SH(),{fmt:JSON.parse(e.fmt),colW:JSON.parse(e.colW),rows:e.rows,cols:e.cols});
+  xlLayout();xlRender();xlChanged();xlUndoUI();
+}
+const xlUndo=()=>xlHist(XL.undo,XL.redo,true), xlRedo=()=>xlHist(XL.redo,XL.undo,false);
+function xlUndoUI(){$('#xlUndo').disabled=!XL.undo.length;$('#xlRedo').disabled=!XL.redo.length;}
+
+/* ---------- ukládání ---------- */
+let xlSaveT=0;
+function xlChanged(){if(!XL.doc)return;XL.doc.updated=Date.now();clearTimeout(xlSaveT);xlSaveT=setTimeout(xlSave,700);}
+function trim2D(a){const out=a.map(r=>{let e=r.length;while(e>0&&(r[e-1]===null||r[e-1]===undefined||r[e-1]===''))e--;return r.slice(0,e);});let e=out.length;while(e>0&&!out[e-1].length)e--;return out.slice(0,e);}
+function xlSave(){
+  clearTimeout(xlSaveT);const d=XL.doc;if(!d||!XL.hf)return;
+  d.sheets.forEach(sh=>{const id=XL.hf.getSheetId(sh.name);if(id!==undefined)sh.data=trim2D(XL.hf.getSheetSerialized(id));});
+  const sh=d.sheets[0],id=XL.hf.getSheetId(sh.name),pv=[];
+  if(id!==undefined)for(let r=0;r<16;r++){const row=[];for(let c=0;c<7;c++){const a={sheet:id,row:r,col:c};row.push(xlFmtVal(XL.hf.getCellValue(a),sh.fmt[r+','+c],XL.hf.getCellValueDetailedType(a)));}pv.push(row);}
+  d.preview=pv;DB.put(d);
+}
+
+/* ---------- otevření, nová tabulka, listy ---------- */
+async function newSheetDoc(){
+  const pl=currentPlace();
+  const title=await modal('Nová tabulka',b=>{const f=el('label',{class:'field'},'<span>Název</span>');f.append(el('input',{type:'text',id:'newXlName',value:'Tabulka '+fmtDate(Date.now()),autofocus:''}));b.append(f);
+    b.append(el('p',{class:'lib-note'},'Vzorce pište česky jako v Excelu, např. =SUMA(A1:A10) nebo =KDYŽ(B2>5;"ano";"ne"). Desetinná čárka, argumenty oddělte středníkem.'));},
+    [{label:'Zrušit'},{label:'Vytvořit',cls:'primary',value:b=>b.querySelector('#newXlName').value.trim()||'Tabulka'}]);
+  if(!title)return;
+  const n={id:uid(),kind:'sheet',title,cover:'#1E7145',folder:pl.folder,cat:pl.cat,fav:false,created:Date.now(),updated:Date.now(),pages:[],sheets:[{name:'List1',data:[],fmt:{},colW:{},rows:100,cols:26}]};
+  await DB.put(n);notebooks.push(n);openSheet(n);
+}
+async function openSheet(n){
+  let HF;toast('Otevírám tabulku…',true);
+  try{HF=await loadHF();}catch(e){toast('Tabulky se napoprvé načítají z internetu. Připojte se a zkuste to znovu.');return;}
+  $('#toast').hidden=true;
+  const sheets={};n.sheets.forEach(sh=>{sh.fmt=sh.fmt||{};sh.colW=sh.colW||{};sh.rows=Math.max(sh.rows||100,(sh.data||[]).length+20);sh.cols=Math.max(sh.cols||26,...(sh.data||[]).map(r=>r.length+2),26);sheets[sh.name]=sh.data||[];});
+  try{XL.hf=HF.buildFromSheets(sheets,XL_CFG);}catch(e){console.error(e);toast('Tabulku se nepodařilo otevřít: '+e.message);return;}
+  XL.doc=n;XL.sheet=0;XL.sel={r:0,c:0,r2:0,c2:0};XL.undo=[];XL.redo=[];XL.edit=null;XL.extend=false;
+  XL.hf.on('valuesUpdated',()=>xlRender());
+  $('#lib').hidden=true;$('#sheet').hidden=false;$('#xlTitle').textContent=n.title;
+  $('#xlGrid').scrollTop=0;$('#xlGrid').scrollLeft=0;
+  xlTabs();xlLayout();xlRender();xlUndoUI();requestWake();
+}
+function closeSheet(){xlCommit();xlSave();try{XL.hf&&XL.hf.destroy();}catch(e){}XL.hf=null;XL.doc=null;$('#sheet').hidden=true;$('#lib').hidden=false;try{if(wake){wake.release();wake=null;}}catch(e){}renderLib();}
+function xlSwitch(i,silent){xlCommit();XL.sheet=i;XL.sel={r:0,c:0,r2:0,c2:0};xlTabs();xlLayout();xlRender();if(!silent)$('#xlGrid').scrollTop=0;}
+function uniqueSheetName(base,doc){let n=base,i=2;const has=x=>(doc||XL.doc).sheets.some(s=>s.name.toLowerCase()===x.toLowerCase());while(has(n))n=base+' '+(i++);return n;}
+function xlTabs(){
+  const t=$('#xlTabs');t.innerHTML='';
+  XL.doc.sheets.forEach((sh,i)=>{const b=el('button',{class:'xtab','aria-current':String(i===XL.sheet)},esc(sh.name));b.onclick=()=>{if(i!==XL.sheet)xlSwitch(i);};onLong(b,()=>sheetMenu(i,b));t.append(b);});
+  const add=el('button',{class:'ib',title:'Nový list','aria-label':'Nový list'},ic('plus'));add.onclick=()=>{xlCommit();const name=uniqueSheetName('List'+(XL.doc.sheets.length+1));XL.hf.addSheet(name);XL.hf.clearUndoStack&&XL.hf.clearUndoStack();XL.undo=[];XL.redo=[];XL.doc.sheets.push({name,data:[],fmt:{},colW:{},rows:100,cols:26});xlSwitch(XL.doc.sheets.length-1);xlChanged();xlUndoUI();};
+  t.append(add);
+}
+function sheetMenu(i,anchor){
+  menuPop(anchor,[
+    ['edit','Přejmenovat list',async()=>{const sh=XL.doc.sheets[i];const v=await modal('Přejmenovat list',b=>{const f=el('label',{class:'field'},'<span>Název listu</span>');f.append(el('input',{type:'text',id:'shName',value:sh.name,autofocus:''}));b.append(f);},[{label:'Zrušit'},{label:'Uložit',cls:'primary',value:b=>b.querySelector('input').value.trim()}]);
+      if(!v||v===sh.name)return;if(XL.doc.sheets.some((s,k)=>k!==i&&s.name.toLowerCase()===v.toLowerCase())){toast('List s tímto názvem už existuje');return;}
+      try{XL.hf.renameSheet(XL.hf.getSheetId(sh.name),v);sh.name=v;xlTabs();xlChanged();}catch(e){toast('Tento název nelze použít');}}],
+    ['trash','Smazat list',async()=>{if(XL.doc.sheets.length<2){toast('Tabulka musí mít alespoň jeden list');return;}const sh=XL.doc.sheets[i];
+      const ok=await modal('Smazat list?',b=>b.append(el('p',{},`List „${esc(sh.name)}“ se smaže i s obsahem.`)),[{label:'Zrušit'},{label:'Smazat',cls:'danger',value:true}]);if(!ok)return;
+      XL.hf.removeSheet(XL.hf.getSheetId(sh.name));XL.doc.sheets.splice(i,1);XL.undo=[];XL.redo=[];xlUndoUI();xlSwitch(Math.min(XL.sheet,XL.doc.sheets.length-1));xlChanged();},'danger']
+  ]);
+}
+
+/* ---------- mřížka ---------- */
+const grid=()=>$('#xlGrid');
+function colW(c){return SH().colW[c]||100;}
+function xlLayout(){
+  const sh=SH(),xs=[XL.HW];for(let c=0;c<sh.cols;c++)xs.push(xs[c]+colW(c));XL.xs=xs;
+  const inner=$('#xlInner');inner.style.width=xs[sh.cols]+'px';inner.style.height=(XL.CH+sh.rows*XL.RH)+'px';
+  let h=`<div class="xl-corner" style="width:${XL.HW}px"></div>`;
+  for(let c=0;c<sh.cols;c++)h+=`<div class="xh" data-c="${c}" style="width:${colW(c)}px">${colName(c)}<i class="grip" data-grip="${c}"></i></div>`;
+  $('#xlCH').innerHTML=h;
+}
+function findCol(x){const xs=XL.xs;let lo=0,hi=xs.length-2;while(lo<hi){const m=(lo+hi+1)>>1;if(xs[m]<=x)lo=m;else hi=m-1;}return lo;}
+let xlRAF=0;
+function xlRender(){if(xlRAF)return;xlRAF=requestAnimationFrame(()=>{xlRAF=0;xlDraw();});}
+function xlDraw(){
+  if(!XL.hf||!XL.doc)return;
+  const g=grid(),sh=SH(),RH=XL.RH,id=sid();
+  const r0=Math.max(0,Math.floor(g.scrollTop/RH)-4),r1=Math.min(sh.rows-1,Math.ceil((g.scrollTop+g.clientHeight)/RH)+4);
+  const cx0=g.scrollLeft,cx1=g.scrollLeft+g.clientWidth;
+  const c0=Math.max(0,findCol(cx0)-1),c1=Math.min(sh.cols-1,findCol(cx1)+1);
+  const s=selN();let h='';
+  for(let r=r0;r<=r1;r++){
+    h+=`<div class="xr" style="top:${XL.CH+r*RH}px;width:${XL.xs[sh.cols]}px"><div class="xrh${r>=s.r1&&r<=s.r2?' on':''}" data-r="${r}" style="width:${XL.HW}px">${r+1}</div><div style="width:${XL.xs[c0]-XL.HW}px;flex:none"></div>`;
+    for(let c=c0;c<=c1;c++){
+      const a={sheet:id,row:r,col:c},v=XL.hf.getCellValue(a),f=sh.fmt[r+','+c];
+      let txt='',cls='xc',st='';
+      if(v!==null&&v!==undefined){const dt=typeof v==='number'?XL.hf.getCellValueDetailedType(a):null;txt=xlFmtVal(v,f,dt);if(typeof v==='number'||typeof v==='boolean')cls+=' n';if(typeof v==='object')cls+=' err n';}
+      if(f){if(f.b)st+='font-weight:700;';if(f.i)st+='font-style:italic;';if(f.al)st+=`text-align:${f.al};`;if(f.bg)st+=`background:${f.bg};`;if(f.fc)st+=`color:${f.fc};`;}
+      h+=`<div class="${cls}" style="width:${colW(c)}px;${st}">${esc(txt)}</div>`;
+    }
+    h+='</div>';
+  }
+  $('#xlBody').innerHTML=h;
+  document.querySelectorAll('#xlCH .xh').forEach(e=>{const c=+e.dataset.c;e.classList.toggle('on',c>=s.c1&&c<=s.c2);});
+  xlSelUI();
+  // nekonečná tabulka: přidávání řádků a sloupců při posunu na okraj
+  if(g.scrollTop+g.clientHeight>XL.CH+sh.rows*RH-RH*6){sh.rows+=50;xlLayout();xlRender();}
+  else if(g.scrollLeft+g.clientWidth>XL.xs[sh.cols]-150&&sh.cols<400){sh.cols+=10;xlLayout();xlRender();}
+}
+function xlSelUI(){
+  const s=selN(),b=$('#xlSel'),xs=XL.xs;if(!xs.length)return;
+  b.style.left=xs[s.c1]+'px';b.style.top=(XL.CH+s.r1*XL.RH)+'px';b.style.width=(xs[s.c2+1]-xs[s.c1])+'px';b.style.height=((s.r2-s.r1+1)*XL.RH)+'px';
+  $('#xlName').value=s.r1===s.r2&&s.c1===s.c2?aName(s.r1,s.c1):aName(s.r1,s.c1)+':'+aName(s.r2,s.c2);
+  if(!XL.edit||XL.edit.src!=='fx')$('#xlFx').value=XL.edit?$('#xlEd').value:rawText(XL.sel.r,XL.sel.c);
+  const f=SH().fmt[XL.sel.r+','+XL.sel.c]||{};
+  $('#xlB').setAttribute('aria-pressed',String(!!f.b));$('#xlI').setAttribute('aria-pressed',String(!!f.i));
+  $('#xlNf').value=f.nf||'';
+  const fb=$('#xlFill');fb.style.display=XL.edit?'none':'';
+}
+function ensureVisible(r,c){
+  const g=grid(),top=XL.CH+r*XL.RH,bot=top+XL.RH,left=XL.xs[c],right=XL.xs[c+1];
+  if(top-XL.CH<g.scrollTop)g.scrollTop=top-XL.CH;else if(bot>g.scrollTop+g.clientHeight)g.scrollTop=bot-g.clientHeight;
+  if(left-XL.HW<g.scrollLeft)g.scrollLeft=left-XL.HW;else if(right>g.scrollLeft+g.clientWidth)g.scrollLeft=right-g.clientWidth;
+}
+function xlSelect(r,c,extend){
+  const sh=SH();r=clamp(r,0,sh.rows-1);c=clamp(c,0,sh.cols-1);
+  if(extend){XL.sel.r2=r;XL.sel.c2=c;}else XL.sel={r,c,r2:r,c2:c};
+  ensureVisible(r,c);xlRender();
+}
+
+/* ---------- úpravy buněk ---------- */
+function setCell(r,c,raw){
+  const p=parseInput(raw);xlSnap(true);
+  try{XL.hf.setCellContents(A(r,c),[[p.val]]);}catch(e){XL.undo.pop();toast('Neplatný vzorec: '+e.message);return false;}
+  if(p.nf){const k=r+','+c;SH().fmt[k]=Object.assign({},SH().fmt[k],{nf:p.nf});}
+  xlChanged();return true;
+}
+function xlStartEdit(initial,src){
+  const r=XL.sel.r,c=XL.sel.c,ed=$('#xlEd');XL.sel.r2=r;XL.sel.c2=c;
+  XL.edit={r,c,src:src||'cell'};
+  const val=initial!=null?initial:rawText(r,c);
+  if(XL.edit.src==='cell'){ensureVisible(r,c);ed.hidden=false;ed.value=val;ed.style.left=XL.xs[c]+'px';ed.style.top=(XL.CH+r*XL.RH)+'px';ed.style.minWidth=Math.max(colW(c),140)+'px';ed.style.height=XL.RH+'px';
+    const f=SH().fmt[r+','+c]||{};ed.style.fontWeight=f.b?'700':'';ed.style.fontStyle=f.i?'italic':'';
+    ed.focus();const n=ed.value.length;try{ed.setSelectionRange(n,n);}catch(e){}}
+  $('#xlFx').value=val;xlSelUI();
+}
+function xlCommit(move){
+  if(!XL.edit)return;const e=XL.edit;XL.edit=null;XL.ref=null;
+  const v=(e.src==='fx'?$('#xlFx'):$('#xlEd')).value;$('#xlEd').hidden=true;
+  if(v!==rawText(e.r,e.c))setCell(e.r,e.c,v);
+  if(move)xlSelect(e.r+move[0],e.c+move[1]);else xlRender();
+}
+function xlCancel(){if(!XL.edit)return;XL.edit=null;XL.ref=null;$('#xlEd').hidden=true;xlRender();}
+function eachSel(fn){const s=selN();let n=0;for(let r=s.r1;r<=s.r2;r++)for(let c=s.c1;c<=s.c2;c++){if(++n>20000)return;fn(r,c);}}
+function xlFmt(patch){
+  xlCommit();xlSnap(false);const F=SH().fmt;
+  eachSel((r,c)=>{const k=r+','+c,o=Object.assign({},F[k],patch);for(const x in o)if(o[x]===undefined||o[x]===''||o[x]===false||o[x]===null)delete o[x];if(Object.keys(o).length)F[k]=o;else delete F[k];});
+  xlChanged();xlRender();
+}
+function xlClear(){
+  xlSnap(true);const s=selN(),rows=[];for(let r=s.r1;r<=s.r2;r++){const row=[];for(let c=s.c1;c<=s.c2;c++)row.push(null);rows.push(row);}
+  XL.hf.setCellContents(A(s.r1,s.c1),rows);xlChanged();
+}
+function curFmt(){return SH().fmt[XL.sel.r+','+XL.sel.c]||{};}
+function stepDp(d){const f=curFmt();let dp=f.dp!=null?f.dp:(f.nf==='pct'||f.nf==='int'?0:2);dp=clamp(dp+d,0,10);xlFmt({dp,nf:f.nf&&f.nf!=='int'?f.nf:'num2'});}
+
+/* ---------- výplň (táhlo v rohu výběru), kopírování ---------- */
+function fillTo(tr,tc){
+  const s=selN(),sh=sid(),F=SH().fmt,fmtBefore=JSON.stringify(F);
+  const dDown=tr-s.r2,dUp=s.r1-tr,dRight=tc-s.c2,dLeft=s.c1-tc;
+  const vmax=Math.max(dDown,dUp,0),hmax=Math.max(dRight,dLeft,0);
+  if(!vmax&&!hmax)return;
+  const vert=vmax>=hmax,ops=[],get=(r,c)=>XL.hf.getCellSerialized({sheet:sh,row:r,col:c});
+  const series=src=>{if(src.length<2||!src.every(v=>typeof v==='number'))return null;const st=src[1]-src[0];return src.every((v,i)=>i===0||Math.abs(v-src[i-1]-st)<1e-9)?st:null;};
+  const copyOp=(r1,c1,r2,c2,tr_,tc_)=>()=>{XL.hf.copy({start:{sheet:sh,row:r1,col:c1},end:{sheet:sh,row:r2,col:c2}});XL.hf.paste({sheet:sh,row:tr_,col:tc_});};
+  if(vert){
+    const h=s.r2-s.r1+1,down=dDown>0;
+    if(down)for(let r=s.r2+1;r<=tr;r+=h){const cnt=Math.min(h,tr-r+1);ops.push(copyOp(s.r1,s.c1,s.r1+cnt-1,s.c2,r,s.c1));}
+    else for(let end=s.r1-1;end>=tr;end-=h){const start=Math.max(tr,end-h+1),cnt=end-start+1;ops.push(copyOp(s.r2-cnt+1,s.c1,s.r2,s.c2,start,s.c1));}
+    for(let c=s.c1;c<=s.c2;c++){const src=[];for(let r=s.r1;r<=s.r2;r++)src.push(get(r,c));const st=series(src);
+      if(st!==null){const vals=[];if(down)for(let k=1;k<=tr-s.r2;k++)vals.push([src[h-1]+st*k]);else for(let r=tr;r<s.r1;r++)vals.push([src[0]-st*(s.r1-r)]);
+        ops.push(()=>XL.hf.setCellContents({sheet:sh,row:down?s.r2+1:tr,col:c},vals));}
+      const rows=down?range(s.r2+1,tr):range(tr,s.r1-1);rows.forEach(r=>{const off=down?(r-s.r2-1)%h:(h-1-((s.r1-1-r)%h));const sf=F[(s.r1+off)+','+c];if(sf)F[r+','+c]=Object.assign({},sf);else delete F[r+','+c];});}
+    if(down){XL.sel.r=s.r1;XL.sel.r2=tr;}else{XL.sel.r=tr;XL.sel.r2=s.r2;}XL.sel.c=s.c1;XL.sel.c2=s.c2;
+  }else{
+    const w=s.c2-s.c1+1,right=dRight>0;
+    if(right)for(let c=s.c2+1;c<=tc;c+=w){const cnt=Math.min(w,tc-c+1);ops.push(copyOp(s.r1,s.c1,s.r2,s.c1+cnt-1,s.r1,c));}
+    else for(let end=s.c1-1;end>=tc;end-=w){const start=Math.max(tc,end-w+1),cnt=end-start+1;ops.push(copyOp(s.r1,s.c2-cnt+1,s.r2,s.c2,s.r1,start));}
+    for(let r=s.r1;r<=s.r2;r++){const src=[];for(let c=s.c1;c<=s.c2;c++)src.push(get(r,c));const st=series(src);
+      if(st!==null){const row=[];if(right)for(let k=1;k<=tc-s.c2;k++)row.push(src[w-1]+st*k);else for(let c=tc;c<s.c1;c++)row.push(src[0]-st*(s.c1-c));
+        ops.push(()=>XL.hf.setCellContents({sheet:sh,row:r,col:right?s.c2+1:tc},[row]));}
+      const cols=right?range(s.c2+1,tc):range(tc,s.c1-1);cols.forEach(c=>{const off=right?(c-s.c2-1)%w:(w-1-((s.c1-1-c)%w));const sf=F[r+','+(s.c1+off)];if(sf)F[r+','+c]=Object.assign({},sf);else delete F[r+','+c];});}
+    if(right){XL.sel.c=s.c1;XL.sel.c2=tc;}else{XL.sel.c=tc;XL.sel.c2=s.c2;}XL.sel.r=s.r1;XL.sel.r2=s.r2;
+  }
+  // formát už je změněný – snímek historie s původním formátem
+  XL.undo.push({hf:true,n:ops.length,sheet:XL.sheet,fmt:fmtBefore,colW:JSON.stringify(SH().colW),rows:SH().rows,cols:SH().cols});XL.redo=[];xlUndoUI();
+  ops.forEach(f=>f());xlChanged();xlRender();
+}
+const range=(a,b)=>{const o=[];for(let i=a;i<=b;i++)o.push(i);return o;};
+function xlCopy(cut){
+  xlCommit();const s=selN(),sh=sid(),rows=[];
+  for(let r=s.r1;r<=s.r2;r++){const row=[];for(let c=s.c1;c<=s.c2;c++)row.push(xlFmtVal(XL.hf.getCellValue({sheet:sh,row:r,col:c}),SH().fmt[r+','+c],null));rows.push(row.join('\t'));}
+  const tsv=rows.join('\n');
+  XL.hf.copy({start:{sheet:sh,row:s.r1,col:s.c1},end:{sheet:sh,row:s.r2,col:s.c2}});
+  const fm={};for(let r=s.r1;r<=s.r2;r++)for(let c=s.c1;c<=s.c2;c++){const f=SH().fmt[r+','+c];if(f)fm[(r-s.r1)+','+(c-s.c1)]=f;}
+  XL.clip={tsv,fmt:fm,cut:cut?{sheet:XL.sheet,s}:null};
+  try{navigator.clipboard&&navigator.clipboard.writeText(tsv).catch(()=>{});}catch(e){}
+  toast(cut?'Vyjmuto – vložte jinam':'Zkopírováno');return tsv;
+}
+function xlPaste(text){
+  xlCommit();const r0=XL.sel.r,c0=XL.sel.c;
+  if(XL.clip&&(text==null||text===XL.clip.tsv)){
+    xlSnap(true);
+    try{XL.hf.paste(A(r0,c0));}catch(e){XL.undo.pop();toast('Vložení se nezdařilo');return;}
+    for(const k in XL.clip.fmt){const[dr,dc]=k.split(',').map(Number);SH().fmt[(r0+dr)+','+(c0+dc)]=Object.assign({},XL.clip.fmt[k]);}
+    if(XL.clip.cut){const{s,sheet}=XL.clip.cut;if(sheet===XL.sheet){const rows=[];for(let r=s.r1;r<=s.r2;r++){const row=[];for(let c=s.c1;c<=s.c2;c++){const inside=r>=r0&&r<r0+(s.r2-s.r1+1)&&c>=c0&&c<c0+(s.c2-s.c1+1);row.push(inside?XL.hf.getCellSerialized(A(r,c)):null);}rows.push(row);}XL.hf.setCellContents(A(s.r1,s.c1),rows);}XL.clip.cut=null;}
+    xlChanged();xlRender();return;
+  }
+  if(text==null){toast('Schránka je prázdná');return;}
+  const rows=text.replace(/\r/g,'').replace(/\n$/,'').split('\n').map(l=>l.split('\t').map(v=>parseInput(v).val));
+  xlSnap(true);XL.hf.setCellContents(A(r0,c0),rows);xlChanged();
+}
+
+/* ---------- řádky, sloupce, řazení ---------- */
+function shiftFmt(axis,at,d){
+  const F=SH().fmt,out={},cw=SH().colW,ow={};
+  for(const k in F){let[r,c]=k.split(',').map(Number);if(axis==='r'){if(d<0&&r>=at&&r<at-d)continue;if(r>=at)r+=d;}else{if(d<0&&c>=at&&c<at-d)continue;if(c>=at)c+=d;}out[r+','+c]=F[k];}
+  SH().fmt=out;
+  if(axis==='c'){for(const k in cw){let c=+k;if(d<0&&c>=at&&c<at-d)continue;if(c>=at)c+=d;ow[c]=cw[k];}SH().colW=ow;}
+}
+function xlRows(op){
+  xlCommit();const s=selN(),n=s.r2-s.r1+1;xlSnap(true);
+  if(op==='ins'){XL.hf.addRows(sid(),[s.r1,n]);shiftFmt('r',s.r1,n);SH().rows+=n;}
+  else{XL.hf.removeRows(sid(),[s.r1,n]);shiftFmt('r',s.r1,-n);}
+  xlLayout();xlChanged();xlRender();
+}
+function xlCols(op){
+  xlCommit();const s=selN(),n=s.c2-s.c1+1;xlSnap(true);
+  if(op==='ins'){XL.hf.addColumns(sid(),[s.c1,n]);shiftFmt('c',s.c1,n);SH().cols+=n;}
+  else{XL.hf.removeColumns(sid(),[s.c1,n]);shiftFmt('c',s.c1,-n);}
+  xlLayout();xlChanged();xlRender();
+}
+function xlSort(asc){
+  xlCommit();const id=sid(),dim=XL.hf.getSheetDimensions(id),s=selN();
+  let r1,r2,c1,c2,key=XL.sel.c;
+  if(s.r2>s.r1){r1=s.r1;r2=s.r2;c1=s.c1;c2=s.c2;}else{r1=0;r2=dim.height-1;c1=0;c2=dim.width-1;const h=XL.hf.getCellValue({sheet:id,row:0,col:key});const b=XL.hf.getCellValue({sheet:id,row:1,col:key});if(typeof h==='string'&&typeof b!=='string')r1=1;}
+  if(r2<=r1){toast('Není co řadit');return;}
+  const rows=[];for(let r=r1;r<=r2;r++){const ser=[],fm=[];for(let c=c1;c<=c2;c++){ser.push(XL.hf.getCellSerialized({sheet:id,row:r,col:c}));fm.push(SH().fmt[r+','+c]);}rows.push({k:XL.hf.getCellValue({sheet:id,row:r,col:key}),ser,fm});}
+  const cmp=(a,b)=>{const x=a.k,y=b.k;if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;if(typeof x==='number'&&typeof y==='number')return asc?x-y:y-x;const r=String(x).localeCompare(String(y),'cs',{numeric:true});return asc?r:-r;};
+  rows.sort(cmp);xlSnap(true);
+  XL.hf.setCellContents({sheet:id,row:r1,col:c1},rows.map(o=>o.ser));
+  rows.forEach((o,i)=>o.fm.forEach((f,j)=>{const k=(r1+i)+','+(c1+j);if(f)SH().fmt[k]=f;else delete SH().fmt[k];}));
+  xlChanged();xlRender();toast(asc?'Seřazeno vzestupně':'Seřazeno sestupně');
+}
+function autoSum(){
+  xlCommit();const s=selN(),id=sid();
+  const isNum=(r,c)=>typeof XL.hf.getCellValue({sheet:id,row:r,col:c})==='number';
+  if(s.r1===s.r2&&s.c1===s.c2){
+    const r=s.r1,c=s.c1;let a=r-1;while(a>=0&&isNum(a,c))a--;
+    if(a<r-1){xlStartEdit(`=SUMA(${aName(a+1,c)}:${aName(r-1,c)})`);return;}
+    let b=c-1;while(b>=0&&isNum(r,b))b--;
+    xlStartEdit(b<c-1?`=SUMA(${aName(r,b+1)}:${aName(r,c-1)})`:'=SUMA()');return;
+  }
+  xlSnap(true);XL.hf.batch(()=>{for(let c=s.c1;c<=s.c2;c++)XL.hf.setCellContents({sheet:id,row:s.r2+1,col:c},[[`=SUMA(${aName(s.r1,c)}:${aName(s.r2,c)})`]]);});
+  xlChanged();xlSelect(s.r2+1,s.c1);
+}
+
+/* ---------- funkce (fx) ---------- */
+const XL_FN=[['SUM','součet čísel'],['AVERAGE','průměr'],['MIN','nejmenší hodnota'],['MAX','největší hodnota'],['COUNT','počet čísel'],['COUNTA','počet neprázdných buněk'],['IF','podmínka: KDYŽ(test;pravda;nepravda)'],['IFERROR','náhradní hodnota při chybě'],['AND','všechny podmínky platí'],['OR','aspoň jedna podmínka platí'],['ROUND','zaokrouhlení na počet míst'],['ROUNDUP','zaokrouhlení nahoru'],['ROUNDDOWN','zaokrouhlení dolů'],['ABS','absolutní hodnota'],['SQRT','druhá odmocnina'],['POWER','mocnina'],['PRODUCT','součin'],['MEDIAN','medián'],['STDEV.S','směrodatná odchylka (výběr)'],['STDEV.P','směrodatná odchylka (populace)'],['VAR.S','rozptyl (výběr)'],['COUNTIF','počet buněk splňujících podmínku'],['SUMIF','součet buněk splňujících podmínku'],['AVERAGEIF','průměr buněk splňujících podmínku'],['VLOOKUP','svislé vyhledání v tabulce'],['HLOOKUP','vodorovné vyhledání'],['INDEX','hodnota na pozici'],['MATCH','pozice hodnoty'],['PI','číslo π'],['SIN','sinus (radiány)'],['COS','kosinus (radiány)'],['TAN','tangens (radiány)'],['ASIN','arkus sinus'],['ACOS','arkus kosinus'],['ATAN','arkus tangens'],['ATAN2','úhel z x a y'],['RADIANS','stupně na radiány'],['DEGREES','radiány na stupně'],['LN','přirozený logaritmus'],['LOG10','dekadický logaritmus'],['EXP','e na x'],['MOD','zbytek po dělení'],['INT','celá část'],['TODAY','dnešní datum'],['NOW','datum a čas'],['CONCATENATE','spojení textů'],['LEN','délka textu'],['UPPER','velká písmena'],['TRIM','odstranění mezer']];
+function fxMenu(anchor){
+  openPop(anchor,p=>{
+    p.style.width='330px';p.append(el('h4',{},'Vložit funkci'));
+    const inp=el('input',{type:'text',id:'fnSearch',placeholder:'Hledat funkci'});inp.style.cssText='width:100%;height:38px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);font:inherit;padding:0 10px;box-sizing:border-box;margin-bottom:8px';p.append(inp);
+    const list=el('div',{class:'menu'});list.style.cssText='max-height:46vh;overflow-y:auto;min-width:0';p.append(list);
+    fnMaps();
+    const all=Object.keys(FN_EN2CS).map(k=>[k,FN_EN2CS[k]]);
+    const draw=()=>{const q=norm(inp.value);list.innerHTML='';
+      const items=q?all.filter(([en,cs])=>norm(cs).includes(q)||norm(en).includes(q)).slice(0,60).map(([en,cs])=>[cs,(XL_FN.find(x=>x[0]===en)||[])[1]||en]):XL_FN.map(([en,d])=>[FN_EN2CS[en]||en,d]);
+      items.forEach(([cs,d])=>{const b=el('button',{},`<b style="min-width:110px">${esc(cs)}</b><span style="color:var(--muted);font-size:13px">${esc(d)}</span>`);b.onclick=()=>{closePops();insertFn(cs);};list.append(b);});};
+    inp.oninput=draw;draw();
+  });
+}
+function insertFn(name){
+  if(!XL.edit)xlStartEdit('=');
+  const ed=XL.edit.src==='fx'?$('#xlFx'):$('#xlEd');let v=ed.value;if(!v.startsWith('='))v='='+v;
+  const pos=ed.selectionStart!=null&&ed.value.startsWith('=')?ed.selectionStart:v.length;
+  ed.value=v.slice(0,pos)+name+'('+v.slice(pos)+')';const np=pos+name.length+1;
+  setTimeout(()=>{ed.focus();ed.setSelectionRange(np,np);syncEd(ed);},0);
+}
+function syncEd(src){if(src.id==='xlEd')$('#xlFx').value=src.value;else if(!$('#xlEd').hidden)$('#xlEd').value=src.value;}
+const refMode=()=>{if(!XL.edit)return false;const ed=XL.edit.src==='fx'?$('#xlFx'):$('#xlEd'),v=ed.value;if(v[0]!=='=')return false;const pos=ed.selectionStart??v.length;const before=v.slice(0,pos).trimEnd();return /[=(;+\-*/^&<>:]$/.test(before)||!!XL.ref;};
+
+/* ---------- graf ---------- */
+async function xlChart(){
+  xlCommit();const s=selN();
+  if(s.r1===s.r2&&s.c1===s.c2){toast('Nejdřív označte data – tažením perem přes buňky.');return;}
+  try{await loadScript(CHART_URL);}catch(e){toast('Graf se nepodařilo načíst. Zkontrolujte připojení.');return;}
+  const id=sid(),val=(r,c)=>XL.hf.getCellValue({sheet:id,row:r,col:c});
+  let hdr=true;for(let c=s.c1;c<=s.c2;c++){const v=val(s.r1,c);if(typeof v==='number')hdr=false;}
+  let lab=true;for(let r=s.r1+(hdr?1:0);r<=s.r2;r++){const v=val(r,s.c1);if(typeof v==='number')lab=false;}
+  if(s.c1===s.c2)lab=false;
+  const rs=hdr?s.r1+1:s.r1,cs=lab?s.c1+1:s.c1,labels=[],sets=[];
+  for(let r=rs;r<=s.r2;r++)labels.push(lab?xlFmtVal(val(r,s.c1),SH().fmt[r+','+s.c1],null):String(r-rs+1));
+  const COL=['#1E7145','#2D5BD3','#D9822B','#B23A48','#6C4AB6','#3A86A8','#C2255C','#8A6D3B'];
+  for(let c=cs;c<=s.c2;c++){const d=[];for(let r=rs;r<=s.r2;r++){const v=val(r,c);d.push(typeof v==='number'?v:null);}sets.push({label:hdr?String(val(s.r1,c)??colName(c)):colName(c),data:d,backgroundColor:COL[(c-cs)%COL.length],borderColor:COL[(c-cs)%COL.length],borderWidth:2});}
+  let chart=null,type='bar';
+  const ink=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#222',line=getComputedStyle(document.documentElement).getPropertyValue('--line').trim()||'#ddd';
+  const build=cv=>{if(chart)chart.destroy();const pie=type==='pie'||type==='doughnut';
+    const ds=sets.map(x=>Object.assign({},x,pie?{backgroundColor:labels.map((_,i)=>COL[i%COL.length]),borderColor:'#fff'}:{},type==='line'?{backgroundColor:x.borderColor,tension:.25}:{}));
+    chart=new window.Chart(cv,{type,data:{labels,datasets:pie?ds.slice(0,1):ds},options:{responsive:false,animation:false,plugins:{legend:{labels:{color:ink}}},scales:pie?{}:{x:{ticks:{color:ink},grid:{color:line}},y:{ticks:{color:ink},grid:{color:line}}}}});};
+  await modal('Graf z označených dat',b=>{
+    const cv=el('canvas',{width:'640',height:'360'});cv.style.cssText='width:100%;height:auto;max-width:640px;background:var(--surface)';
+    chips(b,[['bar','Sloupcový'],['line','Spojnicový'],['pie','Koláčový'],['doughnut','Prstencový']],type,v=>{type=v;build(cv);});
+    b.append(cv);setTimeout(()=>build(cv),0);
+    const sv=el('button',{class:'btn'},ic('down')+'Uložit jako obrázek');sv.onclick=()=>cv.toBlob(bl=>saveFile(safeName(XL.doc.title)+' - graf.png',bl),'image/png');b.append(sv);
+  },[{label:'Zavřít',cls:'primary',value:true}]);
+  if(chart)chart.destroy();
+}
+
+/* ---------- import a export .xlsx / .csv ---------- */
+function nfToZ(f){if(!f||!f.nf)return f&&f.dp!=null?'0'+(f.dp?'.'+'0'.repeat(f.dp):''):undefined;const d=f.dp!=null?f.dp:2,dec=d?'.'+'0'.repeat(d):'';return {num2:'#,##0'+dec,int:'#,##0',pct:'0'+(f.dp?'.'+'0'.repeat(f.dp):'')+'%',czk:'#,##0'+dec+' "Kč"',date:'d.m.yyyy',datetime:'d.m.yyyy h:mm',time:'h:mm'}[f.nf];}
+function zToNf(z){if(!z||z==='General')return null;if(/%/.test(z))return {nf:'pct'};if(/Kč|CZK|€|\$/.test(z))return {nf:'czk'};if(/[dy]/i.test(z)&&!/[h]/i.test(z))return {nf:'date'};if(/h/i.test(z)&&/[dy]/i.test(z))return {nf:'datetime'};if(/h/i.test(z))return {nf:'time'};const m=/0\.(0+)/.exec(z);if(m)return {nf:'num2',dp:m[1].length};return null;}
+async function importSheetFile(file){
+  try{
+    toast('Načítám tabulku…',true);await loadScript(XLSX_URL);await loadHF();fnMaps();
+    const wb=window.XLSX.read(await file.arrayBuffer(),{type:'array',cellFormula:true,cellNF:true,cellDates:false});
+    const doc={sheets:[]};
+    wb.SheetNames.slice(0,30).forEach(name=>{
+      const ws=wb.Sheets[name],nm=uniqueSheetName(name.replace(/[^\p{L}\p{N} _-]/gu,'').trim()||'List',doc),out={name:nm,data:[],fmt:{},colW:{},rows:100,cols:26};
+      if(ws['!ref']){const R=window.XLSX.utils.decode_range(ws['!ref']);const er=Math.min(R.e.r,9999),ec=Math.min(R.e.c,299);
+        for(let r=0;r<=er;r++){const row=[];for(let c=0;c<=ec;c++){const cell=ws[window.XLSX.utils.encode_cell({r,c})];if(!cell){row.push(null);continue;}
+          if(cell.f)row.push('='+xlTranslate(cell.f,true));else if(cell.t==='n'){row.push(cell.v);const f=zToNf(cell.z);if(f)out.fmt[r+','+c]=f;}else if(cell.t==='b')row.push(cell.v);else if(cell.t==='e')row.push(null);else row.push(cell.v==null?null:String(cell.v));
+          if(cell.f&&cell.z){const f=zToNf(cell.z);if(f)out.fmt[r+','+c]=f;}}
+          out.data.push(row);}
+        out.rows=Math.max(100,er+30);out.cols=Math.max(26,ec+4);}
+      (ws['!cols']||[]).forEach((ci,i)=>{if(ci&&(ci.wpx||ci.wch))out.colW[i]=clamp(Math.round(ci.wpx||ci.wch*7.5+12),40,600);});
+      doc.sheets.push(out);
+    });
+    if(!doc.sheets.length)doc.sheets.push({name:'List1',data:[],fmt:{},colW:{},rows:100,cols:26});
+    const pl=currentPlace();const n={id:uid(),kind:'sheet',title:file.name.replace(/\.(xlsx|xls|ods|csv)$/i,''),cover:'#1E7145',folder:pl.folder,cat:pl.cat,fav:false,created:Date.now(),updated:Date.now(),pages:[],sheets:doc.sheets};
+    await DB.put(n);notebooks.push(n);toast('Tabulka importována');openSheet(n);
+  }catch(e){console.error(e);toast('Soubor se nepodařilo načíst. Podporované jsou .xlsx, .xls, .ods a .csv.');}
+}
+async function withHF(n,fn){
+  if(XL.doc===n&&XL.hf){xlCommit();return fn(XL.hf);}
+  const HF=await loadHF();const sheets={};n.sheets.forEach(sh=>sheets[sh.name]=sh.data||[]);const hf=HF.buildFromSheets(sheets,XL_CFG);
+  try{return await fn(hf);}finally{hf.destroy();}
+}
+async function exportXlsx(n){
+  try{
+    toast('Připravuji .xlsx…',true);await loadScript(XLSX_URL);await loadHF();fnMaps();const X=window.XLSX;
+    const out=await withHF(n,hf=>{
+      const wb=X.utils.book_new();
+      n.sheets.forEach(sh=>{
+        const id=hf.getSheetId(sh.name),dim=hf.getSheetDimensions(id),ws={};
+        for(let r=0;r<dim.height;r++)for(let c=0;c<dim.width;c++){
+          const a={sheet:id,row:r,col:c},ser=hf.getCellSerialized(a);if(ser===null||ser===undefined||ser==='')continue;
+          const v=hf.getCellValue(a),cell={},z=nfToZ(sh.fmt&&sh.fmt[r+','+c]);
+          if(typeof v==='number'){cell.t='n';cell.v=v;}else if(typeof v==='boolean'){cell.t='b';cell.v=v;}else if(v&&typeof v==='object'){cell.t='s';cell.v='';}else{cell.t='s';cell.v=v==null?'':String(v);}
+          if(typeof ser==='string'&&ser[0]==='=')cell.f=xlTranslate(ser.slice(1),false);
+          if(z&&cell.t==='n')cell.z=z;
+          ws[X.utils.encode_cell({r,c})]=cell;
+        }
+        ws['!ref']=X.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(0,dim.height-1),c:Math.max(0,dim.width-1)}});
+        const cols=[];for(let c=0;c<Math.max(dim.width,1);c++)cols.push({wpx:(sh.colW&&sh.colW[c])||100});ws['!cols']=cols;
+        X.utils.book_append_sheet(wb,ws,sh.name.slice(0,31));
+      });
+      return X.write(wb,{bookType:'xlsx',type:'array'});
+    });
+    await saveFile(safeName(n.title)+'.xlsx',new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  }catch(e){console.error(e);toast('Export se nezdařil: '+e.message);}
+}
+async function exportCsv(n){
+  try{const txt=await withHF(n,hf=>{const sh=n.sheets[XL.doc===n?XL.sheet:0],id=hf.getSheetId(sh.name),dim=hf.getSheetDimensions(id),lines=[];
+    for(let r=0;r<dim.height;r++){const row=[];for(let c=0;c<dim.width;c++){const a={sheet:id,row:r,col:c},v=hf.getCellValue(a);let t=typeof v==='number'?String(v).replace('.',','):(v&&typeof v==='object'?v.value:(v==null?'':String(v)));if(/[;"\n]/.test(t))t='"'+t.replace(/"/g,'""')+'"';row.push(t);}lines.push(row.join(';'));}
+    return lines.join('\r\n');});
+    await saveFile(safeName(n.title)+'.csv',new Blob(['﻿'+txt],{type:'text/csv'}));
+  }catch(e){toast('Export se nezdařil.');}
+}
+function sheetThumb(n){
+  const w=240,h=333,cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#1E7145';x.fillRect(0,0,w,22);
+  x.fillStyle='#EEF3EF';x.fillRect(0,22,22,h);x.fillRect(0,22,w,16);
+  x.strokeStyle='#D9DEE3';x.lineWidth=1;x.beginPath();for(let r=0;r<20;r++){const y=38+r*15+.5;x.moveTo(0,y);x.lineTo(w,y);}for(let c=0;c<7;c++){const X=22+c*32+.5;x.moveTo(X,22);x.lineTo(X,h);}x.stroke();
+  x.fillStyle='#fff';x.font='600 11px Inter, sans-serif';x.fillText(String(n.title).slice(0,30),8,15);
+  const pv=n.preview||(n.sheets[0]&&n.sheets[0].data)||[];x.font='9px Inter, sans-serif';x.fillStyle='#24292F';
+  for(let r=0;r<Math.min(19,pv.length);r++)for(let c=0;c<Math.min(7,(pv[r]||[]).length);c++){const v=pv[r][c];if(v==null||v==='')continue;x.save();x.beginPath();x.rect(22+c*32,38+r*15,31,15);x.clip();x.fillText(String(v),25+c*32,49+r*15);x.restore();}
+  return cv;
+}
+
+/* ---------- ovládání mřížky (pero a myš vybírají, prst posouvá) ---------- */
+(function(){
+  const g=grid();let drag=null;const tp=new Map();let tScroll=null;
+  const cellAt=e=>{const R=g.getBoundingClientRect(),vx=e.clientX-R.left,vy=e.clientY-R.top,x=vx+g.scrollLeft,y=vy+g.scrollTop;
+    return {r:clamp(Math.floor((y-XL.CH)/XL.RH),0,SH().rows-1),c:clamp(findCol(x),0,SH().cols-1),colHdr:vy<XL.CH,rowHdr:vx<XL.HW};};
+  g.addEventListener('pointerdown',e=>{
+    if(!XL.doc||e.target.id==='xlEd')return;
+    closePops();
+    if(e.pointerType==='touch'&&!e.target.classList.contains('xl-fill')&&!e.target.dataset.grip){tp.set(e.pointerId,{x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t:performance.now(),sl:g.scrollLeft,st:g.scrollTop});tScroll={moved:false,vx:0,vy:0,lt:performance.now()};return;}
+    const p=cellAt(e);try{g.setPointerCapture(e.pointerId);}catch(_){}
+    if(e.target.dataset.grip){const c=+e.target.dataset.grip;drag={type:'resize',c,x0:e.clientX,w0:colW(c)};xlSnap(false);e.preventDefault();return;}
+    if(e.target.classList.contains('xl-fill')){xlCommit();drag={type:'fill',tr:selN().r2,tc:selN().c2};e.preventDefault();return;}
+    if(!p.colHdr&&!p.rowHdr&&refMode()){e.preventDefault();startRef(p.r,p.c);drag={type:'ref',r:p.r,c:p.c};return;}
+    if(XL.edit)xlCommit();
+    if(p.colHdr&&p.rowHdr)return;
+    if(p.colHdr){XL.sel={r:0,c:p.c,r2:SH().rows-1,c2:p.c};drag={type:'cols',c:p.c};xlRender();return;}
+    if(p.rowHdr){XL.sel={r:p.r,c:0,r2:p.r,c2:SH().cols-1};drag={type:'rows',r:p.r};xlRender();return;}
+    const s=selN(),wasSel=s.r1===s.r2&&s.c1===s.c2&&s.r1===p.r&&s.c1===p.c;
+    if(e.shiftKey||XL.extend){xlSelect(p.r,p.c,true);XL.extend=false;$('#xlExt').setAttribute('aria-pressed','false');drag={type:'sel'};return;}
+    XL.sel={r:p.r,c:p.c,r2:p.r,c2:p.c};drag={type:'sel',wasSel,moved:false,r:p.r,c:p.c};xlRender();
+  });
+  g.addEventListener('pointermove',e=>{
+    if(e.pointerType==='touch'&&tp.has(e.pointerId)){const t=tp.get(e.pointerId);const dx=e.clientX-t.x,dy=e.clientY-t.y;t.x=e.clientX;t.y=e.clientY;
+      if(Math.hypot(t.x-t.x0,t.y-t.y0)>8)tScroll.moved=true;if(tScroll.moved){g.scrollLeft-=dx;g.scrollTop-=dy;const now=performance.now(),dt=Math.max(1,now-tScroll.lt);tScroll.lt=now;tScroll.vx=0.7*(-dx/dt)+0.3*tScroll.vx;tScroll.vy=0.7*(-dy/dt)+0.3*tScroll.vy;}return;}
+    if(!drag)return;const p=cellAt(e);
+    if(drag.type==='resize'){SH().colW[drag.c]=clamp(drag.w0+(e.clientX-drag.x0),30,800);xlLayout();xlRender();return;}
+    if(drag.type==='fill'){drag.tr=p.r;drag.tc=p.c;const s=selN(),b=$('#xlFillBox');const r1=Math.min(s.r1,p.r),r2=Math.max(s.r2,p.r),c1=Math.min(s.c1,p.c),c2=Math.max(s.c2,p.c);
+      const vert=Math.max(p.r-s.r2,s.r1-p.r,0)>=Math.max(p.c-s.c2,s.c1-p.c,0);const R1=vert?r1:s.r1,R2=vert?r2:s.r2,C1=vert?s.c1:c1,C2=vert?s.c2:c2;
+      b.hidden=false;b.style.left=XL.xs[C1]+'px';b.style.top=(XL.CH+R1*XL.RH)+'px';b.style.width=(XL.xs[C2+1]-XL.xs[C1])+'px';b.style.height=((R2-R1+1)*XL.RH)+'px';return;}
+    if(drag.type==='ref'){updateRef(p.r,p.c);return;}
+    if(drag.type==='sel'){if(p.r!==XL.sel.r2||p.c!==XL.sel.c2){drag.moved=true;XL.sel.r2=p.r;XL.sel.c2=p.c;xlRender();}}
+    else if(drag.type==='cols'){XL.sel.c2=p.c;xlRender();}else if(drag.type==='rows'){XL.sel.r2=p.r;xlRender();}
+  });
+  const up=e=>{
+    if(e.pointerType==='touch'&&tp.has(e.pointerId)){const t=tp.get(e.pointerId);tp.delete(e.pointerId);
+      if(!tScroll.moved&&e.type==='pointerup'){const p=cellAt(e);touchTap(p,performance.now()-t.t);}
+      else if(tScroll.moved&&performance.now()-tScroll.lt<60){let vx=tScroll.vx,vy=tScroll.vy,last=performance.now();const step=now=>{const dt=Math.min(40,now-last);last=now;g.scrollLeft+=vx*dt;g.scrollTop+=vy*dt;const k=Math.pow(0.995,dt);vx*=k;vy*=k;if(Math.hypot(vx,vy)>0.03)requestAnimationFrame(step);};requestAnimationFrame(step);}
+      return;}
+    if(!drag)return;const d=drag;drag=null;
+    if(d.type==='resize'){xlChanged();return;}
+    if(d.type==='fill'){$('#xlFillBox').hidden=true;fillTo(d.tr,d.tc);return;}
+    if(d.type==='ref'){XL.ref=null;return;}
+    if(d.type==='sel'&&d.wasSel&&!d.moved&&e.pointerType!=='mouse')xlStartEdit();
+  };
+  g.addEventListener('pointerup',up);g.addEventListener('pointercancel',up);
+  g.addEventListener('dblclick',e=>{if(e.target.id!=='xlEd'&&!XL.edit){const p=cellAt(e);if(!p.colHdr&&!p.rowHdr){XL.sel={r:p.r,c:p.c,r2:p.r,c2:p.c};xlStartEdit();}}});
+  g.addEventListener('contextmenu',e=>{e.preventDefault();const p=cellAt(e);if(p.colHdr||p.rowHdr)hdrMenu(p,e.target);else cellMenu(e.target);});
+  g.addEventListener('scroll',()=>xlRender(),{passive:true});
+  function touchTap(p,dur){
+    if(XL.edit&&!p.colHdr&&!p.rowHdr&&refMode()){startRef(p.r,p.c);XL.ref=null;return;}
+    if(XL.edit)xlCommit();
+    if(p.colHdr&&p.rowHdr)return;
+    if(dur>480){if(p.colHdr||p.rowHdr){hdrMenu(p,g);return;}XL.sel={r:p.r,c:p.c,r2:p.r,c2:p.c};xlRender();cellMenu($('#xlSel'));return;}
+    if(p.colHdr){XL.sel={r:0,c:p.c,r2:SH().rows-1,c2:p.c};xlRender();return;}
+    if(p.rowHdr){XL.sel={r:p.r,c:0,r2:p.r,c2:SH().cols-1};xlRender();return;}
+    if(XL.extend){xlSelect(p.r,p.c,true);XL.extend=false;$('#xlExt').setAttribute('aria-pressed','false');return;}
+    const s=selN();if(s.r1===s.r2&&s.c1===s.c2&&s.r1===p.r&&s.c1===p.c){xlStartEdit();return;}
+    xlSelect(p.r,p.c);
+  }
+})();
+function startRef(r,c){
+  const ed=XL.edit.src==='fx'?$('#xlFx'):$('#xlEd');const pos=ed.selectionStart??ed.value.length;
+  const txt=aName(r,c);ed.value=ed.value.slice(0,pos)+txt+ed.value.slice(ed.selectionEnd??pos);XL.ref={pos,len:txt.length,r,c,ed};
+  setTimeout(()=>{ed.focus();ed.setSelectionRange(pos+txt.length,pos+txt.length);},0);syncEd(ed);
+}
+function updateRef(r,c){
+  const f=XL.ref;if(!f)return;const ed=f.ed;const txt=(r===f.r&&c===f.c)?aName(r,c):aName(Math.min(r,f.r),Math.min(c,f.c))+':'+aName(Math.max(r,f.r),Math.max(c,f.c));
+  ed.value=ed.value.slice(0,f.pos)+txt+ed.value.slice(f.pos+f.len);f.len=txt.length;ed.setSelectionRange(f.pos+txt.length,f.pos+txt.length);syncEd(ed);
+}
+function hdrMenu(p,anchor){
+  if(p.colHdr){if(!(XL.sel.c<=p.c&&p.c<=XL.sel.c2&&selN().r2-selN().r1>=SH().rows-1))XL.sel={r:0,c:p.c,r2:SH().rows-1,c2:p.c};xlRender();
+    menuPop(anchor,[['up','Seřadit A → Z (vzestupně)',()=>{XL.sel.r2=XL.sel.r;xlSort(true);}],['dn','Seřadit Z → A (sestupně)',()=>{XL.sel.r2=XL.sel.r;xlSort(false);}],'-',['colsPlus','Vložit sloupec vlevo',()=>xlCols('ins')],['trash','Odstranit sloupec',()=>xlCols('del'),'danger']]);}
+  else{if(!(XL.sel.r<=p.r&&p.r<=XL.sel.r2))XL.sel={r:p.r,c:0,r2:p.r,c2:SH().cols-1};xlRender();
+    menuPop(anchor,[['rowsPlus','Vložit řádek nad',()=>xlRows('ins')],['trash','Odstranit řádek',()=>xlRows('del'),'danger']]);}
+}
+function cellMenu(anchor){
+  menuPop(anchor,[['copy','Kopírovat',()=>xlCopy(false)],['cut','Vyjmout',()=>xlCopy(true)],['paste','Vložit',()=>xlPaste(null)],'-',['edit','Upravit buňku',()=>xlStartEdit()],['trash','Vymazat obsah',xlClear],'-',['rowsPlus','Vložit řádek nad',()=>xlRows('ins')],['colsPlus','Vložit sloupec vlevo',()=>xlCols('ins')],['dn','Vyplnit dolů (Ctrl+D)',fillDown]]);
+}
+function fillDown(){const s=selN();if(s.r2===s.r1){toast('Označte oblast, do které se má vyplnit první řádek');return;}const tr=s.r2;XL.sel={r:s.r1,c:s.c1,r2:s.r1,c2:s.c2};fillTo(tr,s.c1);}
+
+/* ---------- lišta tabulky ---------- */
+(function(){
+  const set=(id,i,fn)=>{const b=$('#'+id);b.innerHTML=ic(i);b.onclick=fn;};
+  set('xlBack','back',closeSheet);set('xlUndo','undo',xlUndo);set('xlRedo','redo',xlRedo);
+  set('xlB','bold',()=>xlFmt({b:!curFmt().b}));set('xlI','italic',()=>xlFmt({i:!curFmt().i}));
+  set('xlAL','alignL',()=>xlFmt({al:'left'}));set('xlAC','alignC',()=>xlFmt({al:'center'}));set('xlAR','alignR',()=>xlFmt({al:'right'}));
+  set('xlBg','fill',e=>xlColorPop(e.currentTarget,'bg'));set('xlFc','fcolor',e=>xlColorPop(e.currentTarget,'fc'));
+  set('xlSum','sigma',autoSum);set('xlFn','fx',e=>fxMenu(e.currentTarget));set('xlChart','chart',xlChart);
+  set('xlRowIns','rowsPlus',()=>xlRows('ins'));set('xlColIns','colsPlus',()=>xlCols('ins'));
+  set('xlCopy','copy',()=>xlCopy(false));set('xlPaste','paste',()=>xlPaste(null));
+  set('xlExt','sel',()=>{XL.extend=!XL.extend;$('#xlExt').setAttribute('aria-pressed',String(XL.extend));if(XL.extend)toast('Klepněte na poslední buňku oblasti');});
+  set('xlMore','more',e=>menuPop(e.currentTarget,[['edit','Přejmenovat tabulku',async()=>{await renameNb(XL.doc);$('#xlTitle').textContent=XL.doc.title;}],'-',['down','Exportovat Excel (.xlsx)',()=>exportXlsx(XL.doc)],['down','Exportovat CSV (aktuální list)',()=>exportCsv(XL.doc)],'-',['up','Seřadit podle sloupce vzestupně',()=>xlSort(true)],['dn','Seřadit podle sloupce sestupně',()=>xlSort(false)],['trash','Vymazat obsah výběru',xlClear],'-',['help','Nápověda k tabulkám',xlHelp]]));
+  $('#xlDecM').onclick=()=>stepDp(-1);$('#xlDecP').onclick=()=>stepDp(1);
+  $('#xlNf').onchange=e=>{const v=e.target.value;xlFmt({nf:v||undefined,dp:undefined});};
+  $('#xlTitle').onclick=async()=>{await renameNb(XL.doc);$('#xlTitle').textContent=XL.doc.title;};
+  const fx=$('#xlFx'),ed=$('#xlEd');
+  fx.addEventListener('focus',()=>{if(!XL.edit){XL.edit={r:XL.sel.r,c:XL.sel.c,src:'fx'};XL.sel.r2=XL.sel.r;XL.sel.c2=XL.sel.c;xlSelUI();}else if(XL.edit.src==='cell'){XL.edit.src='fx';ed.hidden=true;}});
+  [fx,ed].forEach(inp=>{
+    inp.addEventListener('input',()=>{XL.ref=null;syncEd(inp);});
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();xlCommit([e.shiftKey?-1:1,0]);if(inp===fx)fx.blur();}
+      else if(e.key==='Tab'){e.preventDefault();xlCommit([0,e.shiftKey?-1:1]);}
+      else if(e.key==='Escape'){e.preventDefault();xlCancel();inp.blur();}
+      e.stopPropagation();
+    });
+  });
+  $('#xlName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const m=/^([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?$/i.exec(e.target.value.trim());
+    if(m){const cn=s=>s.toUpperCase().split('').reduce((a,ch)=>a*26+ch.charCodeAt(0)-64,0)-1;const r=+m[2]-1,c=cn(m[1]);XL.sel={r,c,r2:m[3]?+m[4]-1:r,c2:m[3]?cn(m[3]):c};const sh=SH();sh.rows=Math.max(sh.rows,XL.sel.r2+20);sh.cols=Math.max(sh.cols,XL.sel.c2+3);xlLayout();ensureVisible(r,c);xlRender();e.target.blur();}else toast('Zadejte adresu jako B4 nebo A1:C10');}e.stopPropagation();});
+})();
+function xlColorPop(anchor,key){
+  openPop(anchor,p=>{p.append(el('h4',{},key==='bg'?'Barva výplně':'Barva písma'));const r=el('div',{class:'row'});
+    const cols=key==='bg'?['#FFF3BF','#D3F9D8','#D0EBFF','#FFE3E3','#E5DBFF','#FFE8CC','#E9ECEF','#C3FAE8','#FFD43B','#69DB7C','#74C0FC','#FF8787']:['#1B2232','#C2255C','#E03131','#E8590C','#2F9E44','#1E7145','#1C7ED6','#5F3DC4','#868E96','#FFFFFF'];
+    cols.forEach(c=>{const b=el('button',{class:'cbtn','aria-label':c});b.style.background=c;b.onclick=()=>{closePops();xlFmt({[key]:c});};r.append(b);});p.append(r);
+    const none=el('button',{class:'btn'},'Bez barvy');none.onclick=()=>{closePops();xlFmt({[key]:undefined});};p.append(none);});
+}
+function xlHelp(){
+  modal('Tabulky – nápověda',b=>{b.innerHTML=`<ul class="help">
+<li><b>Výběr:</b> klepněte na buňku. Perem nebo myší táhněte přes více buněk. Prstem se tabulka posouvá. Pro oblast prstem použijte tlačítko „Rozšířit výběr“ a klepněte na poslední buňku.</li>
+<li><b>Psaní:</b> klepněte na už vybranou buňku (nebo do řádku fx) a pište. Enter uloží a posune dolů, Tab doprava.</li>
+<li><b>Vzorce česky jako v Excelu:</b> <span class="kbd">=SUMA(A1:A10)</span>, <span class="kbd">=PRŮMĚR(B2:B20)</span>, <span class="kbd">=KDYŽ(C2>=50;"prošel";"neprošel")</span>. Desetinná čárka, argumenty se oddělují středníkem.</li>
+<li><b>Odkazy klepnutím:</b> během psaní vzorce klepněte na buňku (nebo perem táhněte přes oblast) a adresa se vloží sama.</li>
+<li><b>Táhlo v rohu výběru</b> kopíruje vzorce dolů nebo doprava. Dvě čísla za sebou (1, 2) vytvoří řadu.</li>
+<li><b>Podržení</b> buňky nebo záhlaví otevře nabídku: kopírovat, vložit, řádky, sloupce, řazení.</li>
+<li><b>Σ</b> sečte čísla nad buňkou, <b>fx</b> vloží libovolnou funkci, ikona grafu vytvoří graf z označených dat.</li>
+<li>Soubory Excelu (.xlsx) otevřete přes „Importovat soubor“ v knihovně a exportujete v menu ⋯.</li></ul>`;},[{label:'Rozumím',cls:'primary',value:true}]);
+}
+document.addEventListener('keydown',e=>{
+  if($('#sheet').hidden||!XL.doc||e.target.closest('input,textarea,select,.modal-ov'))return;
+  const k=e.key,mod=e.ctrlKey||e.metaKey,s=XL.sel;
+  if(mod){const l=k.toLowerCase();
+    if(l==='z'){e.preventDefault();e.shiftKey?xlRedo():xlUndo();}else if(l==='y'){e.preventDefault();xlRedo();}
+    else if(l==='b'){e.preventDefault();xlFmt({b:!curFmt().b});}else if(l==='i'){e.preventDefault();xlFmt({i:!curFmt().i});}
+    else if(l==='d'){e.preventDefault();fillDown();}else if(l==='a'){e.preventDefault();XL.sel={r:0,c:0,r2:SH().rows-1,c2:SH().cols-1};xlRender();}
+    return;}
+  const mv={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[k];
+  if(mv){e.preventDefault();if(e.shiftKey)xlSelect(s.r2+mv[0],s.c2+mv[1],true);else xlSelect(s.r+mv[0],s.c+mv[1]);return;}
+  if(k==='Enter'){e.preventDefault();xlSelect(s.r+(e.shiftKey?-1:1),s.c);return;}
+  if(k==='Tab'){e.preventDefault();xlSelect(s.r,s.c+(e.shiftKey?-1:1));return;}
+  if(k==='Delete'||k==='Backspace'){e.preventDefault();xlClear();return;}
+  if(k==='F2'){e.preventDefault();xlStartEdit();return;}
+  if(k.length===1&&!e.altKey){e.preventDefault();xlStartEdit(k);}
+});
+document.addEventListener('copy',e=>{if($('#sheet').hidden||!XL.doc||e.target.closest('input,textarea'))return;e.preventDefault();const t=xlCopy(false);e.clipboardData&&e.clipboardData.setData('text/plain',t);});
+document.addEventListener('cut',e=>{if($('#sheet').hidden||!XL.doc||e.target.closest('input,textarea'))return;e.preventDefault();const t=xlCopy(true);e.clipboardData&&e.clipboardData.setData('text/plain',t);});
+document.addEventListener('paste',e=>{if($('#sheet').hidden||!XL.doc||e.target.closest('input,textarea'))return;e.preventDefault();xlPaste(e.clipboardData?e.clipboardData.getData('text/plain'):null);});
+addEventListener('resize',()=>{if(XL.doc)xlRender();});
 
 /* ---------- nastavení, nápověda, menu ---------- */
 async function openSettings(){
@@ -1570,6 +2698,7 @@ async function openSettings(){
     const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
     const f2=el('label',{class:'field'},'<span>Když po nakreslení tahu pero podržím</span>');const s2=el('select',{id:'afterHold'});[['shape','Převést na přesný tvar'],['menu','Otevřít kolečko'],['off','Nic nedělat']].forEach(([v,l])=>s2.append(new Option(l,v,false,v===S.afterHold)));s2.onchange=()=>{S.afterHold=s2.value;saveS();};f2.append(s2);b.append(f2);
     const f3=el('label',{class:'field'},'<span>Kreslení prstem</span>');const s3=el('select',{id:'finger'});[['auto','Automaticky (vypne se po použití pera)'],['on','Vždy kreslit prstem'],['off','Prst jen posouvá a přibližuje']].forEach(([v,l])=>s3.append(new Option(l,v,false,v===S.finger)));s3.onchange=()=>{S.finger=s3.value;saveS();};f3.append(s3);b.append(f3);
+    const c4=el('label',{class:'check'});const cb4=el('input',{type:'checkbox',id:'calcFr'});cb4.checked=S.calcFrames;cb4.onchange=()=>{S.calcFrames=cb4.checked;saveS();};c4.append(cb4,document.createTextNode('Nabídnout výpočet, když příklad orámuji'));b.append(c4);
     const c2=el('label',{class:'check'});const cb2=el('input',{type:'checkbox',id:'twoTap'});cb2.checked=S.twoTapUndo;cb2.onchange=()=>{S.twoTapUndo=cb2.checked;saveS();};c2.append(cb2,document.createTextNode('Klepnutí dvěma prsty = Zpět, třemi = Znovu'));b.append(c2);
   },[{label:'Hotovo',cls:'primary',value:true}]);
 }
@@ -1580,13 +2709,16 @@ function openHelp(){
 <li><b>Přesun objektů:</b> nástroj Laso – zakroužkujte, pak táhněte, zvětšujte za rohy a otáčejte horním úchytem. Přetažením na jinou stránku objekt přesunete tam.</li>
 <li><b>Rychlý přesun prstem:</b> podržte prst na čemkoli napsaném a rovnou to posouvejte.</li>
 <li><b>Prsty:</b> jeden prst posouvá, dva přibližují. Klepnutí dvěma prsty vrátí krok, třemi ho zopakuje. Dlaň při psaní perem se ignoruje.</li>
+<li><b>Kalkulačka:</b> napište příklad, nakreslete kolem něj rámeček (obdélník nebo kruh – podržením pera na konci se srovná) a klepněte na „Spočítat“. Funguje i přes laso. Umí + − × ÷, mocniny, odmocniny, zlomky, závorky i funkce (sin, ln, log…). Pokud příklad přečte špatně, opravte ho – vestavěné rozpoznávání se naučí váš rukopis.</li>
+<li><b>Tabulky (Excel):</b> v knihovně „Tabulka“. Vzorce česky (=SUMA, =PRŮMĚR, =KDYŽ…), import a export .xlsx.</li>
+<li><b>Pravítko:</b> tlačítko s pravítkem. Posouvejte ho prstem, otáčejte kolečkem na konci; tah perem podél hrany je rovný.</li>
 <li><b>Opakované klepnutí na aktivní nástroj</b> otevře jeho volby (typ pera, režim gumy, tvary, písmo).</li>
 <li><b>Klávesy:</b> <span class="kbd">P</span> pero, <span class="kbd">H</span> zvýrazňovač, <span class="kbd">E</span> guma, <span class="kbd">L</span> laso, <span class="kbd">S</span> tvary, <span class="kbd">T</span> text, <span class="kbd">K</span> laser, <span class="kbd">Ctrl+Z</span> zpět. Na počítači otevře kolečko pravé tlačítko myši.</li></ul>`;},[{label:'Rozumím',cls:'primary',value:true}]);
 }
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -1595,27 +2727,27 @@ function moreMenu(anchor){
 
 /* ---------- propojení UI ---------- */
 let pdfInto=false;
-$('#bBack').innerHTML=ic('back');$('#bUndo').innerHTML=ic('undo');$('#bRedo').innerHTML=ic('redo');$('#bImage').innerHTML=ic('image');$('#bPages').innerHTML=ic('pages');$('#bMore').innerHTML=ic('more');
-$('#bMarks').innerHTML=ic('star');$('#bPagesClose').innerHTML=ic('close');$('#bAddPage').innerHTML=ic('plus')+'Přidat stránku';
+[['bBack','back'],['bPages','grid'],['bUndo','undo'],['bRedo','redo'],['bImage','image'],['bRuler','ruler'],['bAddPg','plus'],['bFinger','hand'],['bMore','more'],['bMarks','star'],['bPagesClose','close'],['bSide','sidebar'],['bLibAdd','plus'],['bLibMore','more']].forEach(([id,i])=>{$('#'+id).innerHTML=ic(i);});
+$('#bAddPage').innerHTML=ic('plus')+'Přidat stránku';
 document.querySelectorAll('[data-tool]').forEach(b=>{b.innerHTML=ic(b.dataset.tool);b.onclick=()=>{if(T.tool===b.dataset.tool)openToolOptions(T.tool,b);else setTool(b.dataset.tool);};});
-$('#bColor').onclick=e=>openColorPop(e.currentTarget,c=>setColor(c),true);
 $('#bUndo').onclick=undo;$('#bRedo').onclick=redo;
 $('#bImage').onclick=()=>$('#fImg').click();
+$('#bRuler').onclick=toggleRuler;
+$('#bAddPg').onclick=()=>addPage();
+$('#bFinger').onclick=()=>{S.finger=fingerDraws()?'off':'on';saveS();updateToolbar();toast(fingerDraws()?'Kreslení prstem zapnuto':'Prst jen posouvá a přibližuje');};
 $('#bPages').onclick=()=>togglePanel(!pagesOpen());$('#bPagesClose').onclick=()=>togglePanel(false);
 $('#bMarks').onclick=()=>{marksOnly=!marksOnly;$('#bMarks').setAttribute('aria-pressed',String(marksOnly));renderPanel();};
 $('#bAddPage').onclick=()=>addPage();
 $('#bMore').onclick=e=>moreMenu(e.currentTarget);
 $('#bBack').onclick=closeNotebook;
-$('#nbTitle').onclick=()=>renameNb(nb);
-$('#zoomInd').onclick=()=>{fitWidth(true);render();};
-$('#bNew').onclick=newNotebook;$('#bNew').innerHTML=ic('plus')+'Nový sešit';
-$('#bNewFolder').innerHTML=ic('folderPlus')+'Nová složka';$('#bNewFolder').onclick=()=>editFolder();
-$('#bImpPdf').innerHTML=ic('file')+'Import PDF';$('#bImpBak').innerHTML=ic('up')+'Obnovit zálohu';
-$('#bLibSettings').innerHTML=ic('gear');$('#bLibSettings').onclick=openSettings;
-$('#bImpPdf').onclick=()=>{pdfInto=false;$('#fPdf').click();};
-$('#bImpBak').onclick=()=>$('#fBak').click();
+$('#bSide').onclick=()=>{LV.side=!LV.side;saveLV();renderLib();};
+$('#bLibAdd').onclick=e=>menuPop(e.currentTarget,[['quick','Rychlá poznámka',quickNote],['book','Nový sešit',newNotebook],['table','Nová tabulka (Excel)',()=>newSheetDoc()],['folderPlus','Nová složka',()=>editFolder()],['tag','Nová kategorie',()=>editCategory()],'-',['down','Importovat PDF, Excel nebo zálohu',importAny]]);
+$('#bLibMore').onclick=e=>menuPop(e.currentTarget,[['gear','Nastavení',openSettings],['help','Nápověda',openHelp]]);
 $('#fImg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)insertImage(f);};
-$('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importPDF(f,pdfInto&&!!nb);};
+$('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  if(/\.json$/i.test(f.name)||f.type==='application/json')importBackup(f);
+  else if(/\.(xlsx|xls|ods|csv)$/i.test(f.name))importSheetFile(f);
+  else importPDF(f,pdfInto&&!!nb);};
 $('#fBak').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importBackup(f);};
 document.addEventListener('keydown',e=>{
   if(!nb||editing||e.target.closest('input,textarea,select,.modal-ov'))return;
@@ -1628,7 +2760,7 @@ document.addEventListener('keydown',e=>{
   if((k==='delete'||k==='backspace')&&sel){delSel();return;}
   if(k==='escape'){if(radial.open)closeRadial();else clearSel();return;}
   if(mod)return;
-  const map={p:'pen',h:'hl',e:'eraser',l:'lasso',s:'shape',t:'text',k:'laser'};if(map[k])setTool(map[k]);
+  const map={p:'pen',h:'hl',e:'eraser',l:'lasso',s:'shape',t:'text',k:'laser'};if(map[k])setTool(map[k]);if(k==='r')toggleRuler();
   if(k==='+'||k==='=')zoomAt(W/2,H/2,z*1.2);if(k==='-')zoomAt(W/2,H/2,z/1.2);
 });
 document.addEventListener('paste',e=>{if(!nb||editing)return;const f=[...(e.clipboardData&&e.clipboardData.files||[])].find(f=>f.type.startsWith('image/'));if(f){e.preventDefault();insertImage(f);}});
@@ -1667,6 +2799,7 @@ async function init(){
   if(m)lib=Object.assign({id:'lib',folders:[],cats:[]},m);
   else{lib.cats=[{id:uid(),name:'Škola',color:'#2D5BD3'},{id:uid(),name:'Práce',color:'#1F7A5C'},{id:uid(),name:'Osobní',color:'#D9822B'}];await saveLib();}
   if(!notebooks.length&&!store.get('welcomed',false)){const w=makeWelcome();await DB.put(w);notebooks=[w];store.set('welcomed',true);}
+  const old=Date.now()-30*864e5;for(const n of notebooks.filter(n=>n.trashed&&n.trashed<old)){await DB.del(n.id);}notebooks=notebooks.filter(n=>!(n.trashed&&n.trashed<old));
   renderLib();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{tlCache=new WeakMap();if(nb)render();});
   try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!(window.claude&&window.claude.use)&&!/claude/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}
