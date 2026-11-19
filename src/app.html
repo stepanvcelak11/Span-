@@ -259,7 +259,10 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #xlFx:focus,#xlName:focus{outline:2px solid var(--xl);outline-offset:-1px}
 .xl-grid{flex:1;overflow:auto;position:relative;background:var(--surface);touch-action:none;overscroll-behavior:contain;user-select:none;-webkit-user-select:none}
 .xl-inner{position:relative}
-.xl-ch{position:sticky;top:0;z-index:3;display:flex;height:30px;background:var(--surface-2);width:max-content}
+.xl-ch{position:sticky;top:0;z-index:3;width:max-content;background:var(--surface-2)}
+.xl-chr{display:flex;height:30px}
+.xr-fz{position:relative;background:var(--surface);box-shadow:0 2px 0 var(--line)}
+.xr-fz:last-child{box-shadow:0 2px 0 color-mix(in srgb,var(--xl) 50%,var(--line))}
 .xl-corner{position:sticky;left:0;z-index:4;background:var(--surface-2);border-right:1px solid var(--line);border-bottom:1px solid var(--line);flex:none;box-sizing:border-box}
 .xh{flex:none;display:flex;align-items:center;justify-content:center;font:600 12px var(--f-body);color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line);position:relative;box-sizing:border-box}
 .xh.on,.xrh.on{background:color-mix(in srgb,var(--xl) 20%,var(--surface-2));color:var(--xl)}
@@ -301,6 +304,15 @@ input[type=range]{accent-color:var(--accent)}
 .nthumb,.fthumb{transition:transform .15s ease,box-shadow .15s ease}
 @media (hover:hover){.nthumb:hover,.fthumb:hover{transform:translateY(-3px)}}
 .grid-h{grid-column:1/-1;margin:6px 0 -14px;font:600 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* lupa psaní */
+.zoom{position:absolute;left:max(8px,env(safe-area-inset-left,0px));right:max(8px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));height:34%;min-height:190px;max-height:400px;background:#fff;border:1px solid var(--bar-line);border-radius:16px;box-shadow:0 -4px 24px rgba(20,24,40,.14);z-index:6;display:flex;overflow:hidden}
+.zoom[hidden]{display:none}
+.zwrap{flex:1;position:relative;touch-action:none;min-width:0}
+.zwrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.zctl{display:grid;grid-template-columns:1fr 1fr;align-content:center;gap:2px;padding:6px;border-left:1px solid var(--bar-line);background:var(--bar)}
+.zctl .ib{width:40px;height:40px;color:var(--bar-ink)}
+#editor.zoomed .vpal{top:calc(33% - 10px)}
+#editor.zoomed .pgchip{display:none}
 /* kompaktní HUD v sešitu */
 .fbar{top:calc(8px + env(safe-area-inset-top,0px));padding:3px;border-radius:10px;gap:1px;transition:opacity .25s}
 .fbar .ib{width:38px;height:38px;border-radius:8px}
@@ -374,8 +386,13 @@ input[type=range]{accent-color:var(--accent)}
     </div>
     <div class="fbar fr">
       <button class="ib" id="bAddPg" title="Přidat stránku" aria-label="Přidat stránku"></button>
+      <button class="ib" id="bZoom" title="Lupa psaní" aria-label="Lupa psaní"></button>
       <button class="ib" id="bFinger" title="Kreslení prstem" aria-label="Kreslení prstem"></button>
       <button class="ib" id="bMore" title="Další" aria-label="Další volby"></button>
+    </div>
+    <div class="zoom" id="zoomBox" hidden aria-label="Lupa psaní">
+      <div class="zwrap"><canvas id="zc"></canvas><canvas id="zl"></canvas></div>
+      <div class="zctl"><button class="ib" id="zbPrev"></button><button class="ib" id="zbNext"></button><button class="ib" id="zbLine"></button><button class="ib" id="zbOut"></button><button class="ib" id="zbIn"></button><button class="ib" id="zbClose"></button></div>
     </div>
     <div class="vpal" id="vpal" aria-label="Barvy a tloušťky"></div>
     <div class="pgchip" id="pgChip" aria-live="polite"></div>
@@ -405,6 +422,10 @@ input[type=range]{accent-color:var(--accent)}
       <button class="ib" id="xlSum" title="Automatický součet" aria-label="Automatický součet"></button>
       <button class="ib" id="xlFn" title="Vložit funkci" aria-label="Vložit funkci"></button>
       <button class="ib" id="xlChart" title="Graf z označených dat" aria-label="Graf"></button>
+      <span class="vsep2"></span>
+      <button class="ib" id="xlBd" title="Ohraničení" aria-label="Ohraničení"></button>
+      <button class="ib" id="xlFz" title="Ukotvit řádky a sloupce" aria-label="Ukotvit"></button>
+      <button class="ib" id="xlFindB" title="Najít a nahradit (Ctrl+F)" aria-label="Najít a nahradit"></button>
       <span class="vsep2"></span>
       <button class="ib" id="xlRowIns" title="Vložit řádek" aria-label="Vložit řádek"></button>
       <button class="ib" id="xlColIns" title="Vložit sloupec" aria-label="Vložit sloupec"></button>
@@ -511,6 +532,13 @@ const IC={
  rowsPlus:'<rect x="4" y="4" width="16" height="10" rx="1.5"/><path d="M4 9h16M12 17v4M10 19h4"/>',
  colsPlus:'<rect x="4" y="4" width="10" height="16" rx="1.5"/><path d="M9 4v16M17 12h4M19 10v4"/>',
  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ border:'<rect x="4" y="4" width="16" height="16"/><path d="M4 12h16M12 4v16" stroke-dasharray="2 2.2"/>',
+ freeze:'<rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M3.5 9h17M9 4v16" stroke-width="2.6"/>',
+ search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+ fwd:'<path d="M9 5l7 7-7 7"/>',
+ enter:'<path d="M20 5v7a3 3 0 01-3 3H5M9 11l-4 4 4 4"/>',
+ minus:'<path d="M5 12h14"/>',
+ zoomBox:'<rect x="3" y="12.5" width="18" height="8" rx="1.5"/><rect x="8" y="3.5" width="8" height="5.5" rx="1"/><path d="M12 9v3.5"/>',
  calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8.5 12h1M11.5 12h1M14.5 12h1M8.5 15h1M11.5 15h1M14.5 15h1M8.5 18h1M11.5 18h4"/>',
  fx:'<path d="M14 4h-1.5A2.5 2.5 0 0010 6.5v11A2.5 2.5 0 017.5 20H6M7 10h7"/><path d="M15 13l5 5M20 13l-5 5"/>',
  chart:'<path d="M4 20V4M4 20h16"/><rect x="7" y="12" width="3" height="5"/><rect x="12" y="8" width="3" height="9"/><rect x="17" y="10" width="3" height="7"/>',
@@ -811,7 +839,7 @@ function render(){
     drawPage(c,p,{vis:[-m[4]/z,-m[5]/z,(W-m[4])/z,(H-m[5])/z],exclude:sel&&sel.page===p?sel.ids:null,editId:editing&&editing.page===p?editing.id:null});
     c.restore();
   }
-  drawOverlay(); updatePageInd(); if(editing)positionTA(); if(calcState)positionCalc(); if($('#calcChip'))hideCalcChip(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
+  drawOverlay(); updatePageInd(); if(editing)positionTA(); if(ZB.on&&!ZB.act)zbRender(); if(calcState)positionCalc(); if($('#calcChip'))hideCalcChip(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
 }
 let deskCol=null; function getDesk(){if(!deskCol)deskCol=getComputedStyle(document.body).getPropertyValue('--desk').trim()||'#E4E8EE';return deskCol;}
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{deskCol=null;scheduleRender();});
@@ -849,6 +877,7 @@ function drawOverlay(){
     }
   }
   if(hoverPt&&!act&&T.tool==='eraser'){c.setTransform(dpr,0,0,dpr,0,0);c.beginPath();c.arc(hoverPt[0],hoverPt[1],T.eraser.size/2,0,Math.PI*2);c.lineWidth=1.5;c.strokeStyle='rgba(30,40,60,.45)';c.setLineDash([4,3]);c.stroke();c.setLineDash([]);}
+  if(ZB.on&&ZB.page&&ZB.page._top!=null){const p=ZB.page,x=(p._left+ZB.x)*z+ox,y=(p._top+ZB.y)*z+oy,w=ZB.w*z,h=zbH()*z;c.setTransform(dpr,0,0,dpr,0,0);c.fillStyle='rgba(21,147,168,.07)';c.fillRect(x,y,w,h);c.lineWidth=2;c.strokeStyle='rgba(21,147,168,.85)';c.strokeRect(x,y,w,h);c.fillStyle='rgba(21,147,168,.85)';c.fillRect(x+w*0.78-1,y,2,h);}
   if(ruler.on)drawRuler(c);
   if(laser.length)drawLaser(c);
 }
@@ -950,6 +979,7 @@ function touchDown(sx,sy,e){
     if(editing){commitText();return;}
     if(sel){const h=selHit(sx,sy);if(h){startSelDrag(h,sx,sy,e);return;}}
     const rh=rulerHit(sx,sy);if(rh){act=startRulerAct(rh,sx,sy,e);return;}
+    if(ZB.on&&ZB.page){const p=ZB.page,bx=(p._left+ZB.x)*z+ox,by=(p._top+ZB.y)*z+oy;if(sx>=bx&&sx<=bx+ZB.w*z&&sy>=by&&sy<=by+zbH()*z){act={type:'zbmove',pointerId:e.pointerId,ptype:'touch',sx0:sx,sy0:sy,x0:ZB.x,y0:ZB.y,far:true};return;}}
     gest={type:'pan',lx:sx,ly:sy,moved:false,vx:0,vy:0,lt:performance.now()};
     clearTimeout(lpTimer);lpTimer=setTimeout(()=>longPress(sx,sy,e.pointerId),480);
   }else if(touches.size===2){
@@ -1087,6 +1117,7 @@ function moveAct(e,sx,sy){
     case 'lasso':{const[x,y]=toLocal(sx,sy,act.page);const l=act.poly[act.poly.length-1];if(dist([x,y],l)*z>2)act.poly.push([x,y]);drawOverlay();break;}
     case 'seldrag':selDragMove(sx,sy);break;
     case 'ruler':rulerDrag(act,sx,sy);break;
+    case 'zbmove':ZB.x=act.x0+(sx-act.sx0)/z;ZB.y=act.y0+(sy-act.sy0)/z;zbClamp();zbRender();drawOverlay();break;
     case 'laser':for(const ev of list){const[px,py]=sp(ev);laserAdd(px,py);}break;
   }
 }
@@ -1136,8 +1167,8 @@ function commitShape(a){
 }
 
 /* ---------- guma ---------- */
-function eraseSeg(a,x,y){
-  const r=T.eraser.size/2/z, l=a.last, d=Math.hypot(x-l[0],y-l[1]), n=Math.max(1,Math.ceil(d/(r*0.5)));
+function eraseSeg(a,x,y,scale){
+  const r=T.eraser.size/2/(scale||z), l=a.last, d=Math.hypot(x-l[0],y-l[1]), n=Math.max(1,Math.ceil(d/(r*0.5)));
   for(let i=1;i<=n;i++)eraseAt(a,l[0]+(x-l[0])*i/n,l[1]+(y-l[1])*i/n,r);
   a.last=[x,y];a.cur=[x,y];
 }
@@ -1394,7 +1425,7 @@ const lum=hex=>{const h=hex.replace('#','');if(h.length<6)return 1;const r=parse
 function updateToolbar(){
   const col=['pen','hl','shape','text'].includes(T.tool)?curColor():'#23262D',tc=lum(col)>0.62?'#23262D':col;
   document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===T.tool;b.setAttribute('aria-pressed',String(on));b.style.setProperty('--tool-c',on?tc:'#23262D');});
-  $('#bRuler').setAttribute('aria-pressed',String(ruler.on));$('#bFinger').setAttribute('aria-pressed',String(fingerDraws()));
+  $('#bRuler').setAttribute('aria-pressed',String(ruler.on));$('#bZoom').setAttribute('aria-pressed',String(ZB.on));$('#bFinger').setAttribute('aria-pressed',String(fingerDraws()));
   renderPal();
 }
 function renderPal(){
@@ -1882,7 +1913,101 @@ function openNotebook(n){document.body.classList.add('light-ui');deskCol=null;
   togglePanel(false);updateToolbar();updUndo();
   requestAnimationFrame(()=>{resize();if(n._lastY!=null){oy=n._lastY;clampView();render();}});
 }
-function closeNotebook(){document.body.classList.remove('light-ui');closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+function closeNotebook(){document.body.classList.remove('light-ui');if(ZB.on)toggleZoom(false);closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+
+/* =========================================================
+   Lupa psaní (zoom box) – píšete velkým písmem dole, na stránku se zapíše zmenšeně
+   ========================================================= */
+const ZB={on:false,page:null,x:0,y:0,w:300,act:null,adv:0,k:1};
+const zc=$('#zc'),zl=$('#zl'),zctx=zc.getContext('2d'),zlctx=zl.getContext('2d');
+const zbMargin=p=>p.tpl==='lined'||p.tpl==='narrow'?110:40;
+function zbH(){return ZB.w*(zc.clientHeight/(zc.clientWidth||1));}
+function toggleZoom(force){
+  ZB.on=force!=null?force:!ZB.on;$('#editor').classList.toggle('zoomed',ZB.on);$('#zoomBox').hidden=!ZB.on;
+  if(ZB.on){const p=nb.pages[curPageIndex()];ZB.page=p;ZB.w=Math.round(p.w*0.34);ZB.x=zbMargin(p);ZB.y=clamp((H*0.25-oy)/z-p._top,30,p.h-160);
+    requestAnimationFrame(()=>{zbResize();zbClamp();zbEnsure();zbRender();});}
+  updateToolbar();drawOverlay();
+}
+function zbResize(){if(!ZB.on)return;for(const c of [zc,zl]){c.width=Math.round(c.clientWidth*dpr);c.height=Math.round(c.clientHeight*dpr);}ZB.k=zc.clientWidth/ZB.w;}
+function zbClamp(){const p=ZB.page;ZB.w=clamp(ZB.w,80,p.w);ZB.x=clamp(ZB.x,0,Math.max(0,p.w-ZB.w));ZB.y=clamp(ZB.y,0,Math.max(0,p.h-zbH()));ZB.k=zc.clientWidth/ZB.w;}
+function zbTf(c){const k=ZB.k*dpr;c.setTransform(k,0,0,k,-ZB.x*k,-ZB.y*k);}
+function zbRender(){
+  if(!ZB.on||!ZB.page)return;const c=zctx;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,zc.width,zc.height);
+  zbTf(c);drawPage(c,ZB.page,{vis:[ZB.x,ZB.y,ZB.x+ZB.w,ZB.y+zbH()]});
+  // vodítko: kam doběhne text, než se rámeček posune
+  c.setTransform(1,0,0,1,0,0);c.fillStyle='rgba(21,147,168,.07)';c.fillRect(zc.width*0.78,0,zc.width*0.22,zc.height);
+}
+function zbEnsure(){
+  const p=ZB.page,top=(p._top+ZB.y)*z+oy,bot=(p._top+ZB.y+zbH())*z+oy,avail=H-$('#zoomBox').offsetHeight-20;
+  if(top<70||bot>avail){oy+=Math.min(avail*0.35,avail-60)-top;clampView();render();}else drawOverlay();
+}
+function zbMoved(){zbClamp();zbRender();zbEnsure();drawOverlay();}
+function zbStep(dir){
+  clearTimeout(ZB.adv);const p=ZB.page;
+  if(dir>0){if(ZB.x+ZB.w>=p.w-12)return zbNewLine();ZB.x=Math.min(ZB.x+ZB.w*0.62,p.w-ZB.w);}
+  else ZB.x=Math.max(0,ZB.x-ZB.w*0.62);
+  zbMoved();
+}
+function zbNewLine(){
+  clearTimeout(ZB.adv);const p=ZB.page,gap=p.tpl==='lined'?40:p.tpl==='narrow'?30:p.tpl==='todo'?50:null;
+  let dy=zbH()*0.8;if(gap)dy=Math.max(gap,Math.round(dy/gap)*gap);
+  ZB.x=zbMargin(p);ZB.y+=dy;
+  if(ZB.y+zbH()>p.h-10){const i=nb.pages.indexOf(p);if(i===nb.pages.length-1)addPage(i+1);ZB.page=nb.pages[i+1];ZB.y=gap?140:40;}
+  zbMoved();
+}
+const zbPt=e=>{const r=zl.getBoundingClientRect();return [ZB.x+(e.clientX-r.left)/ZB.k,ZB.y+(e.clientY-r.top)/ZB.k];};
+function zbDrawLive(){zlctx.setTransform(1,0,0,1,0,0);zlctx.clearRect(0,0,zl.width,zl.height);if(ZB.act&&ZB.act.type==='draw'){zbTf(zlctx);drawItem(zlctx,ZB.act.it,ZB.page);}}
+zl.addEventListener('pointerdown',e=>{
+  if(!ZB.on||ZB.act)return;if(e.pointerType==='touch'&&!fingerDraws())return;
+  e.preventDefault();try{zl.setPointerCapture(e.pointerId);}catch(_){}clearTimeout(ZB.adv);closePops();
+  if(e.pointerType==='pen'){lastPen=performance.now();}
+  const[x,y]=zbPt(e),page=ZB.page;
+  let tool=T.tool;if(e.pointerType==='pen'&&(e.buttons&32))tool='eraser';
+  if(tool==='eraser'){ZB.act={type:'erase',page,pointerId:e.pointerId,before:page.items,changed:false,last:[x,y],cur:[x,y],tool};eraseSeg(ZB.act,x,y,ZB.k);if(ZB.act.changed){zbRender();scheduleRender();}return;}
+  if(tool!=='hl')tool='pen';const cfg=T[tool],k=tool==='hl'?'hl':(cfg.style==='marker'?'mk':'pen');
+  ZB.act={type:'draw',page,pointerId:e.pointerId,it:{t:'s',id:uid(),k,c:cfg.color,w:cfg.size,ps:cfg.style,pi:k==='pen'?(cfg.style==='ball'?0.4:1)*(cfg.press??0.8):undefined,p:[[x,y,pressureOf(e)]]}};
+  zbDrawLive();
+});
+zl.addEventListener('pointermove',e=>{
+  const a=ZB.act;if(!a||a.pointerId!==e.pointerId)return;
+  const evs=(e.getCoalescedEvents&&e.getCoalescedEvents())||[];
+  for(const ev of (evs.length?evs:[e])){const[x,y]=zbPt(ev);
+    if(a.type==='erase'){eraseSeg(a,x,y,ZB.k);continue;}
+    const p=a.it.p,l=p[p.length-1];if(Math.hypot(x-l[0],y-l[1])*ZB.k<0.8)continue;p.push([x,y,l[2]*0.55+pressureOf(ev)*0.45]);}
+  if(a.type==='erase'){if(a.changed){zbRender();scheduleRender();}}else{pathCache.delete(a.it);zbDrawLive();}
+});
+const zbUp=e=>{
+  const a=ZB.act;if(!a||a.pointerId!==e.pointerId)return;ZB.act=null;
+  if(a.type==='erase'){if(a.changed){pushUndo({k:'items',pid:a.page.id,items:a.before});changed();}render();zbRender();return;}
+  if(e.type==='pointercancel'){zbDrawLive();return;}
+  commitDraw({it:a.it,page:a.page});zbDrawLive();zbRender();
+  const it=a.page.items[a.page.items.length-1];
+  if(it&&it.bb&&it.bb[2]>ZB.x+ZB.w*0.78)ZB.adv=setTimeout(()=>zbStep(1),650);
+};
+zl.addEventListener('pointerup',zbUp);zl.addEventListener('pointercancel',zbUp);
+(function(){
+  const set=(id,i,t,fn)=>{const b=$('#'+id);b.innerHTML=ic(i);b.title=t;b.setAttribute('aria-label',t);b.onclick=fn;};
+  set('zbPrev','back','Posunout rámeček vlevo',()=>zbStep(-1));set('zbNext','fwd','Posunout rámeček vpravo',()=>zbStep(1));
+  set('zbLine','enter','Nový řádek',zbNewLine);set('zbOut','minus','Menší písmo (větší rámeček)',()=>{ZB.w*=1.2;zbMoved();});
+  set('zbIn','plus','Větší písmo (menší rámeček)',()=>{ZB.w/=1.2;zbMoved();});set('zbClose','close','Zavřít lupu',()=>toggleZoom(false));
+})();
+new ResizeObserver(()=>{if(ZB.on){zbResize();zbClamp();zbRender();}}).observe(zc);
+
+/* ---------- hledání v sešitě ---------- */
+function searchNotebook(){
+  openPop($('#bMore'),p=>{
+    p.style.width='340px';p.append(el('h4',{},'Hledat v sešitě'));
+    const inp=el('input',{type:'text',id:'nbSearch',placeholder:'Hledaný text'});inp.style.cssText='width:100%;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);font:inherit;padding:0 12px;box-sizing:border-box;margin-bottom:8px';
+    const list=el('div',{class:'menu'});list.style.cssText='max-height:50vh;overflow-y:auto;min-width:0';p.append(inp,list);
+    const draw=()=>{const q=norm(inp.value.trim());list.innerHTML='';if(!q)return;let n=0;
+      nb.pages.forEach((pg,i)=>pg.items.forEach(it=>{if(it.t!=='x'||n>80)return;const t=it.text||'',k=norm(t).indexOf(q);if(k<0)return;n++;
+        const a=Math.max(0,k-24),snip=(a?'…':'')+esc(t.slice(a,k))+'<mark>'+esc(t.slice(k,k+q.length))+'</mark>'+esc(t.slice(k+q.length,k+q.length+40));
+        const b=el('button',{},`<b style="min-width:58px;color:var(--accent-2)">str. ${i+1}</b><span class="snip" style="margin:0">${snip}</span>`);
+        b.onclick=()=>{closePops();goToPage(i);setTool('lasso');makeSel(pg,[it.id]);const g=getBounds(it);oy=H*0.35-(pg._top+g[1])*z;clampView();render();};list.append(b);}));
+      if(!n)list.append(el('p',{class:'lib-note'},'Nic nenalezeno. Hledá se v psaném textu (ručně psaný text nejdřív převeďte lasem na text).'));};
+    inp.oninput=draw;setTimeout(()=>inp.focus(),30);
+  });
+}
 
 /* =========================================================
    Kalkulačka ručně psaných příkladů
@@ -2289,41 +2414,86 @@ function sheetMenu(i,anchor){
 /* ---------- mřížka ---------- */
 const grid=()=>$('#xlGrid');
 function colW(c){return SH().colW[c]||100;}
-function xlLayout(){
-  const sh=SH(),xs=[XL.HW];for(let c=0;c<sh.cols;c++)xs.push(xs[c]+colW(c));XL.xs=xs;
-  const inner=$('#xlInner');inner.style.width=xs[sh.cols]+'px';inner.style.height=(XL.CH+sh.rows*XL.RH)+'px';
-  let h=`<div class="xl-corner" style="width:${XL.HW}px"></div>`;
-  for(let c=0;c<sh.cols;c++)h+=`<div class="xh" data-c="${c}" style="width:${colW(c)}px">${colName(c)}<i class="grip" data-grip="${c}"></i></div>`;
-  $('#xlCH').innerHTML=h;
-}
 function findCol(x){const xs=XL.xs;let lo=0,hi=xs.length-2;while(lo<hi){const m=(lo+hi+1)>>1;if(xs[m]<=x)lo=m;else hi=m-1;}return lo;}
 let xlRAF=0;
 function xlRender(){if(xlRAF)return;xlRAF=requestAnimationFrame(()=>{xlRAF=0;xlDraw();});}
+function xlLayout(){
+  const sh=SH(),xs=[XL.HW];for(let c=0;c<sh.cols;c++)xs.push(xs[c]+colW(c));XL.xs=xs;
+  const fz=sh.fz||{r:0,c:0};
+  const inner=$('#xlInner');inner.style.width=xs[sh.cols]+'px';inner.style.height=(XL.CH+sh.rows*XL.RH)+'px';
+  let h=`<div class="xl-chr"><div class="xl-corner" style="width:${XL.HW}px"></div>`;
+  for(let c=0;c<sh.cols;c++)h+=`<div class="xh" data-c="${c}" style="width:${colW(c)}px${c<fz.c?`;position:sticky;left:${xs[c]}px;z-index:4;background:var(--surface-2)`:''}">${colName(c)}<i class="grip" data-grip="${c}"></i></div>`;
+  $('#xlCH').innerHTML=h+'</div><div id="xlFzRows"></div>';
+}
+function xlRowHtml(r,cols,frozen){
+  const sh=SH(),id=sid(),s=selN(),fz=sh.fz||{r:0,c:0};
+  let h=`<div class="xr${frozen?' xr-fz':''}" style="${frozen?'':`top:${XL.CH+r*XL.RH}px;`}width:${XL.xs[sh.cols]}px"><div class="xrh${r>=s.r1&&r<=s.r2?' on':''}" data-r="${r}" style="width:${XL.HW}px">${r+1}</div>`;
+  let x=XL.HW;
+  for(const c of cols){
+    if(XL.xs[c]>x){h+=`<div style="width:${XL.xs[c]-x}px;flex:none"></div>`;}x=XL.xs[c+1];
+    const a={sheet:id,row:r,col:c},v=XL.hf.getCellValue(a),f=sh.fmt[r+','+c];
+    let txt='',cls='xc',st='';
+    if(v!==null&&v!==undefined){const dt=typeof v==='number'?XL.hf.getCellValueDetailedType(a):null;txt=xlFmtVal(v,f,dt);if(typeof v==='number'||typeof v==='boolean')cls+=' n';if(typeof v==='object')cls+=' err n';}
+    if(f){if(f.b)st+='font-weight:700;';if(f.i)st+='font-style:italic;';if(f.al)st+=`text-align:${f.al};`;if(f.bg)st+=`background:${f.bg};`;if(f.fc)st+=`color:${f.fc};`;
+      const bs=[];if(f.bt)bs.push('inset 0 1.5px 0 var(--ink)');if(f.bb)bs.push('inset 0 -1.5px 0 var(--ink)');if(f.bl)bs.push('inset 1.5px 0 0 var(--ink)');if(f.br)bs.push('inset -1.5px 0 0 var(--ink)');if(bs.length)st+=`box-shadow:${bs.join(',')};`;}
+    if(c<fz.c){st+=`position:sticky;left:${XL.xs[c]}px;z-index:1;`;if(!(f&&f.bg))st+='background:var(--surface);';cls+=' fzc';}
+    h+=`<div class="${cls}" style="width:${colW(c)}px;${st}">${esc(txt)}</div>`;
+  }
+  return h+'</div>';
+}
 function xlDraw(){
   if(!XL.hf||!XL.doc)return;
-  const g=grid(),sh=SH(),RH=XL.RH,id=sid();
+  const g=grid(),sh=SH(),RH=XL.RH,fz=sh.fz||{r:0,c:0};
   const r0=Math.max(0,Math.floor(g.scrollTop/RH)-4),r1=Math.min(sh.rows-1,Math.ceil((g.scrollTop+g.clientHeight)/RH)+4);
   const cx0=g.scrollLeft,cx1=g.scrollLeft+g.clientWidth;
-  const c0=Math.max(0,findCol(cx0)-1),c1=Math.min(sh.cols-1,findCol(cx1)+1);
+  const c0=Math.max(fz.c,findCol(cx0)-1),c1=Math.min(sh.cols-1,findCol(cx1)+1);
+  const cols=[];for(let c=0;c<fz.c;c++)cols.push(c);for(let c=c0;c<=c1;c++)cols.push(c);
   const s=selN();let h='';
-  for(let r=r0;r<=r1;r++){
-    h+=`<div class="xr" style="top:${XL.CH+r*RH}px;width:${XL.xs[sh.cols]}px"><div class="xrh${r>=s.r1&&r<=s.r2?' on':''}" data-r="${r}" style="width:${XL.HW}px">${r+1}</div><div style="width:${XL.xs[c0]-XL.HW}px;flex:none"></div>`;
-    for(let c=c0;c<=c1;c++){
-      const a={sheet:id,row:r,col:c},v=XL.hf.getCellValue(a),f=sh.fmt[r+','+c];
-      let txt='',cls='xc',st='';
-      if(v!==null&&v!==undefined){const dt=typeof v==='number'?XL.hf.getCellValueDetailedType(a):null;txt=xlFmtVal(v,f,dt);if(typeof v==='number'||typeof v==='boolean')cls+=' n';if(typeof v==='object')cls+=' err n';}
-      if(f){if(f.b)st+='font-weight:700;';if(f.i)st+='font-style:italic;';if(f.al)st+=`text-align:${f.al};`;if(f.bg)st+=`background:${f.bg};`;if(f.fc)st+=`color:${f.fc};`;}
-      h+=`<div class="${cls}" style="width:${colW(c)}px;${st}">${esc(txt)}</div>`;
-    }
-    h+='</div>';
-  }
+  for(let r=Math.max(r0,fz.r);r<=r1;r++)h+=xlRowHtml(r,cols,false);
   $('#xlBody').innerHTML=h;
+  let fh='';for(let r=0;r<fz.r;r++)fh+=xlRowHtml(r,cols,true);
+  const fzEl=$('#xlFzRows');if(fzEl)fzEl.innerHTML=fh;
   document.querySelectorAll('#xlCH .xh').forEach(e=>{const c=+e.dataset.c;e.classList.toggle('on',c>=s.c1&&c<=s.c2);});
   xlSelUI();
-  // nekonečná tabulka: přidávání řádků a sloupců při posunu na okraj
   if(g.scrollTop+g.clientHeight>XL.CH+sh.rows*RH-RH*6){sh.rows+=50;xlLayout();xlRender();}
   else if(g.scrollLeft+g.clientWidth>XL.xs[sh.cols]-150&&sh.cols<400){sh.cols+=10;xlLayout();xlRender();}
 }
+function xlFreeze(r,c){xlCommit();SH().fz={r,c};xlLayout();xlRender();xlChanged();toast(r||c?'Ukotveno':'Ukotvení zrušeno');}
+function xlBorder(kind){
+  xlCommit();xlSnap(false);const s=selN(),F=SH().fmt;
+  eachSel((r,c)=>{const k=r+','+c,o=Object.assign({},F[k]);
+    if(kind==='none'){delete o.bt;delete o.bb;delete o.bl;delete o.br;}
+    else if(kind==='all'){o.bt=o.bb=o.bl=o.br=true;}
+    else if(kind==='outer'){if(r===s.r1)o.bt=true;if(r===s.r2)o.bb=true;if(c===s.c1)o.bl=true;if(c===s.c2)o.br=true;}
+    else if(kind==='bottom'){if(r===s.r2)o.bb=true;}
+    if(Object.keys(o).length)F[k]=o;else delete F[k];});
+  xlChanged();xlRender();
+}
+function xlAutoFit(c){
+  const id=sid(),dim=XL.hf.getSheetDimensions(id),sh=SH();mctx.font='14px Inter, system-ui, sans-serif';let w=40;
+  for(let r=0;r<Math.min(dim.height,3000);r++){const a={sheet:id,row:r,col:c},v=XL.hf.getCellValue(a);if(v===null||v===undefined)continue;const f=sh.fmt[r+','+c];mctx.font=(f&&f.b?'700 ':'')+'14px Inter, system-ui, sans-serif';w=Math.max(w,mctx.measureText(xlFmtVal(v,f,typeof v==='number'?XL.hf.getCellValueDetailedType(a):null)).width+18);}
+  xlSnap(false);sh.colW[c]=Math.min(600,Math.ceil(w));xlLayout();xlRender();xlChanged();
+}
+function xlFind(){
+  modal('Najít a nahradit',b=>{
+    const f1=el('label',{class:'field'},'<span>Najít</span>');const q=el('input',{type:'text',id:'xlQ',autofocus:''});f1.append(q);
+    const f2=el('label',{class:'field'},'<span>Nahradit čím</span>');const rp=el('input',{type:'text',id:'xlRp'});f2.append(rp);
+    const st=el('p',{class:'lib-note'});const row=el('div');row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+    const nx=el('button',{class:'btn'},'Najít další'),ra=el('button',{class:'btn'},'Nahradit vše');row.append(nx,ra);b.append(f1,f2,row,st);
+    const id=sid();
+    nx.onclick=()=>{const t=norm(q.value);if(!t)return;const dim=XL.hf.getSheetDimensions(id),W_=Math.max(1,dim.width),start=XL.sel.r*W_+XL.sel.c+1,N=dim.height*W_;
+      for(let k=0;k<N;k++){const i=(start+k)%N,r=Math.floor(i/W_),c=i%W_;const v=XL.hf.getCellValue({sheet:id,row:r,col:c});if(v==null)continue;
+        if(norm(rawText(r,c)).includes(t)||norm(xlFmtVal(v,SH().fmt[r+','+c],null)).includes(t)){xlSelect(r,c);st.textContent='Nalezeno v '+aName(r,c);return;}}
+      st.textContent='Nic nenalezeno.';};
+    ra.onclick=()=>{const t=q.value;if(!t)return;const dim=XL.hf.getSheetDimensions(id),ops=[];const rx=new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+      for(let r=0;r<dim.height;r++)for(let c=0;c<dim.width;c++){const s=XL.hf.getCellSerialized({sheet:id,row:r,col:c});if(typeof s!=='string'||s[0]==='='||!rx.test(s))continue;rx.lastIndex=0;ops.push([r,c,s.replace(rx,rp.value)]);}
+      if(!ops.length){st.textContent='Nic k nahrazení.';return;}
+      xlSnap(true);XL.hf.batch(()=>ops.forEach(([r,c,v])=>XL.hf.setCellContents({sheet:id,row:r,col:c},[[parseInput(v).val]])));xlChanged();st.textContent=`Nahrazeno ${ops.length}×`;};
+    q.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nx.click();}});
+  },[{label:'Zavřít',cls:'primary',value:true}]);
+}
+function xlBorderMenu(anchor){menuPop(anchor,[['border','Všechna ohraničení',()=>xlBorder('all')],['sel','Vnější ohraničení',()=>xlBorder('outer')],['dn','Spodní ohraničení',()=>xlBorder('bottom')],['close','Bez ohraničení',()=>xlBorder('none')]]);}
+function xlFreezeMenu(anchor){const sh=SH();menuPop(anchor,[['up','Ukotvit první řádek',()=>xlFreeze(1,(sh.fz||{}).c||0)],['back','Ukotvit první sloupec',()=>xlFreeze((sh.fz||{}).r||0,1)],['sel','Ukotvit nad a vlevo od buňky '+aName(XL.sel.r,XL.sel.c),()=>xlFreeze(XL.sel.r,XL.sel.c)],['close','Zrušit ukotvení',()=>xlFreeze(0,0)]]);}
 function xlSelUI(){
   const s=selN(),b=$('#xlSel'),xs=XL.xs;if(!xs.length)return;
   b.style.left=xs[s.c1]+'px';b.style.top=(XL.CH+s.r1*XL.RH)+'px';b.style.width=(xs[s.c2+1]-xs[s.c1])+'px';b.style.height=((s.r2-s.r1+1)*XL.RH)+'px';
@@ -2615,7 +2785,7 @@ function sheetThumb(n){
     closePops();
     if(e.pointerType==='touch'&&!e.target.classList.contains('xl-fill')&&!e.target.dataset.grip){tp.set(e.pointerId,{x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t:performance.now(),sl:g.scrollLeft,st:g.scrollTop});tScroll={moved:false,vx:0,vy:0,lt:performance.now()};return;}
     const p=cellAt(e);try{g.setPointerCapture(e.pointerId);}catch(_){}
-    if(e.target.dataset.grip){const c=+e.target.dataset.grip;drag={type:'resize',c,x0:e.clientX,w0:colW(c)};xlSnap(false);e.preventDefault();return;}
+    if(e.target.dataset.grip){const c=+e.target.dataset.grip,now=performance.now();if(XL.lastGrip&&XL.lastGrip.c===c&&now-XL.lastGrip.t<380){XL.lastGrip=null;xlAutoFit(c);e.preventDefault();return;}XL.lastGrip={c,t:now};drag={type:'resize',c,x0:e.clientX,w0:colW(c)};xlSnap(false);e.preventDefault();return;}
     if(e.target.classList.contains('xl-fill')){xlCommit();drag={type:'fill',tr:selN().r2,tc:selN().c2};e.preventDefault();return;}
     if(!p.colHdr&&!p.rowHdr&&refMode()){e.preventDefault();startRef(p.r,p.c);drag={type:'ref',r:p.r,c:p.c};return;}
     if(XL.edit)xlCommit();
@@ -2693,7 +2863,7 @@ function fillDown(){const s=selN();if(s.r2===s.r1){toast('Označte oblast, do kt
   set('xlAL','alignL',()=>xlFmt({al:'left'}));set('xlAC','alignC',()=>xlFmt({al:'center'}));set('xlAR','alignR',()=>xlFmt({al:'right'}));
   set('xlBg','fill',e=>xlColorPop(e.currentTarget,'bg'));set('xlFc','fcolor',e=>xlColorPop(e.currentTarget,'fc'));
   set('xlSum','sigma',autoSum);set('xlFn','fx',e=>fxMenu(e.currentTarget));set('xlChart','chart',xlChart);
-  set('xlRowIns','rowsPlus',()=>xlRows('ins'));set('xlColIns','colsPlus',()=>xlCols('ins'));
+  set('xlRowIns','rowsPlus',()=>xlRows('ins'));set('xlBd','border',e=>xlBorderMenu(e.currentTarget));set('xlFz','freeze',e=>xlFreezeMenu(e.currentTarget));set('xlFindB','search',xlFind);set('xlColIns','colsPlus',()=>xlCols('ins'));
   set('xlCopy','copy',()=>xlCopy(false));set('xlPaste','paste',()=>xlPaste(null));
   set('xlExt','sel',()=>{XL.extend=!XL.extend;$('#xlExt').setAttribute('aria-pressed',String(XL.extend));if(XL.extend)toast('Klepněte na poslední buňku oblasti');});
   set('xlMore','more',e=>menuPop(e.currentTarget,[['edit','Přejmenovat tabulku',async()=>{await renameNb(XL.doc);$('#xlTitle').textContent=XL.doc.title;}],'-',['down','Exportovat Excel (.xlsx)',()=>exportXlsx(XL.doc)],['down','Exportovat CSV (aktuální list)',()=>exportCsv(XL.doc)],'-',['up','Seřadit podle sloupce vzestupně',()=>xlSort(true)],['dn','Seřadit podle sloupce sestupně',()=>xlSort(false)],['trash','Vymazat obsah výběru',xlClear],'-',['help','Nápověda k tabulkám',xlHelp]]));
@@ -2737,7 +2907,7 @@ document.addEventListener('keydown',e=>{
   if(mod){const l=k.toLowerCase();
     if(l==='z'){e.preventDefault();e.shiftKey?xlRedo():xlUndo();}else if(l==='y'){e.preventDefault();xlRedo();}
     else if(l==='b'){e.preventDefault();xlFmt({b:!curFmt().b});}else if(l==='i'){e.preventDefault();xlFmt({i:!curFmt().i});}
-    else if(l==='d'){e.preventDefault();fillDown();}else if(l==='a'){e.preventDefault();XL.sel={r:0,c:0,r2:SH().rows-1,c2:SH().cols-1};xlRender();}
+    else if(l==='d'){e.preventDefault();fillDown();}else if(l==='f'){e.preventDefault();xlFind();}else if(l==='a'){e.preventDefault();XL.sel={r:0,c:0,r2:SH().rows-1,c2:SH().cols-1};xlRender();}
     return;}
   const mv={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[k];
   if(mv){e.preventDefault();if(e.shiftKey)xlSelect(s.r2+mv[0],s.c2+mv[1],true);else xlSelect(s.r+mv[0],s.c+mv[1]);return;}
@@ -2774,6 +2944,7 @@ function openHelp(){
 <li><b>Kalkulačka:</b> napište příklad, nakreslete kolem něj rámeček (obdélník nebo kruh – podržením pera na konci se srovná) a klepněte na „Spočítat“. Funguje i přes laso. Umí + − × ÷, mocniny, odmocniny, zlomky, závorky i funkce (sin, ln, log…). Pokud příklad přečte špatně, opravte ho – vestavěné rozpoznávání se naučí váš rukopis.</li>
 <li><b>Tabulky (Excel):</b> v knihovně „Tabulka“. Vzorce česky (=SUMA, =PRŮMĚR, =KDYŽ…), import a export .xlsx.</li>
 <li><b>Pravítko:</b> tlačítko s pravítkem. Posouvejte ho prstem, otáčejte kolečkem na konci; tah perem podél hrany je rovný.</li>
+<li><b>Lupa psaní:</b> tlačítko vpravo nahoře – pište velkým písmem do spodního panelu, na stránku se zapíše zmenšeně. Rámeček se sám posouvá; prstem ho přesunete jinam.</li>
 <li><b>Volby nástroje:</b> podržte tlačítko nástroje (nebo na aktivní klepněte znovu) – tloušťka, tlak, vyhlazení, výplň tvarů, tučný text, barva laseru…</li>
 <li><b>Rukopis na text:</b> označte lasem a klepněte na ikonu T v liště výběru.</li>
 <li><b>Opakované klepnutí na aktivní nástroj</b> otevře jeho volby (typ pera, režim gumy, tvary, písmo).</li>
@@ -2782,7 +2953,7 @@ function openHelp(){
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('search','Hledat v sešitě',searchNotebook);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -2799,6 +2970,7 @@ $('#bImage').onclick=e=>menuPop(e.currentTarget,[['image','Obrázek z galerie',(
 $('#fCam').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)insertImage(f);};
 $('#bRuler').onclick=toggleRuler;
 $('#bAddPg').onclick=()=>addPage();
+$('#bZoom').innerHTML=ic('zoomBox');$('#bZoom').onclick=()=>toggleZoom();
 $('#bFinger').onclick=()=>{S.finger=fingerDraws()?'off':'on';saveS();updateToolbar();toast(fingerDraws()?'Kreslení prstem zapnuto':'Prst jen posouvá a přibližuje');};
 $('#bPages').onclick=()=>togglePanel(!pagesOpen());$('#bPagesClose').onclick=()=>togglePanel(false);
 $('#bMarks').onclick=()=>{marksOnly=!marksOnly;$('#bMarks').setAttribute('aria-pressed',String(marksOnly));renderPanel();};
@@ -2818,6 +2990,7 @@ document.addEventListener('keydown',e=>{
   if(!nb||editing||e.target.closest('input,textarea,select,.modal-ov'))return;
   const k=e.key.toLowerCase(),mod=e.ctrlKey||e.metaKey;
   if(mod&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return;}
+  if(mod&&k==='f'){e.preventDefault();searchNotebook();return;}
   if(mod&&k==='y'){e.preventDefault();redo();return;}
   if(mod&&k==='c'&&sel){copySel(false);return;} if(mod&&k==='x'&&sel){copySel(true);return;}
   if(mod&&k==='v'&&clip){pasteAt(W/2,H/2);return;}
