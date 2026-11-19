@@ -348,6 +348,25 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .back-chip{position:fixed;z-index:60;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:6px;height:40px;padding:0 16px 0 10px;border:0;border-radius:20px;background:#2D5BD3;color:#fff;font:600 14px var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.25)}.back-chip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
 .ol-row{display:flex;align-items:center}.ol-row>button:first-child{flex:1;min-width:0}.ol-row>button.cur{font-weight:700}
 .pg-title{font-size:12px;font-weight:600;color:#B07C00;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.pgrid{position:fixed;inset:0;z-index:45;background:var(--bg,#EEF0F4);display:flex;flex-direction:column}
+.pgrid-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.pgrid-bar b{font-size:16px;white-space:nowrap}.pgrid-bar .sp{flex:1}#pgActs{display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end}#pgActs .del{color:#E03131}
+.pgrid-body{flex:1;overflow-y:auto;touch-action:none;padding:16px}
+.pgrid-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px;max-width:1400px;margin:0 auto}
+.pgc{position:relative;display:flex;flex-direction:column;gap:6px;user-select:none;-webkit-user-select:none;cursor:pointer}
+.pgc-th{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(20,30,50,.18),0 4px 14px rgba(20,30,50,.08);overflow:hidden;border:2px solid transparent}
+.pgc-th canvas{width:100%;height:100%;display:block}
+.pgc.cur .pgc-th{border-color:var(--accent)}.pgc.on .pgc-th{border-color:#2D5BD3;box-shadow:0 0 0 3px rgba(45,91,211,.3)}
+.pgc-l{display:flex;gap:6px;align-items:center;justify-content:center;font-size:13px;color:var(--muted);min-width:0}.pgc-m{color:#B07C00;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pgc-ck{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:14px;background:#fff;border:2px solid #2D5BD3;display:grid;place-items:center;color:#2D5BD3}.pgc.on .pgc-ck{background:#2D5BD3;color:#fff}.pgc-ck svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:3}
+.pgc.dragging{opacity:.3}.pgc.drop-b .pgc-th{box-shadow:-6px 0 0 #2D5BD3}.pgc.drop-a .pgc-th{box-shadow:6px 0 0 #2D5BD3}
+.pgc-ghost{position:fixed;z-index:80;pointer-events:none;opacity:.9;transform:rotate(-3deg) scale(1.04)}
+.pgrid-tip{text-align:center;margin:18px auto 0;max-width:520px}
+.ver-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;margin-top:6px}
+.ver-row{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:12px}.ver-row .btn{height:36px;padding:0 12px}
+.ver-th canvas{width:44px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.2);display:block}.ver-i{flex:1;display:flex;flex-direction:column;min-width:0}.ver-i span{font-size:13px;color:var(--muted)}
+.stk-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:8px 0;max-height:46vh;overflow-y:auto}
+.stk{min-width:0;padding:0;height:42px;border:0;border-radius:10px;background:transparent;font-size:26px;line-height:1}.stk:hover{background:var(--surface-2)}
 .rec-stop{width:30px;height:30px;border-radius:15px;border:0;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center}.rec-stop svg{width:16px;height:16px;fill:currentColor}
 .rec-top{display:flex;margin-bottom:10px}.rec-top .btn{display:inline-flex;align-items:center;gap:8px}.rec-top svg{width:18px;height:18px}
 .rec-row{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:4px 8px;padding:8px 0;border-top:1px solid var(--line)}
@@ -425,7 +444,7 @@ input[type=range]{accent-color:var(--accent)}
       <textarea id="ta" hidden spellcheck="false" aria-label="Text"></textarea>
       <div class="selbar" id="selbar" hidden></div>
       <aside class="pages" id="pages" aria-label="Stránky">
-        <div class="pages-head"><span>Stránky</span><button class="ib" id="bMarks" title="Jen záložky" aria-pressed="false"></button><button class="ib" id="bPagesClose" aria-label="Zavřít"></button></div>
+        <div class="pages-head"><span>Stránky</span><button class="ib" id="bGrid" title="Přehled stránek" aria-label="Přehled stránek"></button><button class="ib" id="bMarks" title="Jen záložky" aria-pressed="false"></button><button class="ib" id="bPagesClose" aria-label="Zavřít"></button></div>
         <div class="pages-list" id="pagesList"></div>
         <div class="pages-foot"><button class="btn primary" id="bAddPage"></button></div>
       </aside>
@@ -565,6 +584,9 @@ const IC={
  pages:'<rect x="5" y="3" width="11" height="15" rx="1.5"/><path d="M9 21h9.5a1.5 1.5 0 001.5-1.5V7"/>',
  more:'<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
  back:'<path d="M15 5l-7 7 7 7"/>',
+ history:'<path d="M3.5 12a8.5 8.5 0 102.5-6"/><path d="M3 4v4.5h4.5"/><path d="M12 7.5V12l3 2"/>',
+ smile:'<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.8 2 5.2 2 7 0"/><path d="M9 9.5h.01M15 9.5h.01" stroke-width="2.6"/>',
+ width:'<path d="M4 6h16" stroke-width="1.2"/><path d="M4 11.5h16" stroke-width="2.4"/><path d="M4 17.5h16" stroke-width="4"/>',
  tape:'<path d="M3 8.5h18v7H3z"/><path d="M3 8.5l1.6 1.75L3 12l1.6 1.75L3 15.5M21 8.5l-1.6 1.75L21 12l-1.6 1.75L21 15.5"/><path d="M8 15.5l5-7M12.5 15.5l5-7" opacity=".5"/>',
  link:'<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>',
  study:'<path d="M3 8l9-4 9 4-9 4z"/><path d="M7 10v5c2.5 2 7.5 2 10 0v-5"/><path d="M21 8v6"/>',
@@ -675,7 +697,7 @@ const PALETTE=['#1B2232','#495057','#868E96','#FFFFFF','#2D5BD3','#1C7ED6','#15A
 const COVERS=['#2D5BD3','#1F7A5C','#B23A48','#D9822B','#6C4AB6','#2A2F3A','#3A86A8','#8A6D3B'];
 const PAPERS={white:'#FFFFFF',cream:'#FBF6E9',yellow:'#FFF6C9',mint:'#EEF7F0',dark:'#23272F',black:'#111316'};
 const PAPER_N={white:'Bílý',cream:'Krémový',yellow:'Žlutý',mint:'Mátový',dark:'Tmavý',black:'Černý'};
-const TPLS={blank:'Čistý',lined:'Linky',narrow:'Úzké linky',grid:'Čtverečky',math:'Matematické 5 mm',mm:'Milimetrový',dots:'Tečky',cornell:'Cornell',todo:'Úkoly',music:'Notová osnova',timetable:'Rozvrh hodin',week:'Týdenní plán'};
+const TPLS={blank:'Čistý',lined:'Linky',narrow:'Úzké linky',grid:'Čtverečky',math:'Matematické 5 mm',mm:'Milimetrový',dots:'Tečky',cornell:'Cornell',todo:'Úkoly',music:'Notová osnova',iso:'Izometrická',hex:'Šestiúhelníky',month:'Měsíční plán',timetable:'Rozvrh hodin',week:'Týdenní plán'};
 const FONTS={sans:'Inter, system-ui, sans-serif',serif:'Lora, Georgia, serif',hand:'Caveat, "Segoe Print", cursive'};
 const isDark=p=>p.paper==='dark'||p.paper==='black';
 
@@ -831,6 +853,14 @@ function drawTemplate(c,p){
       D.forEach((d,k)=>{const x=x0+(k%2)*bw,y=y0+Math.floor(k/2)*bh;c.strokeRect(x,y,bw,bh);c.fillStyle=txt;c.font='600 20px Inter, sans-serif';c.textAlign='left';c.textBaseline='top';c.fillText(d,x+14,y+12);
         c.beginPath();for(let ly=y+80;ly<y+bh-10;ly+=40){c.moveTo(x+14,ly);c.lineTo(x+bw-14,ly);}c.stroke();});
       c.font='600 30px Lora, Georgia, serif';c.textBaseline='middle';c.fillText('Týden',x0,64);c.font='18px Inter, sans-serif';c.textAlign='right';c.fillText('od ____________  do ____________',x0+gw,64);break;}
+    case 'iso':{const g=40,dx=g*Math.sqrt(3)/2,t=Math.tan(Math.PI/6);c.lineWidth=0.9;c.beginPath();for(let x=0;x<w;x+=dx){c.moveTo(x,0);c.lineTo(x,h);}
+      for(let b=-w*t;b<h;b+=g){c.moveTo(0,b);c.lineTo(w,b+w*t);c.moveTo(0,b+w*t);c.lineTo(w,b);}c.stroke();break;}
+    case 'hex':{const r=26,hh=r*Math.sqrt(3);c.lineWidth=1;c.beginPath();for(let col=0,x=r;x<w+r;col++,x+=r*1.5){for(let y=(col%2?hh/2:0);y<h+hh;y+=hh){for(let k=0;k<=6;k++){const a=Math.PI/3*k,px=x+r*Math.cos(a),py=y+r*Math.sin(a);k?c.lineTo(px,py):c.moveTo(px,py);}}}c.stroke();break;}
+    case 'month':{const txt=dark?'rgba(255,255,255,.55)':'rgba(40,60,110,.62)';const x0=50,y0=150,cw=(w-100)/7,rh=(h-y0-60)/6;
+      c.fillStyle=txt;c.font='600 30px Lora, Georgia, serif';c.textAlign='left';c.textBaseline='middle';c.fillText('Měsíc ______________',x0,70);
+      c.font='600 18px Inter, sans-serif';c.textAlign='center';['Po','Út','St','Čt','Pá','So','Ne'].forEach((d,k)=>c.fillText(d,x0+cw*(k+0.5),y0-22));
+      c.lineWidth=1.4;c.beginPath();for(let k=0;k<=7;k++){c.moveTo(x0+k*cw,y0);c.lineTo(x0+k*cw,y0+6*rh);}for(let j=0;j<=6;j++){c.moveTo(x0,y0+j*rh);c.lineTo(x0+7*cw,y0+j*rh);}c.stroke();
+      c.fillStyle=dark?'rgba(255,255,255,.04)':'rgba(40,60,110,.04)';c.fillRect(x0+5*cw,y0,2*cw,6*rh);break;}
     case 'music':{c.beginPath();for(let y0=140;y0<h-110;y0+=120){for(let k=0;k<5;k++){const y=y0+k*13;c.moveTo(60,y);c.lineTo(w-60,y);}}c.stroke();break;}
   }
   c.restore();
@@ -1066,7 +1096,7 @@ function updUndo(){$('#bUndo').disabled=!H_.undo.length;$('#bRedo').disabled=!H_
 /* ---------- ukládání ---------- */
 let saveTimer=0;
 function changed(){if(!nb)return;nb.updated=Date.now();clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,500);if(pagesOpen())schedulePanel();}
-function flushSave(){clearTimeout(saveTimer);if(nb)DB.put(nb).then(ok=>{if(!ok)toast('Uložení se nepodařilo – zálohujte sešit.');});}
+function flushSave(){clearTimeout(saveTimer);if(nb){try{verMaybe();}catch(e){}}if(nb)DB.put(nb).then(ok=>{if(!ok)toast('Uložení se nepodařilo – zálohujte sešit.');});}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){commitText();flushSave();}});
 
 /* =========================================================
@@ -1473,6 +1503,8 @@ function buildSelBar(){
   if(selItems().some(it=>it.t==='s'&&it.k!=='hl'))selbar.append(b('calc','Spočítat příklad',()=>{const pg=sel.page,its=selItems();clearSel();calcState=null;calcItems(pg,its);}));
   selbar.append(b('link',selItems().some(it=>it.lk)?'Upravit odkaz':'Odkaz na stránku nebo web',e=>linkMenu(e.currentTarget)));
   if(selItems().some(it=>it.t==='tp'))selbar.append(b('study','Opakovat vybrané pásky',()=>{const ids=new Set(sel.ids),pg=sel.page,i=nb.pages.indexOf(pg);clearSel();startStudy(pg.items.filter(it=>ids.has(it.id)&&it.t==='tp').map(it=>({page:pg,i,it})));}));
+  if(selItems().some(it=>it.t==='s'))selbar.append(b('width','Tloušťka čar',e=>selWidthPop(e.currentTarget)));
+  selbar.append(b('image','Výběr jako obrázek',e=>selImageMenu(e.currentTarget)));
   selbar.append(b('dup','Duplikovat',dupSel),b('copy','Kopírovat',()=>copySel(false)),b('cut','Vyjmout',()=>copySel(true)),b('front','Do popředí',()=>orderSel(1)),b('backl','Do pozadí',()=>orderSel(-1)),b('trash','Smazat',delSel,'del'),b('check','Hotovo',clearSel));
 }
 function recolorSel(c){if(!sel)return;snapItems(sel.page);sel.page.items=sel.page.items.map(it=>sel.ids.has(it.id)&&it.t!=='i'?Object.assign({},it,{c}):it);bumpFav(c);changed();render();}
@@ -2107,8 +2139,9 @@ function openNotebook(n){document.body.classList.add('light-ui');deskCol=null;
   layoutPages();$('#lib').hidden=true;$('#editor').hidden=false;
   togglePanel(false);updateToolbar();updUndo();
   requestAnimationFrame(()=>{resize();if(n._lastY!=null){oy=n._lastY;clampView();render();}});
+  n._lastSnap=Date.now();setTimeout(()=>verOnOpen(n).catch(()=>{}),1500);
 }
-function closeNotebook(){if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui');if(ZB.on)toggleZoom(false);closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+function closeNotebook(){closePageGrid();if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui');if(ZB.on)toggleZoom(false);closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
 
 /* =========================================================
    Lupa psaní (zoom box) – píšete velkým písmem dole, na stránku se zapíše zmenšeně
@@ -3639,6 +3672,10 @@ function openHelp(){
 <li><b>Páska na učení:</b> nástroj Páska (v liště vedle zvýrazňovače, klávesa U) – táhněte přes pojem, výsledek nebo slovíčko. Klepnutím perem či prstem pásku odkryjete a zase zakryjete. Menu ⋯ → <i>Opakování s páskou</i> projde všechny pásky jako kartičky (Umím / Neumím, chyby se opakují).</li>
 <li><b>Odkazy:</b> označte cokoli lasem a klepněte na řetěz – propojíte to s jinou stránkou nebo webem. Klepnutím na modrou šipku odkaz otevřete, vlevo dole je tlačítko Zpět.</li>
 <li><b>Osnova:</b> hvězdička u stránky (panel Stránky) přidá pojmenovanou záložku. Menu ⋯ → <i>Osnova a záložky</i> je rychlý obsah sešitu.</li>
+<li><b>Přehled stránek:</b> panel Stránky → mřížka, nebo menu ⋯ → Přehled stránek. Přetažením měníte pořadí (prstem po podržení), tlačítkem Vybrat označíte víc stránek a hromadně je zduplikujete, smažete, přesunete, změníte pozadí nebo vyexportujete do PDF.</li>
+<li><b>Historie verzí:</b> menu ⋯ → Historie verzí. Span si sám ukládá verze sešitu (při otevření a každých 10 minut psaní) – starší stav obnovíte, nebo otevřete jako kopii.</li>
+<li><b>Nálepky:</b> menu ⋯ → Nálepky (nebo tlačítko obrázku). Lasem je pak zvětšíte a otočíte.</li>
+<li><b>Výběr lasem:</b> umí změnit tloušťku čar a uložit nebo zkopírovat výřez jako obrázek (i s průhledným pozadím).</li>
 <li><b>Hledání v rukopisu:</b> Ctrl+F nebo menu ⋯ → Hledat – najde i ručně psaný text (offline, toleruje drobné chyby rozpoznání) a místo na stránce zvýrazní.</li>
 <li><b>Rychlý přesun prstem:</b> podržte prst na čemkoli napsaném a rovnou to posouvejte.</li>
 <li><b>Rovnice a grafy:</b> do kalkulačky (orámovaný příklad nebo menu ⋯ → Kalkulačka a grafy funkcí) napište rovnici s x, např. x^2 − 5x + 6 = 0, a vyřeší ji. Funkci y = … vykreslí jako graf, který vložíte do stránky.</li>
@@ -3792,7 +3829,7 @@ function closeTop(){const o=document.querySelectorAll('.modal-ov');const t=o[o.l
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('outline','Osnova a záložky',()=>openOutline());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -3953,19 +3990,195 @@ function drawFlash(){
 }
 function goToBB(i,b){const p=nb.pages[i];if(HL())flipTo(i,false);else goToPage(i);oy=H*0.38-(p._top+(b[1]+b[3])/2)*z;if(!HL())ox=W/2-(p._left+(b[0]+b[2])/2)*z;clampView();render();flashAt(p,b);}
 
+/* =========================================================
+   Přehled stránek (mřížka), historie verzí, nálepky, výběr jako obrázek
+   ========================================================= */
+const thumbCache=new WeakMap();
+function pageThumb(p,w){
+  const hit=thumbCache.get(p);if(hit&&hit.items===p.items&&hit.tpl===p.tpl&&hit.paper===p.paper&&hit.w===w)return hit.cv;
+  const s=w/p.w,k=Math.min(2,devicePixelRatio||1),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(p.h*s*k);
+  const x=c.getContext('2d');x.scale(s*k,s*k);drawPage(x,p,{print:true});thumbCache.set(p,{items:p.items,tpl:p.tpl,paper:p.paper,w,cv:c});return c;
+}
+let PG=null;
+function openPageGrid(){
+  if(!nb)return;clearSel();togglePanel(false);closePops();
+  const ov=el('div',{class:'pgrid',id:'pgGrid',role:'dialog','aria-label':'Přehled stránek'});
+  ov.innerHTML='<div class="pgrid-bar"><button class="ib" id="pgX" aria-label="Zavřít"></button><b id="pgTitle"></b><span class="sp"></span><div id="pgActs"></div><button class="btn" id="pgSelB">Vybrat</button></div><div class="pgrid-body" id="pgBody"><div class="pgrid-list" id="pgList"></div><p class="lib-note pgrid-tip">Klepnutím otevřete stránku. Pořadí změníte přetažením – perem nebo myší rovnou, prstem po podržení.</p></div>';
+  document.body.append(ov);PG={sel:new Set(),mode:false};
+  $('#pgX').innerHTML=ic('close');$('#pgX').onclick=closePageGrid;
+  $('#pgSelB').onclick=()=>{PG.mode=!PG.mode;if(!PG.mode)PG.sel.clear();pgRender();};
+  const key=e=>{if(e.key==='Escape'&&$('#pgGrid')&&!document.querySelector('.modal-ov'))closePageGrid();};document.addEventListener('keydown',key);PG.key=key;
+  pgScroller($('#pgBody'));pgRender();
+  const cur=$('#pgList').children[curPageIndex()];if(cur)cur.scrollIntoView({block:'center'});
+}
+function closePageGrid(){const g=$('#pgGrid');if(!g)return;g.remove();if(PG&&PG.key)document.removeEventListener('keydown',PG.key);PG=null;if(nb){layoutPages();clampView();render();}}
+function pgRender(){
+  if(!PG)return;const list=$('#pgList');const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const c=e.target,i=+c.dataset.i,p=nb.pages[i];if(p&&!c.querySelector('canvas'))c.querySelector('.pgc-th').append(pageThumb(p,170));io.unobserve(c);}}),{root:$('#pgBody'),rootMargin:'300px'});
+  list.innerHTML='';const ci=curPageIndex();
+  nb.pages.forEach((p,i)=>{
+    const c=el('div',{class:'pgc'+(i===ci?' cur':'')+(PG.sel.has(p.id)?' on':''),'data-i':String(i)});
+    c.innerHTML=`<div class="pgc-th" style="aspect-ratio:${p.w}/${p.h}"></div><div class="pgc-l"><b>${i+1}</b>${p.mark?'<span class="pgc-m">★ '+esc(p.title||'')+'</span>':''}</div>`+(PG.mode?`<span class="pgc-ck">${PG.sel.has(p.id)?ic('check'):''}</span>`:'');
+    list.append(c);io.observe(c);});
+  $('#pgTitle').textContent=PG.mode?(PG.sel.size?'Vybráno: '+PG.sel.size:'Vyberte stránky'):'Stránky ('+nb.pages.length+')';
+  $('#pgSelB').textContent=PG.mode?'Hotovo':'Vybrat';
+  const A=$('#pgActs');A.innerHTML='';
+  const act=(icn,l,fn,cls='')=>{const b=el('button',{class:'ib '+cls,title:l,'aria-label':l},ic(icn));b.onclick=fn;A.append(b);};
+  if(PG.mode){
+    act('sel',PG.sel.size===nb.pages.length?'Zrušit výběr':'Vybrat vše',()=>{if(PG.sel.size===nb.pages.length)PG.sel.clear();else nb.pages.forEach(p=>PG.sel.add(p.id));pgRender();});
+    if(PG.sel.size){
+      act('dup','Duplikovat vybrané',pgDup);act('up','Přesunout na začátek',()=>pgMoveSel(0));act('dn','Přesunout na konec',()=>pgMoveSel(1));
+      act('tpl','Pozadí vybraných',pgBg);act('down','Exportovat vybrané do PDF',()=>exportPDF({title:nb.title+' (výběr)',pages:nb.pages.filter(p=>PG.sel.has(p.id))}));
+      act('trash','Smazat vybrané',pgDel,'del');}
+  }else act('plus','Přidat stránku na konec',()=>{addPage(nb.pages.length);pgRender();});
+}
+const pgSelected=()=>nb.pages.filter(p=>PG.sel.has(p.id));
+function pgDup(){snapPages();const out=[];nb.pages.forEach(p=>{out.push(p);if(PG.sel.has(p.id))out.push(Object.assign({},p,{id:uid(),mark:false,title:'',items:p.items.map(it=>Object.assign({},it,{id:uid()}))}));});nb.pages=out;layoutPages();changed();toast('Stránky zduplikovány');pgRender();}
+function pgMoveSel(end){snapPages();const s=pgSelected(),r=nb.pages.filter(p=>!PG.sel.has(p.id));nb.pages=end?r.concat(s):s.concat(r);layoutPages();changed();pgRender();}
+async function pgDel(){
+  const n=PG.sel.size;if(n>=nb.pages.length){toast('Sešit musí mít alespoň jednu stránku');return;}
+  const ok=await modal('Smazat stránky',b=>b.append(el('p',{},`Smazat ${n} ${n===1?'stránku':n<5?'stránky':'stránek'}? Vrátit to jde tlačítkem Zpět v sešitě.`)),[{label:'Zrušit'},{label:'Smazat',cls:'primary',value:true}]);
+  if(!ok||!PG)return;snapPages();nb.pages=nb.pages.filter(p=>!PG.sel.has(p.id));PG.sel.clear();layoutPages();changed();pgRender();toast('Smazáno');
+}
+async function pgBg(){
+  const f=pgSelected()[0];const st={tpl:f.tpl,paper:f.paper};
+  const r=await modal('Pozadí vybraných stránek',b=>pickTemplate(b,st),[{label:'Zrušit'},{label:'Použít',cls:'primary',value:true}]);
+  if(!r||!PG)return;snapPages();pgSelected().forEach(p=>{p.tpl=st.tpl;p.paper=st.paper;});changed();pcache.clear();pgRender();
+}
+/* vlastní posouvání + přetahování (prst: podržet, pero/myš: rovnou) */
+function pgScroller(body){
+  let d=null;
+  body.addEventListener('pointerdown',e=>{
+    const c=e.target.closest('.pgc');d={id:e.pointerId,x0:e.clientX,y0:e.clientY,ly:e.clientY,st:body.scrollTop,c,moved:false,drag:false,v:0,lt:performance.now(),type:e.pointerType};
+    try{body.setPointerCapture(e.pointerId);}catch(_){}
+    if(c&&e.pointerType==='touch')d.lp=setTimeout(()=>{if(d&&!d.moved)pgDragStart(d);},380);
+  });
+  body.addEventListener('pointermove',e=>{if(!d||d.id!==e.pointerId)return;
+    const dist=Math.hypot(e.clientX-d.x0,e.clientY-d.y0);
+    if(!d.moved&&dist>10){d.moved=true;clearTimeout(d.lp);if(d.c&&d.type!=='touch'&&!d.drag)pgDragStart(d);}
+    if(d.drag){pgDragMove(d,e);return;}
+    if(d.moved){const now=performance.now();d.v=(e.clientY-d.ly)/Math.max(1,now-d.lt);d.lt=now;d.ly=e.clientY;body.scrollTop=d.st-(e.clientY-d.y0);}
+  });
+  const up=e=>{if(!d||d.id!==e.pointerId)return;clearTimeout(d.lp);const D=d;d=null;
+    if(D.drag){pgDragEnd(D);return;}
+    if(!D.moved&&D.c&&e.type==='pointerup'){const i=+D.c.dataset.i,p=nb.pages[i];if(PG.mode){PG.sel.has(p.id)?PG.sel.delete(p.id):PG.sel.add(p.id);pgRender();}else{closePageGrid();goToPage(i);}return;}
+    let v=-D.v*16;const step=()=>{if(Math.abs(v)<0.5)return;body.scrollTop+=v;v*=0.94;requestAnimationFrame(step);};if(D.moved&&Math.abs(v)>2)requestAnimationFrame(step);};
+  body.addEventListener('pointerup',up);body.addEventListener('pointercancel',up);
+}
+function pgDragStart(d){d.drag=true;vibrate(10);d.from=+d.c.dataset.i;const r=d.c.getBoundingClientRect();
+  const g=d.c.cloneNode(true);g.classList.add('pgc-ghost');g.style.width=r.width+'px';g.style.left=r.left+'px';g.style.top=r.top+'px';d.dx=d.x0-r.left;d.dy=d.y0-r.top;
+  const cv=d.c.querySelector('canvas');if(cv){const k=g.querySelector('canvas');if(k)k.getContext('2d').drawImage(cv,0,0);}
+  document.body.append(g);d.g=g;d.c.classList.add('dragging');}
+function pgDragMove(d,e){d.g.style.left=(e.clientX-d.dx)+'px';d.g.style.top=(e.clientY-d.dy)+'px';
+  const body=$('#pgBody'),r=body.getBoundingClientRect();if(e.clientY<r.top+50)body.scrollTop-=12;else if(e.clientY>r.bottom-50)body.scrollTop+=12;
+  d.g.style.display='none';const t=document.elementFromPoint(e.clientX,e.clientY);d.g.style.display='';
+  document.querySelectorAll('.pgc.drop-b,.pgc.drop-a').forEach(x=>x.classList.remove('drop-b','drop-a'));d.to=null;
+  const c=t&&t.closest('.pgc');if(c&&c!==d.c){const cr=c.getBoundingClientRect(),after=e.clientX>cr.left+cr.width/2;c.classList.add(after?'drop-a':'drop-b');d.to=+c.dataset.i+(after?1:0);}}
+function pgDragEnd(d){d.g.remove();d.c.classList.remove('dragging');document.querySelectorAll('.pgc.drop-b,.pgc.drop-a').forEach(x=>x.classList.remove('drop-b','drop-a'));
+  if(d.to==null)return;let to=d.to;if(to>d.from)to--;if(to===d.from)return;
+  snapPages();const a=nb.pages.slice(),[p]=a.splice(d.from,1);a.splice(to,0,p);nb.pages=a;layoutPages();changed();pgRender();toast('Stránka '+(d.from+1)+' přesunuta na pozici '+(to+1));}
+
+/* ---------- historie verzí ---------- */
+const VER={MAX:15,EVERY:10*60e3};
+const verRange=id=>IDBKeyRange.bound('v:'+id+':','v:'+id+':￿');
+function verReq(mode,fn){return new Promise(res=>{if(!DB.db){res(null);return;}try{const r=fn(DB.os(mode,'meta'));r.onsuccess=()=>res(r.result);r.onerror=()=>res(null);}catch(e){res(null);}});}
+async function verList(id){const a=await verReq('readonly',os=>os.getAll(verRange(id)));return (a||[]).sort((x,y)=>y.t-x.t);}
+async function verSnap(n,why){
+  if(!DB.db||!n||n.kind==='sheet'||!n.pages)return false;const t=Date.now();
+  const data=JSON.stringify(n,(k,v)=>k[0]==='_'?undefined:v);
+  const ok=await verReq('readwrite',os=>os.put({id:'v:'+n.id+':'+t,t,why,pages:n.pages.length,size:data.length,data}));
+  n._lastSnap=t;
+  const keys=(await verReq('readonly',os=>os.getAllKeys(verRange(n.id))))||[];
+  if(keys.length>VER.MAX){keys.sort();for(const k of keys.slice(0,keys.length-VER.MAX))await verReq('readwrite',os=>os.delete(k));}
+  return ok!==null;
+}
+async function verOnOpen(n){const keys=(await verReq('readonly',os=>os.getAllKeys(verRange(n.id))))||[];keys.sort();const last=keys.length?+String(keys[keys.length-1]).split(':').pop():0;n._lastSnap=last;if(Date.now()-last>VER.EVERY&&nb===n)verSnap(n,'Při otevření');}
+function verMaybe(){if(nb&&nb.kind!=='sheet'&&Date.now()-(nb._lastSnap||0)>VER.EVERY)verSnap(nb,'Automaticky');}
+const fmtWhen=t=>new Date(t).toLocaleString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+async function openVersions(){
+  if(!nb)return;const n=nb;
+  if(!DB.db){modal('Historie verzí',b=>b.append(el('p',{},'Historie verzí potřebuje úložiště prohlížeče (IndexedDB), které tady není dostupné.')),[{label:'Zavřít',cls:'primary'}]);return;}
+  const list=await verList(n.id);
+  const v=await modal('Historie verzí',b=>{
+    b.append(el('p',{class:'lib-note'},'Span si sám ukládá verzi sešitu při otevření a pak každých 10 minut psaní (posledních '+VER.MAX+'). Starší verzi můžete obnovit, nebo otevřít jako kopii.'));
+    const now=el('button',{class:'btn'},ic('plus')+'Uložit verzi teď');now.style.alignSelf='flex-start';now.onclick=async()=>{flushSave();await verSnap(n,'Ručně');b.closest('.modal-ov').querySelector('.modal-foot .btn').click();toast('Verze uložena');setTimeout(openVersions,60);};b.append(now);
+    const L=el('div',{class:'ver-list'});
+    if(!list.length)L.append(el('p',{class:'lib-note'},'Zatím žádné uložené verze.'));
+    list.forEach(r=>{const row=el('div',{class:'ver-row'});
+      const th=el('div',{class:'ver-th'});try{const d=JSON.parse(r.data);const p=d.pages[0];p.items=(p.items||[]).map(finalizeLoaded);th.append(pageThumb(p,64));}catch(e){}
+      const info=el('div',{class:'ver-i'},`<b>${fmtWhen(r.t)}</b><span>${esc(r.why||'')} · ${r.pages} ${r.pages===1?'stránka':r.pages<5?'stránky':'stránek'}</span>`);
+      const a=el('button',{class:'btn'},'Kopie');a.title='Otevřít jako nový sešit';a.onclick=()=>verAsCopy(r,b);
+      const o=el('button',{class:'btn primary'},'Obnovit');o.onclick=()=>verRestore(r,b);
+      row.append(th,info,a,o);L.append(row);});
+    b.append(L);
+  },[{label:'Zavřít'}]);
+}
+async function verRestore(r,b){
+  if(!nb)return;const ok=await modal('Obnovit verzi',x=>x.append(el('p',{},'Obnovit sešit do stavu z '+fmtWhen(r.t)+'? Současný stav se předtím uloží jako verze, takže o nic nepřijdete.')),[{label:'Zrušit'},{label:'Obnovit',cls:'primary',value:true}]);
+  if(!ok)return;await verSnap(nb,'Před obnovením');const d=JSON.parse(r.data);
+  nb.pages=d.pages.map(p=>Object.assign(p,{items:(p.items||[]).map(finalizeLoaded)}));nb.audio=d.audio||[];
+  H_.undo=[];H_.redo=[];updUndo();pcache.clear();ocrCache.clear();clearSel();layoutPages();clampView();changed();flushSave();render();
+  const ov=b.closest('.modal-ov');if(ov)ov.querySelector('.modal-foot .btn').click();toast('Obnoveno – verze z '+fmtWhen(r.t));
+}
+async function verAsCopy(r,b){
+  const d=JSON.parse(r.data);d.id=uid();d.title=(d.title||'Sešit')+' ('+fmtWhen(r.t)+')';d.created=d.updated=Date.now();d.fav=false;d.trashed=null;
+  d.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});await DB.put(d);notebooks.push(d);
+  const ov=b.closest('.modal-ov');if(ov)ov.querySelector('.modal-foot .btn').click();toast('Kopie vytvořena v knihovně: '+d.title);
+}
+
+/* ---------- nálepky ---------- */
+const STICKERS=[['Škola','⭐ ✅ ❌ ❗ ❓ 💡 📌 📎 📚 📖 ✏️ 📐 📏 🧮 🧪 🔬 🧬 🌍 🗺️ 🎓 📝 📅 ⏰ 🎯 🏆 🔔'],['Nálada','😀 😊 😍 🤔 😮 😴 😅 😎 🥳 😢 😡 👍 👎 👏 🙌 💪 🙏 ❤️ 💔 🔥 ✨ 🎉'],['Značky','➡️ ⬅️ ⬆️ ⬇️ ↔️ 🔁 ✔️ ✖️ ➕ ➖ ⚠️ 🚫 ⭕ 🔴 🟠 🟡 🟢 🔵 🟣 ⚫ ⬛ 🔺 🔷 💬 💭'],['Ostatní','☀️ 🌧️ ❄️ 🌈 🍎 🍕 ☕ 🎵 ⚽ 🏀 🚲 🚗 ✈️ 🏠 💻 📱 📷 🎨 🐶 🐱 🌸 🌳 💰 🎁 🔑']];
+function stickerMenu(anchor){
+  openPop(anchor||$('#bMore'),p=>{p.style.width='336px';p.append(el('h4',{},'Nálepky'));let tab=store.get('stkTab',0);
+    const tabs=el('div',{class:'row'}),g=el('div',{class:'stk-grid'});
+    const draw=()=>{tabs.innerHTML='';STICKERS.forEach(([n],i)=>{const b=el('button',{class:'chip','aria-pressed':String(i===tab)},esc(n));b.onclick=()=>{tab=i;store.set('stkTab',i);draw();};tabs.append(b);});
+      g.innerHTML='';STICKERS[tab][1].split(' ').forEach(e=>{const b=el('button',{class:'stk','aria-label':'Nálepka '+e},e);b.onclick=()=>{closePops();addSticker(e);};g.append(b);});};
+    draw();p.append(tabs,g,el('p',{class:'lib-note'},'Nálepka se vloží doprostřed obrazovky. Lasem ji pak přesunete, zvětšíte nebo otočíte.'));});
+}
+function addSticker(e){
+  const page=pageAtWorld((W/2-ox)/z,(H/2-oy)/z)||nb.pages[curPageIndex()];const [x,y]=toLocal(W/2,H/2,page);const s=72;
+  const it={t:'x',id:uid(),x:clamp(x-s*0.7,0,page.w-s*1.4),y:clamp(y-s*0.6,0,page.h-s*1.3),w:s*1.4,s,c:'#1B2232',f:'sans',text:e};
+  snapItems(page);page.items=page.items.concat([it]);changed();render();setTool('lasso');makeSel(page,[it.id]);
+}
+
+/* ---------- výběr: tloušťka a obrázek ---------- */
+function selWidthPop(anchor){
+  if(!sel)return;const pg=sel.page,ids=new Set(sel.ids),orig=new Map();pg.items.forEach(it=>{if(ids.has(it.id)&&it.t==='s')orig.set(it.id,it);});
+  if(!orig.size){toast('Ve výběru nejsou žádné tahy');return;}let snapped=false;
+  openPop(anchor,p=>{p.append(el('h4',{},'Tloušťka vybraných tahů'));
+    slider(p,'Násobek',25,400,5,100,v=>v+' %',v=>{if(!snapped){snapItems(pg);snapped=true;}const f=v/100;pg.items=pg.items.map(it=>orig.has(it.id)?finalize(Object.assign({},orig.get(it.id),{w:orig.get(it.id).w*f})):it);sel.bb=selBounds();changed();render();});});
+}
+function selCanvas(items,bg){
+  let b=[1e9,1e9,-1e9,-1e9];items.forEach(it=>{const g=getBounds(it);b=[Math.min(b[0],g[0]),Math.min(b[1],g[1]),Math.max(b[2],g[2]),Math.max(b[3],g[3])];});
+  const pad=16,w=b[2]-b[0]+pad*2,h=b[3]-b[1]+pad*2,sc=Math.min(3,4000/Math.max(w,h));
+  const c=document.createElement('canvas');c.width=Math.max(8,Math.round(w*sc));c.height=Math.max(8,Math.round(h*sc));const x=c.getContext('2d');
+  if(bg){x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);}x.setTransform(sc,0,0,sc,(pad-b[0])*sc,(pad-b[1])*sc);
+  items.forEach(it=>drawItem(x,it,sel?sel.page:{paper:'white'}));return c;
+}
+function selImageMenu(anchor){
+  if(!sel)return;const its=selItems().map(it=>transformItem(it,sel.m)),page=sel.page,bg=PAPERS[page.paper]||'#fff';
+  menuPop(anchor,[
+    ['down','Uložit jako obrázek (PNG)',()=>selCanvas(its,bg).toBlob(b=>saveFile(safeName(nb.title)+' - výřez.png',b),'image/png')],
+    ['down','Uložit s průhledným pozadím',()=>selCanvas(its,null).toBlob(b=>saveFile(safeName(nb.title)+' - výřez.png',b),'image/png')],
+    ['copy','Kopírovat jako obrázek',()=>selCanvas(its,bg).toBlob(async b=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);toast('Obrázek zkopírován – vložte ho třeba do zprávy');}catch(e){toast('Kopírování obrázku tady prohlížeč nedovolil – použijte Uložit.');}},'image/png')],
+    ['image','Vložit jako obrázek do sešitu (sloučit)',()=>{const c=selCanvas(its,null),src=c.toDataURL('image/png');const g=its.reduce((b,it)=>{const q=getBounds(it);return [Math.min(b[0],q[0]),Math.min(b[1],q[1]),Math.max(b[2],q[2]),Math.max(b[3],q[3])];},[1e9,1e9,-1e9,-1e9]);
+      const ids=new Set(sel.ids);snapItems(page);const im={t:'i',id:uid(),src,x:g[0]-16,y:g[1]-16,w:g[2]-g[0]+32,h:g[3]-g[1]+32};page.items=page.items.filter(i=>!ids.has(i.id)).concat([im]);clearSel();changed();render();makeSel(page,[im.id]);toast('Sloučeno do jednoho obrázku – lze vrátit tlačítkem Zpět');}]
+  ]);
+}
+
 /* ---------- propojení UI ---------- */
 let pdfInto=false;
 [['bBack','back'],['bPages','grid'],['bUndo','undo'],['bRedo','redo'],['bImage','image'],['bRuler','ruler'],['bAddPg','plus'],['bFinger','hand'],['bMore','more'],['bMarks','star'],['bPagesClose','close'],['bSide','sidebar'],['bLibAdd','plus'],['bLibMore','more']].forEach(([id,i])=>{$('#'+id).innerHTML=ic(i);});
 $('#bAddPage').innerHTML=ic('plus')+'Přidat stránku';
 document.querySelectorAll('[data-tool]').forEach(b=>{b.innerHTML=ic(b.dataset.tool);onLong(b,()=>openToolOptions(b.dataset.tool,b));b.onclick=()=>{if(T.tool===b.dataset.tool)openToolOptions(T.tool,b);else setTool(b.dataset.tool);};});
 $('#bUndo').onclick=undo;$('#bRedo').onclick=redo;
-$('#bImage').onclick=e=>menuPop(e.currentTarget,[['image','Obrázek z galerie',()=>$('#fImg').click()],['camera','Vyfotit',()=>$('#fCam').click()]]);
+$('#bImage').onclick=e=>menuPop(e.currentTarget,[['image','Obrázek z galerie',()=>$('#fImg').click()],['camera','Vyfotit',()=>$('#fCam').click()],['smile','Nálepka',()=>stickerMenu($('#bImage'))]]);
 $('#fCam').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)insertImage(f);};
 $('#bRuler').onclick=toggleRuler;
 $('#bAddPg').onclick=()=>addPage();
 $('#bZoom').innerHTML=ic('zoomBox');$('#bZoom').onclick=()=>toggleZoom();
 $('#bFinger').onclick=()=>{S.finger=fingerDraws()?'off':'on';saveS();updateToolbar();toast(fingerDraws()?'Kreslení prstem zapnuto':'Prst jen posouvá a přibližuje');};
 $('#bPages').onclick=()=>togglePanel(!pagesOpen());$('#bPagesClose').onclick=()=>togglePanel(false);
+$('#bGrid').innerHTML=ic('grid');$('#bGrid').onclick=openPageGrid;
 $('#bMarks').onclick=()=>{marksOnly=!marksOnly;$('#bMarks').setAttribute('aria-pressed',String(marksOnly));renderPanel();};
 $('#bAddPage').onclick=()=>addPage();
 $('#bMore').onclick=e=>moreMenu(e.currentTarget);

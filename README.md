@@ -16,6 +16,7 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - **Psaní rukou v tabulce** (převod na text/vzorec, offline rozpoznávání, které se učí vaše písmo, guma) a řada speciálních znaků α β Δ ² ₁ √ ≤ °.
 - **Listování po stránkách** (jako kniha, dvoustrana na šířku), **čmáranice maže**, **nahrávky propojené s poznámkami**, **tužka**, nové tvary (hvězda, mnohoúhelníky, osy).
 - **Páska na učení** (klepnutím odkrýt/zakrýt) a **opakování jako kartičky** (Umím / Neumím), **odkazy** mezi stránkami i na web, **pojmenované záložky a osnova**, **hledání v ručně psaném textu** (offline, toleruje chyby).
+- **Přehled stránek** (mřížka, přetahování, hromadné akce), **historie verzí** (automatické snímky, obnovení i jako kopie), **nálepky**, výběr lasem jako obrázek a změna tloušťky, šablony izometrická, šestiúhelníky, měsíční plán.
 - **Offline převod rukopisu na text** v sešitě (lasem → T), s učením z oprav.
 - **Moderní funkce Excelu**: XLOOKUP, TEXTJOIN, SORT, SEQUENCE, ČETNOSTI, LINREGRESE, FORECAST, INTERCEPT, MÍRA.VÝNOSNOSTI.
 - **Matice**: SOUČIN.MATIC, INVERZE, DETERMINANT, TRANSPOZICE, MATICE.JEDNOTKOVÁ (výsledek se rozlije do buněk).
