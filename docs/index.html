@@ -611,7 +611,7 @@ const PALETTE=['#1B2232','#495057','#868E96','#FFFFFF','#2D5BD3','#1C7ED6','#15A
 const COVERS=['#2D5BD3','#1F7A5C','#B23A48','#D9822B','#6C4AB6','#2A2F3A','#3A86A8','#8A6D3B'];
 const PAPERS={white:'#FFFFFF',cream:'#FBF6E9',yellow:'#FFF6C9',mint:'#EEF7F0',dark:'#23272F',black:'#111316'};
 const PAPER_N={white:'Bílý',cream:'Krémový',yellow:'Žlutý',mint:'Mátový',dark:'Tmavý',black:'Černý'};
-const TPLS={blank:'Čistý',lined:'Linky',narrow:'Úzké linky',grid:'Čtverečky',math:'Matematické 5 mm',mm:'Milimetrový',dots:'Tečky',cornell:'Cornell',todo:'Úkoly',music:'Notová osnova'};
+const TPLS={blank:'Čistý',lined:'Linky',narrow:'Úzké linky',grid:'Čtverečky',math:'Matematické 5 mm',mm:'Milimetrový',dots:'Tečky',cornell:'Cornell',todo:'Úkoly',music:'Notová osnova',timetable:'Rozvrh hodin',week:'Týdenní plán'};
 const FONTS={sans:'Inter, system-ui, sans-serif',serif:'Lora, Georgia, serif',hand:'Caveat, "Segoe Print", cursive'};
 const isDark=p=>p.paper==='dark'||p.paper==='black';
 
@@ -745,6 +745,18 @@ function drawTemplate(c,p){
     case 'todo':{ruled(50,150);c.lineWidth=1.6;for(let y=150;y<h-60;y+=50){c.strokeRect(60,y-33,22,22);}break;}
     case 'math':{const g=PW/210*5;c.lineWidth=0.9;c.beginPath();for(let x=g;x<w;x+=g){c.moveTo(x,0);c.lineTo(x,h);}for(let y=g;y<h;y+=g){c.moveTo(0,y);c.lineTo(w,y);}c.stroke();break;}
     case 'mm':{const m=PW/210,col=dark?'255,180,120':'230,120,60';[[1,.09,.45],[5,.2,.7],[10,.34,1.1]].forEach(([st,al,lw])=>{c.strokeStyle=`rgba(${col},${al})`;c.lineWidth=lw;c.beginPath();for(let i=st;i*m<w;i+=st){c.moveTo(i*m,0);c.lineTo(i*m,h);}for(let i=st;i*m<h;i+=st){c.moveTo(0,i*m);c.lineTo(w,i*m);}c.stroke();});break;}
+    case 'timetable':{const txt=dark?'rgba(255,255,255,.55)':'rgba(40,60,110,.62)';const x0=50,y0=120,hw=110,hh=60,cols=8,rows=5,cw=(w-x0*2-hw)/cols,rh=Math.min(200,(h-y0-80-hh)/rows);
+      c.lineWidth=1.4;c.beginPath();for(let i=0;i<=cols;i++){const x=x0+hw+i*cw;c.moveTo(x,y0);c.lineTo(x,y0+hh+rows*rh);}c.moveTo(x0,y0);c.lineTo(x0,y0+hh+rows*rh);
+      for(let j=0;j<=rows+1;j++){const y=j===0?y0:y0+hh+(j-1)*rh;c.moveTo(x0,y);c.lineTo(x0+hw+cols*cw,y);}c.stroke();
+      c.fillStyle=txt;c.textAlign='center';c.textBaseline='middle';const T0=['8:00','8:55','10:00','10:55','11:50','12:45','13:40','14:35'];
+      for(let i=0;i<cols;i++){c.font='600 22px Inter, sans-serif';c.fillText((i+1)+'.',x0+hw+i*cw+cw/2,y0+hh/2-9);c.font='13px Inter, sans-serif';c.fillText(T0[i],x0+hw+i*cw+cw/2,y0+hh/2+14);}
+      c.font='600 22px Inter, sans-serif';['Po','Út','St','Čt','Pá'].forEach((d,j)=>c.fillText(d,x0+hw/2,y0+hh+j*rh+rh/2));
+      c.font='600 30px Lora, Georgia, serif';c.textAlign='left';c.fillText('Rozvrh hodin',x0,64);break;}
+    case 'week':{const txt=dark?'rgba(255,255,255,.55)':'rgba(40,60,110,.62)';const x0=50,y0=110,gw=w-100,bh=(h-y0-60)/4,bw=gw/2;
+      c.lineWidth=1.4;const D=['Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota','Neděle','Poznámky'];
+      D.forEach((d,k)=>{const x=x0+(k%2)*bw,y=y0+Math.floor(k/2)*bh;c.strokeRect(x,y,bw,bh);c.fillStyle=txt;c.font='600 20px Inter, sans-serif';c.textAlign='left';c.textBaseline='top';c.fillText(d,x+14,y+12);
+        c.beginPath();for(let ly=y+80;ly<y+bh-10;ly+=40){c.moveTo(x+14,ly);c.lineTo(x+bw-14,ly);}c.stroke();});
+      c.font='600 30px Lora, Georgia, serif';c.textBaseline='middle';c.fillText('Týden',x0,64);c.font='18px Inter, sans-serif';c.textAlign='right';c.fillText('od ____________  do ____________',x0+gw,64);break;}
     case 'music':{c.beginPath();for(let y0=140;y0<h-110;y0+=120){for(let k=0;k<5;k++){const y=y0+k*13;c.moveTo(60,y);c.lineTo(w-60,y);}}c.stroke();break;}
   }
   c.restore();
@@ -1671,7 +1683,7 @@ async function exportPDF(n){
 async function exportPNG(){const p=nb.pages[curPageIndex()];const c=await pageCanvas(p,2);c.toBlob(b=>saveFile(`${safeName(nb.title)} - strana ${curPageIndex()+1}.png`,b),'image/png');}
 async function exportBackup(n){const data=JSON.stringify({app:'span',v:1,notebook:Object.assign({},n,{pages:n.pages.map(p=>{const q=Object.assign({},p);delete q._top;delete q._left;return q;})})});await saveFile(safeName(n.title)+'.span.json',new Blob([data],{type:'application/json'}));}
 async function importBackup(file){
-  try{const j=JSON.parse(await readFile(file,'text'));const n=j.notebook||j;if(!n||!Array.isArray(n.pages))throw 0;
+  try{const j=JSON.parse(await readFile(file,'text'));if(j&&j.all&&Array.isArray(j.notebooks)){await importAll(j);return;}const n=j.notebook||j;if(!n||!Array.isArray(n.pages))throw 0;
     n.id=uid();n.updated=Date.now();if(!folderById(n.folder))n.folder=currentPlace().folder;if(!catById(n.cat))n.cat=null;n.pages.forEach(p=>{p.id=p.id||uid();p.items=(p.items||[]).map(finalizeLoaded);});
     await DB.put(n);notebooks.push(n);renderLib();toast('Záloha obnovena: '+n.title);
   }catch(e){toast('Soubor není platná záloha Span.');}
@@ -2053,36 +2065,69 @@ function searchNotebook(){
 const CALC_FN={sqrt:Math.sqrt,cbrt:Math.cbrt,sin:Math.sin,cos:Math.cos,tan:Math.tan,cot:x=>1/Math.tan(x),asin:Math.asin,acos:Math.acos,atan:Math.atan,arcsin:Math.asin,arccos:Math.acos,arctan:Math.atan,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,ln:Math.log,log:(x,b)=>b===undefined?Math.log10(x):Math.log(x)/Math.log(b),exp:Math.exp,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,nthroot:(x,n)=>x<0&&n%2===1?-Math.pow(-x,1/n):Math.pow(x,1/n),root:(x,n)=>x<0&&n%2===1?-Math.pow(-x,1/n):Math.pow(x,1/n),max:Math.max,min:Math.min};
 const CALC_CONST={pi:Math.PI,e:Math.E};
 function factorial(n){if(n<0||!Number.isInteger(n))throw new Error('Faktoriál jen pro přirozená čísla');let r=1;for(let i=2;i<=n;i++)r*=i;return r;}
-function calcEval(src,vars){
-  const V=vars||{};
-  let s=String(src).replace(/[×·⋅]/g,'*').replace(/[÷:]/g,'/').replace(/√/g,'sqrt').replace(/π/g,'pi').replace(/[−–]/g,'-').replace(/\*\*/g,'^');
+const CALC_SPECIAL={int:1,integral:1,der:1,derivace:1,sum:1,prod:1,lim:1};
+const calcCache=new Map();
+function calcCompile(src){
+  const key=String(src);const hit=calcCache.get(key);if(hit)return hit;
+  let s=key.replace(/[×·⋅]/g,'*').replace(/[÷:]/g,'/').replace(/√/g,'sqrt').replace(/π/g,'pi').replace(/∞/g,'inf').replace(/∫/g,'int').replace(/[−–]/g,'-').replace(/\*\*/g,'^');
   s=s.replace(/(\d),(\d)/g,'$1.$2').replace(/,/g,';').replace(/\s+/g,'').replace(/=+$/,'');
   if(!s)throw new Error('Prázdný příklad');
+  const NAMES=Object.keys(CALC_FN).concat(Object.keys(CALC_CONST),Object.keys(CALC_SPECIAL),['x','inf']).sort((a,b)=>b.length-a.length);
   const tk=[];let i=0;
   while(i<s.length){const r=s.slice(i);let m;
     if((m=/^(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?/.exec(r))){tk.push({t:'n',v:parseFloat(m[0])});i+=m[0].length;continue;}
     if((m=/^[a-zA-Z]+/.exec(r))){let w=m[0].toLowerCase();
-      // rozdělí např. „2pi“ i „sinx“ ne – podporujeme jen známá jména
-      if(!(w in CALC_FN)&&!(w in CALC_CONST)&&!(w in V)){const k=Object.keys(CALC_FN).concat(Object.keys(CALC_CONST),Object.keys(V)).sort((a,b)=>b.length-a.length).find(f=>w.startsWith(f));if(!k)throw new Error('Neznámý název „'+m[0]+'“');w=k;}
+      if(!NAMES.includes(w)){const k=NAMES.find(f=>w.startsWith(f));if(!k)throw new Error('Neznámý název „'+m[0]+'“');w=k;}
       tk.push({t:'id',v:w});i+=w.length;continue;}
     if('+-*/^()!;'.includes(r[0])){tk.push({t:r[0]});i++;continue;}
     throw new Error('Neznámý znak „'+r[0]+'“');}
   let p=0;const peek=()=>tk[p],eat=t=>{if(tk[p]&&tk[p].t===t){p++;return true;}return false;};
-  const expr=()=>{let v=term();for(;;){if(eat('+'))v+=term();else if(eat('-'))v-=term();else return v;}};
+  const expr=()=>{let f=term();for(;;){if(eat('+')){const a=f,b=term();f=e=>a(e)+b(e);}else if(eat('-')){const a=f,b=term();f=e=>a(e)-b(e);}else return f;}};
   const startsPrimary=x=>x&&(x.t==='n'||x.t==='id'||x.t==='(');
-  const term=()=>{let v=unary();for(;;){if(eat('*'))v*=unary();else if(eat('/')){const d=unary();v/=d;}else if(startsPrimary(peek()))v*=unary();else return v;}};
-  const unary=()=>{if(eat('-'))return -unary();if(eat('+'))return unary();return power();};
-  const power=()=>{const b=postfix();if(eat('^'))return Math.pow(b,unary());return b;};
-  const postfix=()=>{let v=primary();while(eat('!'))v=factorial(v);return v;};
+  const term=()=>{let f=unary();for(;;){let op;if(eat('*'))op=1;else if(eat('/'))op=2;else if(startsPrimary(peek()))op=1;else return f;const a=f,b=unary();f=op===1?e=>a(e)*b(e):e=>a(e)/b(e);}};
+  const unary=()=>{if(eat('-')){const a=unary();return e=>-a(e);}if(eat('+'))return unary();return power();};
+  const power=()=>{const b=postfix();if(eat('^')){const x=unary();return e=>Math.pow(b(e),x(e));}return b;};
+  const postfix=()=>{let f=primary();while(eat('!')){const a=f;f=e=>factorial(a(e));}return f;};
+  const args=()=>{const L=[expr()];while(eat(';'))L.push(expr());if(!eat(')'))throw new Error('Chybí závorka');return L;};
   const primary=()=>{const x=tk[p++];if(!x)throw new Error('Neúplný příklad');
-    if(x.t==='n')return x.v;
-    if(x.t==='('){const v=expr();if(!eat(')'))throw new Error('Chybí závorka');return v;}
-    if(x.t==='id'){if(x.v in V)return V[x.v];if(x.v in CALC_CONST&&!(peek()&&peek().t==='('))return CALC_CONST[x.v];
-      const f=CALC_FN[x.v];if(!f)throw new Error('Neznámá funkce');
-      if(eat('(')){const args=[expr()];while(eat(';'))args.push(expr());if(!eat(')'))throw new Error('Chybí závorka');return f(...args);}
-      return f(power());}
+    if(x.t==='n'){const v=x.v;return ()=>v;}
+    if(x.t==='('){const f=expr();if(!eat(')'))throw new Error('Chybí závorka');return f;}
+    if(x.t==='id'){
+      if(x.v==='x')return e=>{if(e.x===undefined)throw new Error('Obsahuje x – napište rovnici (… = …) nebo funkci y = …');return e.x;};
+      if(x.v==='inf')return ()=>Infinity;
+      if(x.v in CALC_SPECIAL){if(!eat('('))throw new Error('Za '+x.v+' chybí závorka');const A=args();return calcSpecial(x.v,A);}
+      if(x.v in CALC_CONST&&!(peek()&&peek().t==='(')){const v=CALC_CONST[x.v];return ()=>v;}
+      const fn=CALC_FN[x.v];if(!fn)throw new Error('Neznámá funkce');
+      if(eat('(')){const A=args();return e=>fn(...A.map(g=>g(e)));}
+      const a=power();return e=>fn(a(e));}
     throw new Error('Nečekaný znak „'+x.t+'“');};
-  const v=expr();if(p<tk.length)throw new Error('Nečekaný znak „'+(tk[p].t==='n'?tk[p].v:tk[p].t)+'“');
+  const f=expr();if(p<tk.length)throw new Error('Nečekaný znak „'+(tk[p].t==='n'?tk[p].v:tk[p].t)+'“');
+  if(calcCache.size>200)calcCache.clear();calcCache.set(key,f);return f;
+}
+function calcSpecial(name,A){const f0=calcSpecial0(name,A),dig=name==='lim'?8:name.startsWith('int')?9:10;return e=>{const v=f0(e);if(!isFinite(v))return v;return Math.abs(v)<1e-9?0:+v.toPrecision(dig);};}
+function calcSpecial0(name,A){
+  const need=n=>{if(A.length<n)throw new Error(name+': chybí argumenty (oddělte je středníkem)');};
+  const at=(f,e,x)=>f(Object.assign({},e,{x}));
+  if(name==='int'||name==='integral'){need(3);return e=>{const f=A[0];let a=A[1](e),b=A[2](e),sg=1;if(a>b){[a,b]=[b,a];sg=-1;}
+    const up=(c,dir)=>simpson(t=>{const u=1-t;return at(f,e,c+dir*t/u)/(u*u);},0,1-1e-12,20000);
+    if(!isFinite(a)&&!isFinite(b))return sg*(up(0,1)+up(0,-1));
+    if(!isFinite(b))return sg*up(a,1);if(!isFinite(a))return sg*up(b,-1);
+    return sg*simpson(t=>at(f,e,t),a,b,2000);};}
+  if(name==='der'||name==='derivace'){need(2);return e=>{const f=A[0],a=A[1](e),k=A[2]?Math.round(A[2](e)):1,h=1e-3*Math.max(1,Math.abs(a));
+    const d1=x=>(-at(f,e,x+2*h)+8*at(f,e,x+h)-8*at(f,e,x-h)+at(f,e,x-2*h))/(12*h);
+    if(k===1)return d1(a);if(k===2)return (-at(f,e,a+2*h)+16*at(f,e,a+h)-30*at(f,e,a)+16*at(f,e,a-h)-at(f,e,a-2*h))/(12*h*h);throw new Error('Derivace jen 1. nebo 2. řádu');};}
+  if(name==='sum'||name==='prod'){need(3);return e=>{const a=Math.ceil(A[1](e)),b=Math.floor(A[2](e));if(b-a>2e6)throw new Error('Příliš mnoho členů');let r=name==='sum'?0:1;for(let x=a;x<=b;x++){const v=at(A[0],e,x);r=name==='sum'?r+v:r*v;}return r;};}
+  if(name==='lim'){need(2);return e=>{const f=A[0],a=A[1](e);
+    if(!isFinite(a)){const s=Math.sign(a),v1=at(f,e,s*1e6),v2=at(f,e,s*1e8);if(Math.abs(v2)>1e9&&Math.abs(v2)>Math.abs(v1)*10)return Math.sign(v2)*Infinity;return v2;}
+    const side=dir=>{const v=[1e-4,1e-6,1e-8].map(h=>at(f,e,a+dir*h));if(Math.abs(v[2])>1e7&&Math.abs(v[2])>Math.abs(v[0])*10)return Math.sign(v[2])*Infinity;return v[2];};
+    const L=side(-1),R=side(1);
+    if(!isFinite(L)&&!isFinite(R)&&L===R)return L;
+    if(isFinite(L)&&isFinite(R)&&Math.abs(L-R)<1e-4*Math.max(1,Math.abs(L)))return (L+R)/2;
+    throw new Error('Limita neexistuje (zleva '+fmtNum(L)+', zprava '+fmtNum(R)+')');};}
+}
+function simpson(g,a,b,n){if(a===b)return 0;n+=n%2;const h=(b-a)/n;let s=g(a)+g(b);for(let i=1;i<n;i++)s+=(i%2?4:2)*g(a+i*h);const r=s*h/3;if(isNaN(r))throw new Error('Integrál nelze spočítat (funkce není na intervalu definovaná)');return r;}
+function calcEval(src,vars){
+  const v=calcCompile(src)(vars||{});
   if(typeof v!=='number'||isNaN(v))throw new Error('Výsledek není číslo');
   return v;
 }
@@ -2306,7 +2351,7 @@ function calcItems(page,items,frameBB){
     try{
       const img=await strokesImage(page,strokes);
       const r=await sf.json('Na obrázku je ručně psaný matematický příklad (může jít i o vysokoškolskou matematiku). Přepiš ho a spočítej. Odpověz pouze JSON objektem {"expr": "...", "result": "...", "latex": "..."}. '+
-        '"expr" je zápis pro kalkulačku: desetinná tečka, operátory + - * / ^, závorky, funkce sqrt(x), nthroot(x;n), sin cos tan asin acos atan ln log exp abs, konstanty pi a e, faktoriál n!, argumenty odděluj středníkem; zlomek zapiš jako (čitatel)/(jmenovatel). Pokud příklad končí „=“, vynech ho. Rovnici s neznámou x zachovej i s rovnítkem (např. x^2-5*x+6=0), funkci zapiš jako y=... (neznámá je vždy x). '+
+        '"expr" je zápis pro kalkulačku: desetinná tečka, operátory + - * / ^, závorky, funkce sqrt(x), nthroot(x;n), sin cos tan asin acos atan ln log exp abs, konstanty pi a e, faktoriál n!, argumenty odděluj středníkem; zlomek zapiš jako (čitatel)/(jmenovatel). Pokud příklad končí „=“, vynech ho. Rovnici s neznámou x zachovej i s rovnítkem (např. x^2-5*x+6=0), funkci zapiš jako y=... (neznámá je vždy x). Určitý integrál zapiš int(f;a;b), derivaci v bodě der(f;a), sumu sum(f;od;do), limitu lim(f;a) – proměnná je vždy x, nekonečno je inf. '+
         '"result" je výsledek jako krátký text s desetinnou čárkou (u derivací, integrálů, limit apod. i symbolický výsledek). Pokud příklad nejde přečíst, dej expr prázdný.',{images:[img],modelTier:'default'});
       if(!calcState||calcState.items!==strokes)return;
       if(r&&typeof r==='object'&&(r.expr||r.result)){calcState.src='claude';calcState.claudeResult=r.result?String(r.result):'';calcState.groups=null;showCalc(String(r.expr||''),'claude');}
@@ -3066,6 +3111,9 @@ function openHelp(){
 <li><b>Přesun objektů:</b> nástroj Laso – zakroužkujte, pak táhněte, zvětšujte za rohy a otáčejte horním úchytem. Přetažením na jinou stránku objekt přesunete tam.</li>
 <li><b>Rychlý přesun prstem:</b> podržte prst na čemkoli napsaném a rovnou to posouvejte.</li>
 <li><b>Rovnice a grafy:</b> do kalkulačky (orámovaný příklad nebo menu ⋯ → Kalkulačka a grafy funkcí) napište rovnici s x, např. x^2 − 5x + 6 = 0, a vyřeší ji. Funkci y = … vykreslí jako graf, který vložíte do stránky.</li>
+<li><b>Vyšší matematika:</b> int(x^2;0;1) – určitý integrál (i do inf), der(x^3;2) – derivace v bodě (der(f;a;2) druhá), sum(1/x^2;1;100) – součet, lim(sin(x)/x;0) – limita. Proměnná je vždy x.</li>
+<li><b>Tabulka a rozvrh:</b> menu ⋯ → Vložit tabulku nakreslí mřížku do stránky. V Pozadí stránky najdete šablony Rozvrh hodin a Týdenní plán.</li>
+<li><b>Záloha všeho:</b> v knihovně tlačítko ⋯ → Zálohovat celou knihovnu uloží všechny sešity, tabulky, složky i kategorie do jednoho souboru.</li>
 <li><b>Lepicí poznámky a nahrávky:</b> menu ⋯ → Lepicí poznámka vloží barevný papírek s textem. Nahrát zvuk spustí nahrávání přednášky, nahrávky najdete v menu ⋯ → Nahrávky.</li>
 <li><b>Prsty:</b> jeden prst posouvá, dva přibližují. Klepnutí dvěma prsty vrátí krok, třemi ho zopakuje. Dlaň při psaní perem se ignoruje.</li>
 <li><b>Kalkulačka:</b> napište příklad, nakreslete kolem něj rámeček (obdélník nebo kruh – podržením pera na konci se srovná) a klepněte na „Spočítat“. Funguje i přes laso. Umí + − × ÷, mocniny, odmocniny, zlomky, závorky i funkce (sin, ln, log…). Pokud příklad přečte špatně, opravte ho – vestavěné rozpoznávání se naučí váš rukopis.</li>
@@ -3077,6 +3125,42 @@ function openHelp(){
 <li><b>Opakované klepnutí na aktivní nástroj</b> otevře jeho volby (typ pera, režim gumy, tvary, písmo).</li>
 <li><b>Klávesy:</b> <span class="kbd">P</span> pero, <span class="kbd">H</span> zvýrazňovač, <span class="kbd">E</span> guma, <span class="kbd">L</span> laso, <span class="kbd">S</span> tvary, <span class="kbd">T</span> text, <span class="kbd">K</span> laser, <span class="kbd">Ctrl+Z</span> zpět. Na počítači otevře kolečko pravé tlačítko myši.</li></ul>`;},[{label:'Rozumím',cls:'primary',value:true}]);
 }
+/* ---------- tabulka do stránky ---------- */
+async function insertTable(){
+  if(!nb)return;let R=4,C=3;
+  const v=await modal('Vložit tabulku',b=>{
+    const mk=(lab,val,set)=>{const f=el('label',{class:'field'},'<span>'+lab+'</span>');const i=el('input',{type:'text',inputmode:'numeric',value:String(val)});i.oninput=()=>set(parseInt(i.value)||0);f.append(i);return f;};
+    const row=el('div');row.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px';row.append(mk('Řádky',R,x=>R=x),mk('Sloupce',C,x=>C=x));b.append(row);
+    b.append(el('p',{class:'lib-note'},'Tabulka se nakreslí čarami barvou nástroje Tvary. Lasem ji pak přesunete nebo zvětšíte a do buněk můžete psát perem.'));
+  },[{label:'Zrušit'},{label:'Vložit',cls:'primary',value:true}]);
+  if(!v)return;R=clamp(R||1,1,30);C=clamp(C||1,1,12);
+  const pg=nb.pages[curPageIndex()],tw=Math.min(pg.w-120,C*190),rh=60,th=R*rh;
+  const x0=Math.round(pg.w/2-tw/2),y0=clamp((H/2-oy)/z-pg._top-th/2,60,Math.max(60,pg.h-th-60));
+  const col=lum(T.shape.color)>0.85?'#1B2232':T.shape.color,ln=(a,b,c,d,w)=>finalize({t:'s',id:uid(),k:'sh',c:col,w,p:[[a,b,0.5],[c,d,0.5]]});
+  const its=[];for(let i=0;i<=R;i++)its.push(ln(x0,y0+i*rh,x0+tw,y0+i*rh,i===0||i===R?2.2:1.4));
+  for(let j=0;j<=C;j++)its.push(ln(x0+j*tw/C,y0,x0+j*tw/C,y0+th,j===0||j===C?2.2:1.4));
+  if(R>1)its.push(ln(x0,y0+rh+3,x0+tw,y0+rh+3,1.4));
+  clearSel();snapItems(pg);pg.items=pg.items.concat(its);changed();setTool('lasso');makeSel(pg,its.map(i=>i.id));render();
+}
+
+/* ---------- záloha celé knihovny ---------- */
+const stripNb=n=>Object.assign({},n,{pages:(n.pages||[]).map(p=>{const q=Object.assign({},p);delete q._top;delete q._left;return q;})});
+async function exportAll(){
+  const data=JSON.stringify({app:'span',v:1,all:true,lib,notebooks:notebooks.map(stripNb)});
+  const d=new Date(),ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  await saveFile('span-zaloha-'+ds+'.span.json',new Blob([data],{type:'application/json'}));store.set('lastBackup',Date.now());
+}
+async function importAll(j){
+  (j.lib&&j.lib.folders||[]).forEach(f=>{if(!lib.folders.some(x=>x.id===f.id))lib.folders.push(f);});
+  (j.lib&&j.lib.cats||[]).forEach(c=>{if(!lib.cats.some(x=>x.id===c.id))lib.cats.push(c);});
+  await saveLib();let n=0,skip=0;
+  for(const nbk of j.notebooks||[]){if(!nbk||!Array.isArray(nbk.pages))continue;
+    const ex=notebooks.find(x=>x.id===nbk.id);if(ex&&(ex.updated||0)>=(nbk.updated||0)){skip++;continue;}
+    nbk.pages.forEach(p=>{p.id=p.id||uid();p.items=(p.items||[]).map(finalizeLoaded);});
+    await DB.put(nbk);if(ex)notebooks.splice(notebooks.indexOf(ex),1,nbk);else notebooks.push(nbk);n++;}
+  renderLib();toast('Obnoveno '+items(n)+(skip?' · '+skip+' už bylo aktuálních':''));
+}
+
 /* ---------- lepicí poznámky ---------- */
 const STICKY=['#FFE58A','#FFC4D6','#BDE7FF','#C8F2C2','#E3D4FF','#FFD7A8'];
 function addSticky(color){
@@ -3147,7 +3231,7 @@ function closeTop(){const o=document.querySelectorAll('.modal-ov');const t=o[o.l
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('search','Hledat v sešitě',searchNotebook);it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('search','Hledat v sešitě',searchNotebook);it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -3173,7 +3257,7 @@ $('#bMore').onclick=e=>moreMenu(e.currentTarget);
 $('#bBack').onclick=closeNotebook;
 $('#bSide').onclick=()=>{LV.side=!LV.side;saveLV();renderLib();};
 $('#bLibAdd').onclick=e=>menuPop(e.currentTarget,[['quick','Rychlá poznámka',quickNote],['book','Nový sešit',newNotebook],['table','Nová tabulka (Excel)',()=>newSheetDoc()],['folderPlus','Nová složka',()=>editFolder()],['tag','Nová kategorie',()=>editCategory()],'-',['down','Importovat PDF, Excel nebo zálohu',importAny]]);
-$('#bLibMore').onclick=e=>menuPop(e.currentTarget,[['gear','Nastavení',openSettings],['help','Nápověda',openHelp]]);
+$('#bLibMore').onclick=e=>menuPop(e.currentTarget,[['down','Zálohovat celou knihovnu',exportAll],['up','Obnovit ze zálohy',()=>$('#fBak').click()],'-',['gear','Nastavení',openSettings],['help','Nápověda',openHelp]]);
 $('#fImg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)insertImage(f);};
 $('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   if(/\.json$/i.test(f.name)||f.type==='application/json')importBackup(f);
