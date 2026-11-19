@@ -2270,7 +2270,7 @@ const BASE_TPL=[
 ];
 let TPLC=null;
 const CALC_MAP={'×':'*','·':'*','÷':'/',':':'/','−':'-'};
-function tplClouds(){if(TPLC)return TPLC;TPLC=BASE_TPL.map(([s,st])=>({s,c:pcloud(st)}));(store.get('calcT',[])||[]).forEach(t=>TPLC.push({s:t.s,c:t.c,u:true}));
+function tplClouds(){if(TPLC)return TPLC;TPLC=BASE_TPL.map(([s,st])=>({s,c:pcloud(st)})).concat(hwBaseClouds().filter(t=>/^[0-9\/]$/.test(t.s)));(store.get('calcT',[])||[]).forEach(t=>TPLC.push({s:t.s,c:t.c,u:true}));
   (store.get('hwT',[])||[]).forEach(t=>{const ch=CALC_MAP[t.s]||t.s;if(/^[0-9+*/()]$/.test(ch))TPLC.push({s:ch,c:t.c.map(q=>({x:q[0],y:q[1],id:q[2]})),u:true});});return TPLC;}
 function bbOf(strokes){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;strokes.forEach(s=>s.forEach(q=>{x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}));return {x0,y0,x1,y1,w:x1-x0,h:y1-y0,cx:(x0+x1)/2,cy:(y0+y1)/2};}
 const median=a=>{const b=a.slice().sort((x,y)=>x-y);return b.length?b[b.length>>1]:0;};
@@ -2360,21 +2360,38 @@ function strokesImage(page,items){
   return new Promise(r=>c.toBlob(r,'image/png'));
 }
 
+function hwLines(strokes){
+  const bb=strokes.map(s=>bbOf([s]));const H=median(bb.map(b=>Math.max(b.h,b.w*0.5)))||30;
+  const big=[],small=[];bb.forEach((b,i)=>(b.h>0.4*H||b.w>1.2*H?big:small).push(i));
+  if(!big.length)return [strokes];
+  big.sort((a,b)=>bb[a].cy-bb[b].cy);const lines=[];
+  big.forEach(i=>{const b=bb[i];const L=lines.find(l=>{const t=median(l.t),bt=median(l.b),ov=Math.min(bt,b.y1)-Math.max(t,b.y0);return ov>0.25*Math.min(b.h,bt-t||b.h);});
+    if(L){L.idx.push(i);L.t.push(b.y0);L.b.push(b.y1);L.y0=Math.min(L.y0,b.y0);L.y1=Math.max(L.y1,b.y1);L.cy=(median(L.t)+median(L.b))/2;}else lines.push({idx:[i],t:[b.y0],b:[b.y1],cy:b.cy,y0:b.y0,y1:b.y1});});
+  small.forEach(i=>{const b=bb[i];let best=lines[0],bd=Infinity;lines.forEach(l=>{const d=b.y1<l.y0?l.y0-b.y1:b.y0>l.y1?(b.y0-l.y1)*1.6:0;if(d<bd){bd=d;best=l;}});best.idx.push(i);});
+  return lines.sort((a,b)=>a.cy-b.cy).map(l=>l.idx.sort((a,b)=>a-b).map(i=>strokes[i]));
+}
 async function hwToText(){
   if(!sel)return;const pg=sel.page,its=selItems().filter(i=>i.t==='s'&&i.k!=='hl');if(!its.length)return;
+  const lines=hwLines(its.map(it=>it.p.map(q=>[q[0],q[1]]))),Ls=lines.map(l=>hwLocal(l,0));
   const sf=await getSample();
-  if(!sf){toast('Převod rukopisu na text funguje v aplikaci na claude.ai – rozpoznává ho Claude.');return;}
-  toast('Převádím rukopis na text…',true);
-  try{
-    const img=await strokesImage(pg,its);
-    const r=await sf.json('Na obrázku je ručně psaný text (nejčastěji česky, může obsahovat matematiku). Přepiš ho přesně jako prostý text a zachovej zalomení řádků. Matematické symboly zapiš znaky Unicode (√, π, ², ³, ∫, ≤, ≥, ≠, ·). Odpověz pouze JSON {"text": "..."}.',{images:[img]});
-    const text=r&&r.text?String(r.text).trim():'';if(!text){toast('Text se nepodařilo přečíst.');return;}
-    let b=[1e9,1e9,-1e9,-1e9];its.forEach(it=>{const g=it.bb;b=[Math.min(b[0],g[0]),Math.min(b[1],g[1]),Math.max(b[2],g[2]),Math.max(b[3],g[3])];});
-    const lines=text.split('\n').length,s=clamp((b[3]-b[1])/lines*0.62,14,72);
-    const it={t:'x',id:uid(),x:b[0],y:b[1],w:clamp(b[2]-b[0]+60,160,pg.w-b[0]-10),s,c:its[0].c,f:'sans',text};
-    const ids=new Set(its.map(i=>i.id));snapItems(pg);pg.items=pg.items.filter(i=>!ids.has(i.id)).concat([it]);
-    clearSel();changed();render();makeSel(pg,[it.id]);toast('Převedeno na text – lze vrátit tlačítkem Zpět');
-  }catch(e){toast(e&&e.code==='not_granted'?'Převod vyžaduje povolení Clauda.':'Převod se nepodařil, zkuste to znovu.');}
+  const v=await modal('Převést rukopis na text',b=>{
+    const ta=el('textarea',{rows:String(clamp(lines.length+1,2,8)),spellcheck:'false'});ta.value=Ls.map(l=>l.text).join('\n');
+    ta.style.cssText='width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);font:500 17px var(--f-body);padding:10px 12px;resize:vertical';
+    const st=el('p',{class:'lib-note'},'Rozpoznáno offline. Zkontrolujte a případně opravte – z oprav se aplikace učí vaše písmo. Psací (spojené) písmo offline nečte.');
+    b.append(ta,st);
+    if(sf){const cb=el('button',{class:'btn'},ic('check')+'Zpřesnit Claudem (online)');cb.style.alignSelf='flex-start';
+      cb.onclick=async()=>{st.textContent='Rozpoznávám…';cb.disabled=true;try{const img=await strokesImage(pg,its);const r=await sf.json('Na obrázku je ručně psaný text (nejčastěji česky, může obsahovat matematiku). Přepiš ho přesně jako prostý text a zachovej zalomení řádků. Matematické symboly zapiš znaky Unicode (√, π, ², ³, ∫, ≤, ≥, ≠, ·). Odpověz pouze JSON {"text": "..."}.',{images:[img],modelTier:'default'});
+        const t=r&&r.text?String(r.text).trim():'';if(t){ta.value=t;st.textContent='Přečetl Claude – při převodu se z výsledku aplikace naučí.';}else st.textContent='Claude text nepřečetl.';}
+        catch(e){st.textContent=e&&e.code==='not_granted'?'Claude není povolen.':'Claude teď není dostupný.';}cb.disabled=false;};b.append(cb);}
+    setTimeout(()=>ta.focus(),40);
+  },[{label:'Zrušit'},{label:'Převést',cls:'primary',value:b=>b.querySelector('textarea').value}]);
+  const text=(v||'').replace(/\s+$/,'');if(!text.trim())return;
+  const tl=text.split('\n');let learned=0;if(tl.length===Ls.length)tl.forEach((t,i)=>learned+=hwLearn(Ls[i],t));
+  let b=[1e9,1e9,-1e9,-1e9];its.forEach(it=>{const g=it.bb;b=[Math.min(b[0],g[0]),Math.min(b[1],g[1]),Math.max(b[2],g[2]),Math.max(b[3],g[3])];});
+  const s=clamp((b[3]-b[1])/tl.length*0.62,14,72);
+  const it={t:'x',id:uid(),x:b[0],y:b[1],w:clamp(b[2]-b[0]+60,160,pg.w-b[0]-10),s,c:its[0].c,f:'sans',text};
+  const ids=new Set(its.map(i=>i.id));snapItems(pg);pg.items=pg.items.filter(i=>!ids.has(i.id)).concat([it]);
+  clearSel();changed();render();makeSel(pg,[it.id]);toast('Převedeno na text'+(learned?' · naučeno '+learned+' vzorů písma':'')+' – lze vrátit tlačítkem Zpět');
 }
 /* ---------- panel kalkulačky ---------- */
 let calcState=null;
@@ -2527,6 +2544,53 @@ function xlExtraFns(HF){
   const cs={MDETERM:'DETERMINANT',MINVERSE:'INVERZE',MUNIT:'MATICE.JEDNOTKOVÁ'};
   Object.assign(HF.languages.csCZ.functions,cs);
   HF.registerFunctionPlugin(SpanMatrix,{enGB:{MDETERM:'MDETERM',MINVERSE:'MINVERSE',MUNIT:'MUNIT'},csCZ:cs});
+  /* další funkce z novějšího Excelu */
+  const vals=m=>m instanceof SRV?m.data.flat():[m];
+  const isNum=v=>typeof v==='number'||(v&&typeof v==='object'&&typeof v.val==='number');
+  const num=v=>typeof v==='number'?v:(v&&typeof v.val==='number'?v.val:NaN);
+  const pairs=(ys,xs)=>{const a=vals(ys),b=vals(xs);if(a.length!==b.length)return null;const P=[];a.forEach((y,i)=>{if(isNum(y)&&isNum(b[i]))P.push([num(b[i]),num(y)]);});return P;};
+  const lin=P=>{const n=P.length;if(n<2)return null;let sx=0,sy=0;P.forEach(([x,y])=>{sx+=x;sy+=y;});const mx=sx/n,my=sy/n;let sxy=0,sxx=0;P.forEach(([x,y])=>{sxy+=(x-mx)*(y-my);sxx+=(x-mx)**2;});if(!sxx)return null;const k=sxy/sxx;return {k,q:my-k*mx};};
+  const NA=()=>new CellError(ErrorType.NA,'Hodnota nenalezena'),DIV=()=>new CellError(ErrorType.DIV_BY_ZERO,'Málo dat');
+  const eqv=(a,b)=>typeof a==='string'&&typeof b==='string'?a.toLowerCase()===b.toLowerCase():num(a)===num(b)&&isNum(a)&&isNum(b)||a===b;
+  const litSize=(ast,i,def)=>{const a=ast.args[i];if(!a)return def;return a.type==='NUMBER'?Math.trunc(a.value):null;};
+  const arrSt=st=>Object.assign(Object.create(Object.getPrototypeOf(st)),st,{arraysFlag:true});
+  class SpanModern extends FunctionPlugin{
+    xlookup(ast,state){return this.runFunction(ast.args,state,this.metadata('XLOOKUP'),(key,look,ret,nf)=>{const L=vals(look),R=ret.data;const i=L.findIndex(v=>eqv(v,key));if(i<0)return nf===undefined?NA():nf;
+      const flat=R.length===1?R[0]:R.map(r=>r[0]);if(R.length>1&&R[0].length>1&&look.height()===1)return R[0][i]??NA();return flat[i]===undefined?NA():flat[i];});}
+    textjoin(ast,state){return this.runFunction(ast.args,state,this.metadata('TEXTJOIN'),(d,ign,...rest)=>{const out=[];rest.forEach(a=>vals(a).forEach(v=>{if(typeof v==='symbol'||v===null||v===undefined)v='';if(ign&&v==='')return;out.push(isNum(v)?String(num(v)).replace('.',','):String(v));}));return out.join(d);});}
+    intercept(ast,state){return this.runFunction(ast.args,state,this.metadata('INTERCEPT'),(y,x)=>{const P=pairs(y,x);if(!P)return NA();const r=lin(P);return r?r.q:DIV();});}
+    forecast(ast,state){return this.runFunction(ast.args,state,this.metadata('FORECAST'),(x0,y,x)=>{const P=pairs(y,x);if(!P)return NA();const r=lin(P);return r?r.q+r.k*x0:DIV();});}
+    linest(ast,state){return this.runFunction(ast.args,state,this.metadata('LINEST'),(y,x)=>{const P=pairs(y,x);if(!P)return NA();const r=lin(P);return r?SRV.onlyNumbers([[r.k,r.q]]):DIV();});}
+    linestSize(){return new ArraySize(2,1);}
+    irr(ast,state){return this.runFunction(ast.args,state,this.metadata('IRR'),(m,g)=>{const c=vals(m).filter(isNum).map(num);if(c.length<2)return DIV();let r=g;
+      for(let it=0;it<200;it++){let f=0,df=0;c.forEach((v,t)=>{f+=v/Math.pow(1+r,t);df-=t*v/Math.pow(1+r,t+1);});if(!df)break;const nr=r-f/df;if(!isFinite(nr))break;if(Math.abs(nr-r)<1e-10)return nr;r=nr;}
+      return new CellError(ErrorType.NUM,'Výpočet nekonverguje');});}
+    sequence(ast,state){return this.runFunction(ast.args,state,this.metadata('SEQUENCE'),(r,c,st,sp)=>{r=Math.trunc(r);c=Math.trunc(c);const o=[];for(let i=0;i<r;i++){o.push([]);for(let j=0;j<c;j++)o[i].push(st+(i*c+j)*sp);}return SRV.onlyNumbers(o);});}
+    sequenceSize(ast){const r=litSize(ast,0,1),c=litSize(ast,1,1);if(!r||!c||r<1||c<1||r*c>1e5)return ArraySize.error();return new ArraySize(c,r);}
+    sort(ast,state){return this.runFunction(ast.args,state,this.metadata('SORT'),(m,idx,ord)=>{const rows=m.data.map(r=>r.slice());const k=Math.max(0,Math.trunc(idx)-1),o=ord<0?-1:1;
+      const key=v=>typeof v==='symbol'?[3,0]:isNum(v)?[0,num(v)]:typeof v==='string'?[1,v.toLowerCase()]:typeof v==='boolean'?[2,+v]:[3,0];
+      rows.sort((a,b)=>{const A=key(a[k]),B=key(b[k]);if(A[0]!==B[0])return A[0]-B[0];return (A[1]<B[1]?-1:A[1]>B[1]?1:0)*o;});return SRV.onlyValues(rows);});}
+    sortSize(ast,state){const r=this.arraySizeForAst(ast.args[0],arrSt(state));return new ArraySize(r.width,r.height);}
+    frequency(ast,state){return this.runFunction(ast.args,state,this.metadata('FREQUENCY'),(d,b)=>{const D=vals(d).filter(isNum).map(num),B=vals(b).filter(isNum).map(num);const S=B.map((v,i)=>[v,i]).sort((x,y)=>x[0]-y[0]);const out=new Array(B.length+1).fill(0);
+      D.forEach(v=>{const j=S.find(([lim])=>v<=lim);out[j?j[1]:B.length]++;});return SRV.onlyNumbers(out.map(v=>[v]));});}
+    frequencySize(ast,state){if(ast.args.length!==2)return ArraySize.error();const r=this.arraySizeForAst(ast.args[1],arrSt(state));return new ArraySize(1,r.width*r.height+1);}
+  }
+  const R=FA.RANGE,N=FA.NUMBER,Any=FA.ANY;
+  SpanModern.implementedFunctions={
+    XLOOKUP:{method:'xlookup',parameters:[{argumentType:Any},{argumentType:R},{argumentType:R},{argumentType:Any,optionalArg:true}],vectorizationForbidden:true},
+    TEXTJOIN:{method:'textjoin',parameters:[{argumentType:FA.STRING},{argumentType:FA.BOOLEAN},{argumentType:Any}],repeatLastArgs:1,vectorizationForbidden:true},
+    INTERCEPT:{method:'intercept',parameters:[{argumentType:R},{argumentType:R}],vectorizationForbidden:true},
+    FORECAST:{method:'forecast',parameters:[{argumentType:N},{argumentType:R},{argumentType:R}]},
+    'FORECAST.LINEAR':{method:'forecast',parameters:[{argumentType:N},{argumentType:R},{argumentType:R}]},
+    LINEST:{method:'linest',arraySizeMethod:'linestSize',parameters:[{argumentType:R},{argumentType:R}],vectorizationForbidden:true},
+    IRR:{method:'irr',parameters:[{argumentType:R},{argumentType:N,defaultValue:0.1}],vectorizationForbidden:true},
+    SEQUENCE:{method:'sequence',arraySizeMethod:'sequenceSize',parameters:[{argumentType:N},{argumentType:N,defaultValue:1},{argumentType:N,defaultValue:1},{argumentType:N,defaultValue:1}]},
+    SORT:{method:'sort',arraySizeMethod:'sortSize',parameters:[{argumentType:R},{argumentType:N,defaultValue:1},{argumentType:N,defaultValue:1}],vectorizationForbidden:true},
+    FREQUENCY:{method:'frequency',arraySizeMethod:'frequencySize',parameters:[{argumentType:R},{argumentType:R}],vectorizationForbidden:true},
+  };
+  const cs2={XLOOKUP:'XLOOKUP',TEXTJOIN:'TEXTJOIN',INTERCEPT:'INTERCEPT',FORECAST:'FORECAST','FORECAST.LINEAR':'FORECAST.LINEAR',LINEST:'LINREGRESE',IRR:'MÍRA.VÝNOSNOSTI',SEQUENCE:'SEQUENCE',SORT:'SORT',FREQUENCY:'ČETNOSTI'};
+  Object.assign(HF.languages.csCZ.functions,cs2);
+  HF.registerFunctionPlugin(SpanModern,{enGB:Object.fromEntries(Object.keys(cs2).map(k=>[k,k])),csCZ:cs2});
 }
 /* ---------- překlad vzorců mezi Excelem (anglicky) a českým zápisem ---------- */
 let FN_EN2CS=null,FN_CS2EN=null;
@@ -2576,7 +2640,7 @@ function rawText(r,c){
   return String(s);
 }
 function parseInput(raw){
-  const s=String(raw==null?'':raw);if(s==='')return {val:null};if(s[0]==='=')return {val:s};
+  const s=String(raw==null?'':raw);if(s==='')return {val:null};if(s[0]==='=')return {val:s.split('"').map((x,i)=>i%2?x:x.replace(/(^|[^A-Za-zÀ-ž0-9_.])(PRAVDA|NEPRAVDA)(?![A-Za-zÀ-ž0-9_.(])/gi,(m,p,w)=>p+w.toUpperCase()+'()')).join('"')};
   const t=s.trim(),num=x=>parseFloat(x.replace(/[\s ]/g,'').replace(',','.'));
   let m=t.match(/^(-?[\d\s ]*\d(?:,\d+)?)\s?%$/);if(m)return {val:num(m[1])/100,nf:'pct'};
   m=t.match(/^(-?[\d\s ]*\d(?:,\d+)?)\s?(Kč|,-)$/i);if(m)return {val:num(m[1]),nf:'czk'};
@@ -2897,7 +2961,7 @@ function autoSum(){
 }
 
 /* ---------- funkce (fx) ---------- */
-const XL_FN=[['SUM','součet čísel'],['AVERAGE','průměr'],['MIN','nejmenší hodnota'],['MAX','největší hodnota'],['COUNT','počet čísel'],['COUNTA','počet neprázdných buněk'],['IF','podmínka: KDYŽ(test;pravda;nepravda)'],['IFERROR','náhradní hodnota při chybě'],['AND','všechny podmínky platí'],['OR','aspoň jedna podmínka platí'],['ROUND','zaokrouhlení na počet míst'],['ROUNDUP','zaokrouhlení nahoru'],['ROUNDDOWN','zaokrouhlení dolů'],['ABS','absolutní hodnota'],['SQRT','druhá odmocnina'],['POWER','mocnina'],['PRODUCT','součin'],['MEDIAN','medián'],['STDEV.S','směrodatná odchylka (výběr)'],['STDEV.P','směrodatná odchylka (populace)'],['VAR.S','rozptyl (výběr)'],['COUNTIF','počet buněk splňujících podmínku'],['SUMIF','součet buněk splňujících podmínku'],['AVERAGEIF','průměr buněk splňujících podmínku'],['VLOOKUP','svislé vyhledání v tabulce'],['HLOOKUP','vodorovné vyhledání'],['INDEX','hodnota na pozici'],['MATCH','pozice hodnoty'],['PI','číslo π'],['SIN','sinus (radiány)'],['COS','kosinus (radiány)'],['TAN','tangens (radiány)'],['ASIN','arkus sinus'],['ACOS','arkus kosinus'],['ATAN','arkus tangens'],['ATAN2','úhel z x a y'],['RADIANS','stupně na radiány'],['DEGREES','radiány na stupně'],['LN','přirozený logaritmus'],['LOG10','dekadický logaritmus'],['EXP','e na x'],['MOD','zbytek po dělení'],['INT','celá část'],['TODAY','dnešní datum'],['NOW','datum a čas'],['CONCATENATE','spojení textů'],['LEN','délka textu'],['UPPER','velká písmena'],['TRIM','odstranění mezer'],['MMULT','součin matic – vyplní celou oblast'],['MINVERSE','inverzní matice'],['MDETERM','determinant matice'],['TRANSPOSE','transponovaná matice'],['MUNIT','jednotková matice n×n'],['SUMPRODUCT','skalární součin'],['CORREL','korelace'],['SLOPE','směrnice regrese'],['NORM.DIST','normální rozdělení'],['T.TEST','t-test']];
+const XL_FN=[['SUM','součet čísel'],['AVERAGE','průměr'],['MIN','nejmenší hodnota'],['MAX','největší hodnota'],['COUNT','počet čísel'],['COUNTA','počet neprázdných buněk'],['IF','podmínka: KDYŽ(test;pravda;nepravda)'],['IFERROR','náhradní hodnota při chybě'],['AND','všechny podmínky platí'],['OR','aspoň jedna podmínka platí'],['ROUND','zaokrouhlení na počet míst'],['ROUNDUP','zaokrouhlení nahoru'],['ROUNDDOWN','zaokrouhlení dolů'],['ABS','absolutní hodnota'],['SQRT','druhá odmocnina'],['POWER','mocnina'],['PRODUCT','součin'],['MEDIAN','medián'],['STDEV.S','směrodatná odchylka (výběr)'],['STDEV.P','směrodatná odchylka (populace)'],['VAR.S','rozptyl (výběr)'],['COUNTIF','počet buněk splňujících podmínku'],['SUMIF','součet buněk splňujících podmínku'],['AVERAGEIF','průměr buněk splňujících podmínku'],['VLOOKUP','svislé vyhledání v tabulce'],['HLOOKUP','vodorovné vyhledání'],['INDEX','hodnota na pozici'],['MATCH','pozice hodnoty'],['PI','číslo π'],['SIN','sinus (radiány)'],['COS','kosinus (radiány)'],['TAN','tangens (radiány)'],['ASIN','arkus sinus'],['ACOS','arkus kosinus'],['ATAN','arkus tangens'],['ATAN2','úhel z x a y'],['RADIANS','stupně na radiány'],['DEGREES','radiány na stupně'],['LN','přirozený logaritmus'],['LOG10','dekadický logaritmus'],['EXP','e na x'],['MOD','zbytek po dělení'],['INT','celá část'],['TODAY','dnešní datum'],['NOW','datum a čas'],['CONCATENATE','spojení textů'],['LEN','délka textu'],['UPPER','velká písmena'],['TRIM','odstranění mezer'],['MMULT','součin matic – vyplní celou oblast'],['MINVERSE','inverzní matice'],['MDETERM','determinant matice'],['TRANSPOSE','transponovaná matice'],['MUNIT','jednotková matice n×n'],['XLOOKUP','vyhledání hodnoty (nástupce SVYHLEDAT)'],['TEXTJOIN','spojení textů s oddělovačem'],['SEQUENCE','řada čísel'],['SORT','seřazení oblasti'],['FREQUENCY','četnosti v intervalech'],['LINEST','lineární regrese: směrnice a úsek'],['FORECAST','lineární předpověď'],['INTERCEPT','úsek regresní přímky'],['IRR','vnitřní výnosové procento'],['SUMPRODUCT','skalární součin'],['CORREL','korelace'],['SLOPE','směrnice regrese'],['NORM.DIST','normální rozdělení'],['T.TEST','t-test']];
 function fxMenu(anchor){
   openPop(anchor,p=>{
     p.style.width='330px';p.append(el('h4',{},'Vložit funkci'));
@@ -3058,7 +3122,7 @@ const HW_BASE={"0":["15,8,10,15,6,23,3,32,2,42,1,51,0,60,0,69,0,79,3,87,9,93,18,
 let HWTC=null,HWB=null;
 const hwT=()=>store.get('hwT',[])||[];
 function hwBaseClouds(){if(HWB)return HWB;HWB=[];for(const ch in HW_BASE)for(const smp of HW_BASE[ch]){const st=smp.split(';').map(x=>{const a=x.split(',').map(Number),p=[];for(let i=0;i<a.length;i+=2)p.push([a[i],a[i+1]]);return p;});HWB.push({s:ch,c:pcloud(st)});}return HWB;}
-function hwTpl(){if(HWTC)return HWTC;HWTC=tplClouds().concat(hwBaseClouds());hwT().forEach(t=>HWTC.push({s:t.s,c:t.c.map(q=>({x:q[0],y:q[1],id:q[2]})),r:t.r,u:2}));return HWTC;}
+function hwTpl(){if(HWTC)return HWTC;HWTC=tplClouds().concat(hwBaseClouds().filter(t=>!/^[0-9\/]$/.test(t.s)));hwT().forEach(t=>HWTC.push({s:t.s,c:t.c.map(q=>({x:q[0],y:q[1],id:q[2]})),r:t.r,u:2}));return HWTC;}
 function hwSave(T){while(T.length>2500)T.shift();store.set('hwT',T);HWTC=null;TPLC=null;}
 function hwAddTpl(T,ch,pc,r){const same=T.filter(t=>t.s===ch);if(same.length>=12)T.splice(T.indexOf(same[0]),1);T.push({s:ch,c:pc.map(q=>[+q.x.toFixed(3),+q.y.toFixed(3),q.id]),r:+r.toFixed(3)});}
 function hwRank(strokes,r){
@@ -3102,9 +3166,9 @@ function hwCompose(ch,marks){
   return ch;
 }
 const isDigitish=c=>/^[0-9.,+\-·×:\/=%()]$/.test(c),isLetter=c=>/^\p{L}$/u.test(c);
-function hwLocal(strokes){
+function hwLocal(strokes,refH){
   const out={text:'',groups:[]};if(!strokes.length)return out;
-  const padH=$('#hwC').getBoundingClientRect().height||200;
+  const padH=refH===undefined?($('#hwC').getBoundingClientRect().height||200):refH;
   const bbs=strokes.map(s=>bbOf([s]));const Hraw=median(bbs.filter(b=>b.h>b.w*0.4).map(b=>b.h))||median(bbs.map(b=>Math.max(b.w,b.h)))||40;
   const idx=strokes.map((s,i)=>i).sort((a,b)=>bbs[a].x0-bbs[b].x0),groups=[];
   idx.forEach(i=>{const b=bbs[i];
@@ -3120,9 +3184,9 @@ function hwLocal(strokes){
     if(n<=2&&b.w>2.6*b.h&&b.h<0.5*H){let ch='-';if(n===2){const[a,c]=g.strokes.map(x=>bbOf([x]));if(Math.abs(a.cy-c.cy)>0.12*H)ch='=';}return {fixed:ch,b,g};}
     const sp=hwSplitMarks(g.strokes,H),bb=bbOf(sp.body),bsz=Math.max(bb.w,bb.h);
     if(bsz<0.28*H)return {fixed:hwCompose('.',sp.marks),b,bb,g,marks:sp.marks};
-    const rk=hwRank(sp.body,bb.h/padH);if(bsz>0.35*H){const f=rk.cands.filter(c=>!/^[.,'·:]$/.test(c.s));if(f.length)rk.cands=f;}
+    const rk=hwRank(sp.body,padH?bb.h/padH:0);if(bsz>0.35*H){const f=rk.cands.filter(c=>!/^[.,'·:]$/.test(c.s));if(f.length)rk.cands=f;}
     if(sp.marks[0]==='dot'&&bb.w<0.45*bb.h&&!rk.cands.slice(0,3).some(c=>/^[jJ]$/.test(c.s)))rk.cands.unshift({s:'i',d:rk.cands[0].d});
-    return {cands:rk.cands,pc:rk.pc,ch:rk.cands[0].s,d:rk.cands[0].d,r:bb.h/padH,b,bb,g,marks:sp.marks};});
+    return {cands:rk.cands,pc:rk.pc,ch:rk.cands[0].s,d:rk.cands[0].d,r:padH?bb.h/padH:0,b,bb,g,marks:sp.marks};});
   const base=median(R.filter(x=>(x.bb||x.b).h>0.5*H).map(x=>(x.bb||x.b).y1))||0;
   for(const x of R)if(x.fixed&&x.fixed==='.'&&x.b.h>x.b.w*1.4&&x.b.cy>base-0.15*H)x.fixed=',';
   // kontext: čísla vs. písmena
@@ -3456,6 +3520,8 @@ function openHelp(){
 <li><b>Vyšší matematika:</b> int(x^2;0;1) – určitý integrál (i do inf), der(x^3;2) – derivace v bodě (der(f;a;2) druhá), sum(1/x^2;1;100) – součet, lim(sin(x)/x;0) – limita. Proměnná je vždy x.</li>
 <li><b>Tabulka a rozvrh:</b> menu ⋯ → Vložit tabulku nakreslí mřížku do stránky. V Pozadí stránky najdete šablony Rozvrh hodin a Týdenní plán.</li>
 <li><b>Psaní rukou v tabulce:</b> tlačítko s perem v liště tabulky otevře dole panel. Napište perem text nebo vzorec (např. =SUMA(A1:A5) nebo α = 0,05), po chvilce se převede na znaky a Vložit do buňky ho zapíše a posune se o řádek níž. Rozpoznávání běží offline (číslice, písmena, česká diakritika, matematické znaky – pište znaky odděleně) a učí se vaše písmo: tlačítkem Aa ho natrénujete a každá oprava před vložením se uloží jako nový vzor. Volitelně ho v menu Aa zpřesní Claude. Guma (nebo tlačítko na peru) maže celé tahy. Nad panelem je řada speciálních znaků (řecká písmena, matematika, indexy ², ₁, jednotky) – klepnutím se přidají do buňky.</li>
+<li><b>Rukopis na text (i offline):</b> označte psaný text lasem a klepněte na T. Text se rozpozná přímo v zařízení, zobrazí se k opravě a z oprav se aplikace učí vaše písmo. Tlačítko Zpřesnit Claudem pomůže u psacího písma (online).</li>
+<li><b>Další funkce tabulek:</b> XLOOKUP, TEXTJOIN, SORT, SEQUENCE, ČETNOSTI, LINREGRESE, FORECAST, INTERCEPT, MÍRA.VÝNOSNOSTI.</li>
 <li><b>Matice v tabulce:</b> SOUČIN.MATIC, INVERZE, DETERMINANT, TRANSPOZICE, MATICE.JEDNOTKOVÁ – výsledek se sám rozlije do sousedních buněk (napište vzorec jen do levé horní buňky).</li>
 <li><b>Obrázky v tabulce:</b> v tabulce tlačítko s obrázkem vloží fotku z galerie nebo z fotoaparátu. Táhnutím ji přesunete, za kulatý roh zvětšíte. Graf z označených dat jde vložit přímo do listu.</li>
 <li><b>Záloha všeho:</b> v knihovně tlačítko ⋯ → Zálohovat celou knihovnu uloží všechny sešity, tabulky, složky i kategorie do jednoho souboru.</li>

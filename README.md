@@ -14,6 +14,8 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - **Tabulky jako v Excelu**: české vzorce (=SUMA, =PRŮMĚR, =KDYŽ… přes HyperFormula), více listů, formáty čísel, vyplňování táhlem, řazení, grafy, import/export .xlsx a .csv.
 - **Kalkulačka rukopisu**: orámujte příklad (nebo laso) → „Spočítat“; rozpoznává Claude (v claude.ai) nebo vestavěný rozpoznávač, který se učí z oprav. Řeší rovnice s neznámou x, kreslí grafy funkcí (y = …) a počítá integrály, derivace, sumy a limity.
 - **Psaní rukou v tabulce** (převod na text/vzorec, offline rozpoznávání, které se učí vaše písmo, guma) a řada speciálních znaků α β Δ ² ₁ √ ≤ °.
+- **Offline převod rukopisu na text** v sešitě (lasem → T), s učením z oprav.
+- **Moderní funkce Excelu**: XLOOKUP, TEXTJOIN, SORT, SEQUENCE, ČETNOSTI, LINREGRESE, FORECAST, INTERCEPT, MÍRA.VÝNOSNOSTI.
 - **Matice**: SOUČIN.MATIC, INVERZE, DETERMINANT, TRANSPOZICE, MATICE.JEDNOTKOVÁ (výsledek se rozlije do buněk).
 - Offline rozpoznávání písma používá vzorky znaků z balíčku millirec (MIT, © 2026 Robert Wilcox) – převzata jsou jen data.
 - **Obrázky a grafy přímo v listu tabulky** (přesun, změna velikosti, vrácení zpět).
