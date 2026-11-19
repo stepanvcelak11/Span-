@@ -293,6 +293,12 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .xtab{height:36px;padding:0 16px;border:0;border-radius:8px;background:transparent;font-weight:600;color:var(--muted);white-space:nowrap;flex:none}
 .xtab[aria-current="true"]{background:var(--surface);color:var(--xl);box-shadow:inset 0 -3px 0 var(--xl)}
 .xl-tabs .ib{width:36px;height:36px;color:var(--xl)}
+.xl-img{position:absolute;z-index:2;touch-action:none;cursor:move;box-sizing:border-box}
+.xl-img img{width:100%;height:100%;display:block;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.xl-img.on{outline:2px solid var(--xl);outline-offset:1px}
+.xl-img-h{position:absolute;right:-11px;bottom:-11px;width:22px;height:22px;border-radius:50%;background:var(--xl);border:3px solid var(--surface);box-sizing:border-box;cursor:nwse-resize;touch-action:none}
+.xl-img-bar{position:absolute;left:0;top:-50px;display:flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.xl-img-bar .ib{width:38px;height:38px}.xl-img-bar .ib.del{color:var(--danger)}
 /* kalkulačka */
 .calc{position:absolute;z-index:8;width:min(340px,calc(100vw - 24px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
 .calc-h{display:flex;align-items:center;gap:8px;font-size:15px}.calc-h .grow{flex:1}.calc-h .ib{width:34px;height:34px}.calc-h>svg{color:var(--accent-2)}
@@ -445,6 +451,7 @@ input[type=range]{accent-color:var(--accent)}
       <button class="ib" id="xlSum" title="Automatický součet" aria-label="Automatický součet"></button>
       <button class="ib" id="xlFn" title="Vložit funkci" aria-label="Vložit funkci"></button>
       <button class="ib" id="xlChart" title="Graf z označených dat" aria-label="Graf"></button>
+      <button class="ib" id="xlImgB" title="Vložit obrázek" aria-label="Vložit obrázek"></button>
       <span class="vsep2"></span>
       <button class="ib" id="xlBd" title="Ohraničení" aria-label="Ohraničení"></button>
       <button class="ib" id="xlFz" title="Ukotvit řádky a sloupce" aria-label="Ukotvit"></button>
@@ -467,6 +474,7 @@ input[type=range]{accent-color:var(--accent)}
         <div class="xl-body" id="xlBody"></div>
         <div class="xl-selbox" id="xlSel"><i class="xl-fill" id="xlFill"></i></div>
         <div class="xl-fillbox" id="xlFillBox" hidden></div>
+        <div id="xlImgs"></div>
         <input class="xl-ed" id="xlEd" type="text" autocomplete="off" spellcheck="false" hidden aria-label="Úprava buňky">
       </div>
     </div>
@@ -475,6 +483,7 @@ input[type=range]{accent-color:var(--accent)}
   <input type="file" id="fImg" accept="image/*" hidden>
   <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
   <input type="file" id="fPdf" accept="application/pdf,.pdf,.json,application/json,.xlsx,.xls,.ods,.csv" hidden>
+  <input type="file" id="fXlImg" accept="image/*" hidden>
   <input type="file" id="fBak" accept=".json,application/json" hidden>
   <div id="toast" hidden role="status"></div>
 </div>
@@ -2515,13 +2524,14 @@ function parseInput(raw){
 }
 
 /* ---------- historie (obsah přes HyperFormula, formát a šířky sloupců zvlášť) ---------- */
-function xlSnap(hf){XL.undo.push({hf,sheet:XL.sheet,fmt:JSON.stringify(SH().fmt),colW:JSON.stringify(SH().colW),rows:SH().rows,cols:SH().cols});if(XL.undo.length>300)XL.undo.shift();XL.redo=[];xlUndoUI();}
+const imgCopy=()=>(SH().imgs||[]).map(o=>Object.assign({},o));
+function xlSnap(hf){XL.undo.push({hf,imgs:imgCopy(),sheet:XL.sheet,fmt:JSON.stringify(SH().fmt),colW:JSON.stringify(SH().colW),rows:SH().rows,cols:SH().cols});if(XL.undo.length>300)XL.undo.shift();XL.redo=[];xlUndoUI();}
 function xlHist(from,to,isUndo){
   xlCancel();const e=from.pop();if(!e){toast(isUndo?'Není co vrátit':'Není co opakovat');return;}
   if(e.sheet!==XL.sheet)xlSwitch(e.sheet,true);
-  to.push({hf:e.hf,n:e.n,sheet:e.sheet,fmt:JSON.stringify(SH().fmt),colW:JSON.stringify(SH().colW),rows:SH().rows,cols:SH().cols});
+  to.push({hf:e.hf,n:e.n,imgs:imgCopy(),sheet:e.sheet,fmt:JSON.stringify(SH().fmt),colW:JSON.stringify(SH().colW),rows:SH().rows,cols:SH().cols});
   if(e.hf){for(let i=0;i<(e.n||1);i++){try{isUndo?XL.hf.undo():XL.hf.redo();}catch(err){}}}
-  Object.assign(SH(),{fmt:JSON.parse(e.fmt),colW:JSON.parse(e.colW),rows:e.rows,cols:e.cols});
+  if(e.imgs)SH().imgs=e.imgs;xlImgSel=null;Object.assign(SH(),{fmt:JSON.parse(e.fmt),colW:JSON.parse(e.colW),rows:e.rows,cols:e.cols});
   xlLayout();xlRender();xlChanged();xlUndoUI();
 }
 const xlUndo=()=>xlHist(XL.undo,XL.redo,true), xlRedo=()=>xlHist(XL.redo,XL.undo,false);
@@ -2594,6 +2604,7 @@ function xlLayout(){
   let h=`<div class="xl-chr"><div class="xl-corner" style="width:${XL.HW}px"></div>`;
   for(let c=0;c<sh.cols;c++)h+=`<div class="xh" data-c="${c}" style="width:${colW(c)}px${c<fz.c?`;position:sticky;left:${xs[c]}px;z-index:4;background:var(--surface-2)`:''}">${colName(c)}<i class="grip" data-grip="${c}"></i></div>`;
   $('#xlCH').innerHTML=h+'</div><div id="xlFzRows"></div>';
+  xlImgs();
 }
 function xlRowHtml(r,cols,frozen){
   const sh=SH(),id=sid(),s=selN(),fz=sh.fz||{r:0,c:0};
@@ -2861,7 +2872,7 @@ async function xlChart(){
   const COL=['#1E7145','#2D5BD3','#D9822B','#B23A48','#6C4AB6','#3A86A8','#C2255C','#8A6D3B'];
   for(let c=cs;c<=s.c2;c++){const d=[];for(let r=rs;r<=s.r2;r++){const v=val(r,c);d.push(typeof v==='number'?v:null);}sets.push({label:hdr?String(val(s.r1,c)??colName(c)):colName(c),data:d,backgroundColor:COL[(c-cs)%COL.length],borderColor:COL[(c-cs)%COL.length],borderWidth:2});}
   let chart=null,type='bar';
-  const ink=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#222',line=getComputedStyle(document.documentElement).getPropertyValue('--line').trim()||'#ddd';
+  const ink=getComputedStyle(document.body).getPropertyValue('--ink').trim()||'#222',line=getComputedStyle(document.body).getPropertyValue('--line').trim()||'#ddd';
   const build=cv=>{if(chart)chart.destroy();const pie=type==='pie'||type==='doughnut';
     const ds=sets.map(x=>Object.assign({},x,pie?{backgroundColor:labels.map((_,i)=>COL[i%COL.length]),borderColor:'#fff'}:{},type==='line'?{backgroundColor:x.borderColor,tension:.25}:{}));
     chart=new window.Chart(cv,{type,data:{labels,datasets:pie?ds.slice(0,1):ds},options:{responsive:false,animation:false,plugins:{legend:{labels:{color:ink}}},scales:pie?{}:{x:{ticks:{color:ink},grid:{color:line}},y:{ticks:{color:ink},grid:{color:line}}}}});};
@@ -2869,9 +2880,57 @@ async function xlChart(){
     const cv=el('canvas',{width:'640',height:'360'});cv.style.cssText='width:100%;height:auto;max-width:640px;background:var(--surface)';
     chips(b,[['bar','Sloupcový'],['line','Spojnicový'],['pie','Koláčový'],['doughnut','Prstencový']],type,v=>{type=v;build(cv);});
     b.append(cv);setTimeout(()=>build(cv),0);
-    const sv=el('button',{class:'btn'},ic('down')+'Uložit jako obrázek');sv.onclick=()=>cv.toBlob(bl=>saveFile(safeName(XL.doc.title)+' - graf.png',bl),'image/png');b.append(sv);
+    const sv=el('button',{class:'btn'},ic('down')+'Uložit jako obrázek');sv.onclick=()=>cv.toBlob(bl=>saveFile(safeName(XL.doc.title)+' - graf.png',bl),'image/png');
+    const ins=el('button',{class:'btn'},ic('image')+'Vložit graf do listu');ins.onclick=()=>{const c2=document.createElement('canvas');c2.width=cv.width;c2.height=cv.height;const g2=c2.getContext('2d');g2.fillStyle=getComputedStyle(document.body).getPropertyValue('--surface').trim()||'#fff';g2.fillRect(0,0,c2.width,c2.height);g2.drawImage(cv,0,0);xlAddImg(c2.toDataURL('image/png'),c2.width,c2.height,{x:XL.xs[Math.min(s.c2+1,XL.xs.length-1)]+24,y:XL.CH+s.r1*XL.RH});closeTop();};
+    const row=el('div');row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';row.append(sv,ins);b.append(row);
   },[{label:'Zavřít',cls:'primary',value:true}]);
   if(chart)chart.destroy();
+}
+
+/* ---------- obrázky v tabulce ---------- */
+let xlImgSel=null;
+function xlImgs(){
+  const box=$('#xlImgs');if(!box||!XL.doc)return;box.replaceChildren();const L=SH().imgs||[];
+  L.forEach(o=>{
+    const d=el('div',{class:'xl-img'+(xlImgSel===o.id?' on':'')});d.style.cssText=`left:${o.x}px;top:${o.y}px;width:${o.w}px;height:${o.h}px`;
+    d.append(el('img',{src:o.src,alt:'',draggable:'false'}));
+    if(xlImgSel===o.id){
+      const h=el('i',{class:'xl-img-h','aria-label':'Změnit velikost'});
+      const bar=el('div',{class:'xl-img-bar'});
+      const mk=(i,l,fn,cls='')=>{const b=el('button',{class:'ib '+cls,'aria-label':l,title:l},ic(i));b.addEventListener('pointerdown',e=>e.stopPropagation());b.onclick=e=>{e.stopPropagation();fn();};bar.append(b);};
+      mk('front','Do popředí',()=>{xlSnap(false);SH().imgs=L.filter(x=>x!==o).concat([o]);xlImgs();xlChanged();});
+      mk('dup','Duplikovat',()=>{xlSnap(false);const n=Object.assign({},o,{id:uid(),x:o.x+24,y:o.y+24});SH().imgs=L.concat([n]);xlImgSel=n.id;xlImgs();xlChanged();});
+      mk('down','Uložit obrázek',async()=>{const b=await (await fetch(o.src)).blob();saveFile(safeName(XL.doc.title)+' - obrazek.'+(b.type.split('/')[1]||'png'),b);});
+      mk('trash','Smazat',()=>{xlSnap(false);SH().imgs=L.filter(x=>x!==o);xlImgSel=null;xlImgs();xlChanged();},'del');
+      d.append(h,bar);
+      h.addEventListener('pointerdown',e=>xlImgDrag(e,o,d,'size'));
+    }
+    d.addEventListener('pointerdown',e=>{if(e.target.closest('.xl-img-bar,.xl-img-h'))return;xlImgDrag(e,o,d,'move');});
+    box.append(d);});
+}
+function xlImgDrag(e,o,d,mode){
+  e.stopPropagation();e.preventDefault();xlCommit&&xlCommit();
+  const wasSel=xlImgSel===o.id;const x0=e.clientX,y0=e.clientY,ox=o.x,oy=o.y,ow=o.w,oh=o.h,ratio=o.h/o.w;let moved=false;
+  if(!wasSel){xlImgSel=o.id;xlImgs();d=[...$('#xlImgs').children][(SH().imgs||[]).indexOf(o)];}
+  const tgt=window;
+  const mv=ev=>{if(ev.pointerId!==e.pointerId)return;const dx=ev.clientX-x0,dy=ev.clientY-y0;
+    if(!moved&&Math.hypot(dx,dy)<4)return;if(!moved){moved=true;xlSnap(false);}
+    if(mode==='move'){o.x=Math.max(XL.HW,ox+dx);o.y=Math.max(XL.CH,oy+dy);}else{o.w=Math.max(40,ow+dx);o.h=ev.shiftKey?Math.max(30,oh+dy):o.w*ratio;}
+    if(d){d.style.left=o.x+'px';d.style.top=o.y+'px';d.style.width=o.w+'px';d.style.height=o.h+'px';}};
+  const up=ev=>{if(ev.pointerId!==e.pointerId)return;tgt.removeEventListener('pointermove',mv);tgt.removeEventListener('pointerup',up);tgt.removeEventListener('pointercancel',up);if(moved){xlImgs();xlChanged();}};
+  tgt.addEventListener('pointermove',mv);tgt.addEventListener('pointerup',up);tgt.addEventListener('pointercancel',up);
+}
+function xlAddImg(src,w,h,pos){
+  const g=grid(),k=Math.min(1,380/w,300/h);
+  const o={id:uid(),src,x:g.scrollLeft+XL.HW+24,y:g.scrollTop+XL.CH+(SH().fz&&SH().fz.r?SH().fz.r*XL.RH:0)+24,w:Math.round(w*k),h:Math.round(h*k)};if(pos){o.x=pos.x;o.y=pos.y;}
+  xlSnap(false);SH().imgs=(SH().imgs||[]).concat([o]);xlImgSel=o.id;xlImgs();xlChanged();toast('Obrázek vložen – táhnutím ho přesunete, za roh zvětšíte');
+}
+async function xlInsertImage(file){
+  try{const url=await readFile(file);const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url;});
+    const k=Math.min(1,1400/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    const src=/png|gif|webp/.test(file.type)&&c.width*c.height<1.2e6?c.toDataURL('image/png'):c.toDataURL('image/jpeg',0.88);
+    xlAddImg(src,c.width,c.height);
+  }catch(e){toast('Obrázek se nepodařilo načíst.');}
 }
 
 /* ---------- import a export .xlsx / .csv ---------- */
@@ -2903,7 +2962,7 @@ async function withHF(n,fn){
   const HF=await loadHF();const sheets={};n.sheets.forEach(sh=>sheets[sh.name]=sh.data||[]);const hf=HF.buildFromSheets(sheets,XL_CFG);
   try{return await fn(hf);}finally{hf.destroy();}
 }
-async function exportXlsx(n){
+async function exportXlsx(n){if((n.sheets||[]).some(sh=>sh.imgs&&sh.imgs.length))setTimeout(()=>toast('Pozor: obrázky a vložené grafy se do .xlsx neuloží – zůstávají jen ve Span.'),1600);
   try{
     toast('Připravuji .xlsx…',true);await loadScript(XLSX_URL);await loadHF();fnMaps();const X=window.XLSX;
     const out=await withHF(n,hf=>{
@@ -3032,7 +3091,9 @@ function fillDown(){const s=selN();if(s.r2===s.r1){toast('Označte oblast, do kt
   set('xlB','bold',()=>xlFmt({b:!curFmt().b}));set('xlI','italic',()=>xlFmt({i:!curFmt().i}));
   set('xlAL','alignL',()=>xlFmt({al:'left'}));set('xlAC','alignC',()=>xlFmt({al:'center'}));set('xlAR','alignR',()=>xlFmt({al:'right'}));
   set('xlBg','fill',e=>xlColorPop(e.currentTarget,'bg'));set('xlFc','fcolor',e=>xlColorPop(e.currentTarget,'fc'));
-  set('xlSum','sigma',autoSum);set('xlFn','fx',e=>fxMenu(e.currentTarget));set('xlChart','chart',xlChart);
+  set('xlSum','sigma',autoSum);set('xlImgB','image',e=>menuPop(e.currentTarget,[['image','Obrázek z galerie',()=>$('#fXlImg').click()],['camera','Vyfotit',()=>{const f=$('#fXlImg');f.setAttribute('capture','environment');f.click();setTimeout(()=>f.removeAttribute('capture'),1500);}]]));
+  $('#fXlImg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)xlInsertImage(f);};
+  grid().addEventListener('pointerdown',()=>{if(xlImgSel){xlImgSel=null;xlImgs();}});set('xlFn','fx',e=>fxMenu(e.currentTarget));set('xlChart','chart',xlChart);
   set('xlRowIns','rowsPlus',()=>xlRows('ins'));set('xlBd','border',e=>xlBorderMenu(e.currentTarget));set('xlFz','freeze',e=>xlFreezeMenu(e.currentTarget));set('xlFindB','search',xlFind);set('xlColIns','colsPlus',()=>xlCols('ins'));
   set('xlCopy','copy',()=>xlCopy(false));set('xlPaste','paste',()=>xlPaste(null));
   set('xlExt','sel',()=>{XL.extend=!XL.extend;$('#xlExt').setAttribute('aria-pressed',String(XL.extend));if(XL.extend)toast('Klepněte na poslední buňku oblasti');});
@@ -3113,6 +3174,7 @@ function openHelp(){
 <li><b>Rovnice a grafy:</b> do kalkulačky (orámovaný příklad nebo menu ⋯ → Kalkulačka a grafy funkcí) napište rovnici s x, např. x^2 − 5x + 6 = 0, a vyřeší ji. Funkci y = … vykreslí jako graf, který vložíte do stránky.</li>
 <li><b>Vyšší matematika:</b> int(x^2;0;1) – určitý integrál (i do inf), der(x^3;2) – derivace v bodě (der(f;a;2) druhá), sum(1/x^2;1;100) – součet, lim(sin(x)/x;0) – limita. Proměnná je vždy x.</li>
 <li><b>Tabulka a rozvrh:</b> menu ⋯ → Vložit tabulku nakreslí mřížku do stránky. V Pozadí stránky najdete šablony Rozvrh hodin a Týdenní plán.</li>
+<li><b>Obrázky v tabulce:</b> v tabulce tlačítko s obrázkem vloží fotku z galerie nebo z fotoaparátu. Táhnutím ji přesunete, za kulatý roh zvětšíte. Graf z označených dat jde vložit přímo do listu.</li>
 <li><b>Záloha všeho:</b> v knihovně tlačítko ⋯ → Zálohovat celou knihovnu uloží všechny sešity, tabulky, složky i kategorie do jednoho souboru.</li>
 <li><b>Lepicí poznámky a nahrávky:</b> menu ⋯ → Lepicí poznámka vloží barevný papírek s textem. Nahrát zvuk spustí nahrávání přednášky, nahrávky najdete v menu ⋯ → Nahrávky.</li>
 <li><b>Prsty:</b> jeden prst posouvá, dva přibližují. Klepnutí dvěma prsty vrátí krok, třemi ho zopakuje. Dlaň při psaní perem se ignoruje.</li>
