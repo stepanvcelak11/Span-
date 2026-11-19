@@ -9,9 +9,11 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - Podržení prstu na objektu = okamžitý přesun.
 - Tvary: automatické rozpoznání (podržením pera na konci tahu) i ruční čára, šipka, obdélník, elipsa, trojúhelník.
 - Text (3 písma), obrázky (i vložení ze schránky), laserové ukazovátko.
-- Sešity s obálkami, stránky (linky, čtverečky, tečky, Cornell, úkoly, noty; 6 barev papíru), panel stránek s náhledy, záložky.
+- **Knihovna se složkami (i vnořenými) a barevnými kategoriemi**, oblíbené, nedávné, řazení, hledání v názvech i napsaném textu.
+- Sešity s obálkami (na výšku i na šířku), stránky (linky, čtverečky, tečky, Cornell, úkoly, noty; 6 barev papíru), panel stránek s náhledy, záložky.
 - Import PDF k anotaci, export do PDF / PNG, záloha a obnova (.json).
 - Gesta: posun a zoom prsty, klepnutí 2 prsty = zpět, 3 prsty = znovu, ignorování dlaně.
+- Optimalizace pro tablet: rychlý posun/zoom z mezipaměti stránek, obrazovka nezhasíná při psaní, celá obrazovka, větší dotykové plochy, světlý/tmavý vzhled.
 - Funguje offline, data v IndexedDB na zařízení.
 
 ## Struktura
