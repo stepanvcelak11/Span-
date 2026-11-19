@@ -327,7 +327,8 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .calc-st{font-size:12px;color:var(--muted);line-height:1.4}
 .calc-a{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .calc-a .btn:disabled{opacity:.45}
-.rec-bar{position:fixed;z-index:60;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;height:40px;padding:0 6px 0 14px;border-radius:20px;background:#1B2232;color:#fff;font:600 14px var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.25);font-variant-numeric:tabular-nums}
+.rec-bar{position:fixed;z-index:60;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;height:40px;padding:0 6px 0 14px;border-radius:20px;background:#1B2232;color:#fff;font:600 14px var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.25);font-variant-numeric:tabular-nums}
+.play-bar{gap:6px;padding:0 6px}.play-bar .pb-n{max-width:30vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;opacity:.75}.play-bar .rec-stop svg{fill:none;stroke:currentColor}
 .rec-dot{width:10px;height:10px;border-radius:50%;background:#FF4D4F;animation:recp 1.2s ease-in-out infinite}
 @keyframes recp{50%{opacity:.25}}
 .rec-stop{width:30px;height:30px;border-radius:15px;border:0;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center}.rec-stop svg{width:16px;height:16px;fill:currentColor}
@@ -746,9 +747,18 @@ function getBounds(it){
   const cs=[[it.x,it.y],[it.x+it.w,it.y],[it.x+it.w,it.y+h],[it.x,it.y+h]].map(q=>tf(m,q[0],q[1]));
   return [Math.min(...cs.map(c=>c[0])),Math.min(...cs.map(c=>c[1])),Math.max(...cs.map(c=>c[0])),Math.max(...cs.map(c=>c[1]))];
 }
+const pencilCache=new Map();
+function pencilPat(c,col){
+  let cv=pencilCache.get(col);
+  if(!cv){cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d'),im=g.createImageData(64,64),h=col.replace('#','');const r=parseInt(h.slice(0,2),16),gg=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+    let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+    for(let i=0;i<64*64;i++){const n=rnd();im.data[i*4]=r;im.data[i*4+1]=gg;im.data[i*4+2]=b;im.data[i*4+3]=n<0.22?0:Math.round(120+135*n);}
+    g.putImageData(im,0,0);pencilCache.set(col,cv);}
+  const p=c.createPattern(cv,'repeat');try{p.setTransform(new DOMMatrix().scale(0.5));}catch(e){}return p;
+}
 function drawItem(c,it,page){
   if(it.t==='s'){
-    if(it.k==='pen'){c.fillStyle=it.c;c.fill(pathOf(it));return;}
+    if(it.k==='pen'){if(it.ps==='pencil'){c.save();c.globalAlpha=0.9;c.fillStyle=pencilPat(c,it.c);c.fill(pathOf(it));c.restore();return;}c.fillStyle=it.c;c.fill(pathOf(it));return;}
     c.save();
     if(it.k==='hl'){c.globalAlpha=0.42;if(!isDark(page))c.globalCompositeOperation='multiply';}
     if(it.fl){c.save();c.globalAlpha=0.2;c.fillStyle=it.c;c.fill(pathOf(it));c.restore();}
@@ -827,6 +837,11 @@ function genShape(kind,a,b){
     case 'rect':return poly2pts([[x0,y0],[x1,y0],[x1,y1],[x0,y1]],true);
     case 'ellipse':return ellipsePts((x0+x1)/2,(y0+y1)/2,(x1-x0)/2,(y1-y0)/2);
     case 'triangle':return poly2pts([[(x0+x1)/2,y0],[x1,y1],[x0,y1]],true);
+    case 'rtriangle':return poly2pts([[x0,y0],[x0,y1],[x1,y1]],true);
+    case 'star':{const cx=(x0+x1)/2,cy=(y0+y1)/2,rx=(x1-x0)/2,ry=(y1-y0)/2,P=[];for(let i=0;i<10;i++){const r=i%2?0.42:1,an=-Math.PI/2+i*Math.PI/5;P.push([cx+rx*r*Math.cos(an),cy+ry*r*Math.sin(an)]);}return poly2pts(P,true);}
+    case 'pentagon':case 'hexagon':{const n=kind==='pentagon'?5:6,cx=(x0+x1)/2,cy=(y0+y1)/2,rx=(x1-x0)/2,ry=(y1-y0)/2,P=[];for(let i=0;i<n;i++){const an=-Math.PI/2+i*2*Math.PI/n;P.push([cx+rx*Math.cos(an),cy+ry*Math.sin(an)]);}return poly2pts(P,true);}
+    case 'darrow':{const ang=Math.atan2(b[1]-a[1],b[0]-a[0]),L=Math.min(36,Math.max(12,dist(a,b)*0.25)),hd=(p,s)=>[[p[0]-s*L*Math.cos(ang-0.45),p[1]-s*L*Math.sin(ang-0.45)],[p[0]-s*L*Math.cos(ang+0.45),p[1]-s*L*Math.sin(ang+0.45)]];const[h1,h2]=hd(b,1),[g1,g2]=hd(a,-1);return poly2pts([g1,a,g2,a,b,h1,b,h2]);}
+    case 'axes':{const cx=(x0+x1)/2,cy=(y0+y1)/2,L=Math.min(22,Math.max(10,(x1-x0)*0.05));return poly2pts([[x0,cy],[x1,cy],[x1-L,cy-L*0.55],[x1,cy],[x1-L,cy+L*0.55],[x1,cy],[cx,cy],[cx,y1],[cx,y0],[cx-L*0.55,y0+L],[cx,y0],[cx+L*0.55,y0+L]]);}
   }
   return null;
 }
@@ -868,7 +883,28 @@ function recognize(raw){
 /* =========================================================
    Pohled a vykreslování
    ========================================================= */
-function layoutPages(){let y=0;maxPW=0;for(const p of nb.pages){p._top=y;p._left=-p.w/2;y+=p.h+GAP;maxPW=Math.max(maxPW,p.w);}docH=Math.max(0,y-GAP);}
+const HL=()=>S.layout==='h';let docW=0,maxPH=PH;
+function layoutPages(){
+  maxPW=0;maxPH=0;
+  if(HL()){let x=0;for(const p of nb.pages){p._left=x;p._top=0;x+=p.w+GAP*2;maxPW=Math.max(maxPW,p.w);maxPH=Math.max(maxPH,p.h);}docW=Math.max(0,x-GAP*2);docH=maxPH;return;}
+  let y=0;for(const p of nb.pages){p._top=y;p._left=-p.w/2;y+=p.h+GAP;maxPW=Math.max(maxPW,p.w);maxPH=Math.max(maxPH,p.h);}docH=Math.max(0,y-GAP);
+}
+const spread=()=>HL()&&W>H*1.15;
+const pageCenterX=i=>{const P=nb.pages;if(spread()){const a=i-i%2,p0=P[a],p1=P[a+1];return p1?(p0._left+p1._left+p1.w)/2:p0._left+p0.w/2;}const p=P[i];return p._left+p.w/2;};
+function fitZoom(){return HL()?clamp(Math.min((W-24)/(spread()?maxPW*2+GAP*2:maxPW),(H-96)/maxPH),0.1,3):clamp(W/maxPW,0.2,3);}
+const hFits=()=>HL()&&z<=fitZoom()*1.06;
+function flipTo(i,anim=true){
+  i=clamp(i,0,nb.pages.length-1);const tx=W/2-pageCenterX(i)*z;cancelInertia();
+  if(!anim){ox=tx;clampView();render();return;}
+  const x0=ox,t0=performance.now(),D=260;setFast();
+  const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);ox=x0+(tx-x0)*e;clampView();render();if(k<1)inertiaRAF=requestAnimationFrame(step);else{inertiaRAF=0;endFast();updatePageInd&&updatePageInd();}};
+  inertiaRAF=requestAnimationFrame(step);
+}
+function flipAfterPan(vx){const i=curPageIndex(),st=spread()?2:1;let t=i-(i%st);
+  const c=pageCenterX(t)*z+ox-W/2;
+  if(vx<-0.25)t=c<0?t+st:t;else if(vx>0.25)t=c>0?t-st:t;else if(Math.abs(c)>W*0.3)t=c<0?t+st:t-st;
+  flipTo(t);}
+function setLayout(m){const i=nb?curPageIndex():0;S.layout=m;saveS();if(!nb)return;layoutPages();z=fitZoom();if(HL()){flipTo(i,false);}else{ox=W/2;goToPage(i);}toast(m==='h'?'Listování po stránkách – táhněte prstem do stran':'Svislé posouvání stránek');}
 function resize(){
   if(!nb)return;
   const r=stage.getBoundingClientRect(); if(r.width<10)return;
@@ -878,20 +914,24 @@ function resize(){
 }
 new ResizeObserver(()=>resize()).observe(stage);
 function fitWidth(keepCenter){
+  if(HL()){const i=nb?curPageIndex():0;z=fitZoom();flipTo(i,false);return;}
   const cy=keepCenter?(H/2-oy)/z:null;
   z=clamp(W/maxPW,0.2,3); ox=W/2;
   oy=cy==null?0:H/2-cy*z; clampView();
 }
 function clampView(){
+  if(HL()&&nb&&nb.pages.length){const P=nb.pages,fc=pageCenterX(0),lc=pageCenterX(P.length-1);
+    ox=clamp(ox,Math.min(W/2-lc*z,W-docW*z-30),Math.max(W/2-fc*z,30));
+    const ch=maxPH*z;if(ch<=H-70)oy=Math.max(56,(H-ch)/2+16);else oy=clamp(oy,H-ch-40,60);return;}
   const cw=maxPW*z; if(cw<=W+1)ox=W/2; else ox=clamp(ox,W-cw/2-30,cw/2+30);
   const ch=docH*z; oy=clamp(oy,Math.min(0,H-100-ch),100);
 }
 function zoomAt(sx,sy,nz){nz=clamp(nz,0.2,6);ox=sx-(sx-ox)*nz/z;oy=sy-(sy-oy)*nz/z;z=nz;clampView();scheduleRender();}
 function pageAtWorld(wx,wy,strict=true){
-  for(const p of nb.pages){if(wy>=p._top&&wy<=p._top+p.h&&(!strict||(wx>=p._left&&wx<=p._left+p.w)))return p;}
+  for(const p of nb.pages){const iy=wy>=p._top&&wy<=p._top+p.h,ix=wx>=p._left&&wx<=p._left+p.w;if(HL()?(ix&&(!strict||iy)):(iy&&(!strict||ix)))return p;}
   return null;
 }
-function curPageIndex(){const wy=(H*0.45-oy)/z;let best=0;nb.pages.forEach((p,i)=>{if(wy>=p._top-GAP)best=i;});return best;}
+function curPageIndex(){if(HL()){const wx=(W/2-ox)/z;let best=0;nb.pages.forEach((p,i)=>{if(wx>=p._left-GAP)best=i;});if(spread()&&best%2===1&&wx<nb.pages[best]._left+8)best--;return best;}const wy=(H*0.45-oy)/z;let best=0;nb.pages.forEach((p,i)=>{if(wy>=p._top-GAP)best=i;});return best;}
 function toLocal(sx,sy,p){return [(sx-ox)/z-p._left,(sy-oy)/z-p._top];}
 function pageMat(p){return [z,0,0,z,p._left*z+ox,p._top*z+oy];}
 function setTf(c,m){c.setTransform(m[0]*dpr,m[1]*dpr,m[2]*dpr,m[3]*dpr,m[4]*dpr,m[5]*dpr);}
@@ -916,6 +956,7 @@ function render(){
   const wy0=-oy/z, wy1=(H-oy)/z;
   for(const p of nb.pages){
     if(p._top+p.h<wy0||p._top>wy1)continue;
+    if(HL()&&(p._left*z+ox>W||(p._left+p.w)*z+ox<0))continue;
     const m=pageMat(p);
     c.save();c.shadowColor='rgba(18,28,56,.20)';c.shadowBlur=14;c.shadowOffsetY=3;c.fillStyle=PAPERS[p.paper]||'#fff';c.fillRect(m[4],m[5],p.w*z,p.h*z);c.restore();
     if(fastMode&&!(sel&&sel.page===p)&&!(editing&&editing.page===p)){c.imageSmoothingQuality='high';c.drawImage(pageBitmap(p),m[4],m[5],p.w*z,p.h*z);continue;}
@@ -932,6 +973,7 @@ function drawOnMain(p,it){const c=bctx;c.save();setTf(c,pageMat(p));c.beginPath(
 function drawOverlay(){
   const c=lctx; c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,live.width,live.height);
   if(!nb)return;
+  drawRecHL();
   if(sel){
     c.save(); setTf(c,mul(pageMat(sel.page),sel.m));
     for(const it of selItems())drawItem(c,it,sel.page);
@@ -1012,7 +1054,8 @@ stage.addEventListener('pointermove',onMove);
 stage.addEventListener('pointerup',onUp);
 stage.addEventListener('pointercancel',onCancel);
 stage.addEventListener('contextmenu',e=>e.preventDefault());
-stage.addEventListener('wheel',e=>{e.preventDefault();stageRect=stage.getBoundingClientRect();if(e.ctrlKey||e.metaKey){setFast();const[sx,sy]=sp(e);zoomAt(sx,sy,z*Math.exp(-e.deltaY*0.01));}else{setFast();ox-=e.deltaX;oy-=e.deltaY;clampView();scheduleRender();}endFast(180);},{passive:false});
+stage.addEventListener('wheel',e=>{e.preventDefault();stageRect=stage.getBoundingClientRect();if(e.ctrlKey||e.metaKey){setFast();const[sx,sy]=sp(e);zoomAt(sx,sy,z*Math.exp(-e.deltaY*0.01));}else if(hFits()){wAcc+=e.deltaY+e.deltaX;const now=performance.now();if(Math.abs(wAcc)>60&&now-wLast>380){wLast=now;const st=spread()?2:1,i=curPageIndex();flipTo(i-(i%st)+(wAcc>0?st:-st));wAcc=0;}return;}else{setFast();ox-=e.deltaX;oy-=e.deltaY;clampView();scheduleRender();}endFast(180);},{passive:false});
+let wAcc=0,wLast=0;
 
 function onDown(e){
   if(e.target.closest('.selbar,textarea,.pages'))return;
@@ -1095,7 +1138,7 @@ function touchUp(){
       if(!gest.moved&&dt<380&&S.twoTapUndo&&performance.now()-lastPen>400){if(gest.fingers>=3)redo();else undo();}
       gest=null;endFast();
     }
-  }else if(gest.type==='pan'){clearTimeout(lpTimer);if(!(gest.moved&&performance.now()-gest.lt<60&&startInertia(gest.vx,gest.vy)))endFast();gest=null;}
+  }else if(gest.type==='pan'){clearTimeout(lpTimer);if(gest.moved&&hFits())flipAfterPan(performance.now()-gest.lt<80?gest.vx:0);else if(!(gest.moved&&performance.now()-gest.lt<60&&startInertia(gest.vx,gest.vy)))endFast();gest=null;}
 }
 function startInertia(vx,vy){
   if(Math.hypot(vx,vy)<0.25)return false;
@@ -1135,7 +1178,7 @@ function beginAct(e,sx,sy){
   switch(tool){
     case 'pen':case 'hl':{const cfg=T[tool];const k=tool==='hl'?'hl':(cfg.style==='marker'?'mk':'pen');
       const edge=rulerEdge(sx,sy);
-      act=Object.assign(base,{type:'draw',it:{t:'s',id:uid(),k,c:cfg.color,w:cfg.size,ps:cfg.style,pi:k==='pen'?(cfg.style==='ball'?0.4:1)*(cfg.press??0.8):undefined,p:[]},stillAt:[sx,sy],straight:tool==='hl'&&cfg.straight&&edge==null,snap:edge,far:edge!=null});
+      act=Object.assign(base,{type:'draw',it:{t:'s',id:uid(),k,c:cfg.color,w:cfg.size,ps:cfg.style,pi:k==='pen'?(cfg.style==='ball'?0.4:cfg.style==='pencil'?0.75:1)*(cfg.press??0.8):undefined,p:[]},stillAt:[sx,sy],straight:tool==='hl'&&cfg.straight&&edge==null,snap:edge,far:edge!=null});
       if(edge!=null){const q=snapPt(act,sx,sy);const L=toLocal(q[0],q[1],page);act.it.p.push([L[0],L[1],0.5]);}else act.it.p.push([x,y,pr]);
       if(k==='hl'&&!isDark(page))live.style.mixBlendMode='multiply';break;}
     case 'shape':act=Object.assign(base,{type:'shape',a:[x,y],b:[x,y],raw:[[x,y,pr]],kind:T.shape.kind});break;
@@ -1235,17 +1278,41 @@ function abortAct(){
   if(a.type==='radial')closeRadial();
   drawOverlay();
 }
+function drawRecHL(){
+  if(!recAudio||recAudio.paused||!nb)return;const t=recAudio.currentTime,id=recAudio._id;const c=lctx;
+  for(const p of nb.pages){if(p._top*z+oy>H||(p._top+p.h)*z+oy<0)continue;const its=p.items.filter(it=>it.ra===id&&it.rt<=t&&it.rt>t-4);if(!its.length)continue;
+    c.save();setTf(c,pageMat(p));its.forEach(it=>{const g=getBounds(it);c.fillStyle='rgba(21,147,168,.16)';c.fillRect(g[0]-6,g[1]-6,g[2]-g[0]+12,g[3]-g[1]+12);});c.restore();}
+}
+function recStamp(it){if(REC.mr&&REC.nb===nb&&REC.sid){it.ra=REC.sid;it.rt=Math.max(0,(Date.now()-REC.t0)/1000);}}
+function isScribble(p){
+  if(p.length<12)return false;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,L=0;
+  for(let i=0;i<p.length;i++){const q=p[i];x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);if(i)L+=Math.hypot(q[0]-p[i-1][0],q[1]-p[i-1][1]);}
+  const w=x1-x0,h=y1-y0,ext=Math.max(w,h);if(ext<14||L<3.2*ext)return false;
+  const ax=w>=h?0:1,thr=0.18*(ax?h:w);let dir=0,acc=0,turns=0;
+  for(let i=1;i<p.length;i++){acc+=p[i][ax]-p[i-1][ax];if(Math.abs(acc)>thr){const sg=Math.sign(acc);if(dir&&sg!==dir)turns++;dir=sg;acc=0;}}
+  return turns>=4;
+}
+function scribbleErase(page,it){
+  if(!isScribble(it.p))return false;const b=it.bb,poly=null;
+  const hits=page.items.filter(o=>{if(o===it)return false;const g=getBounds(o),ix=Math.max(0,Math.min(g[2],b[2])-Math.max(g[0],b[0])),iy=Math.max(0,Math.min(g[3],b[3])-Math.max(g[1],b[1]));const a=Math.max(1,(g[2]-g[0])*(g[3]-g[1]));
+    if(o.t==='s'){const pts=o.p.filter((q,i)=>i%2===0);const inside=pts.filter(q=>q[0]>=b[0]&&q[0]<=b[2]&&q[1]>=b[1]&&q[1]<=b[3]).length;return inside>=pts.length*0.6;}
+    return ix*iy/a>0.6;});
+  if(!hits.length)return false;
+  const ids=new Set(hits.map(o=>o.id));snapItems(page);page.items=page.items.filter(o=>!ids.has(o.id));changed();render();toast('Smazáno čmáranicí ('+hits.length+') – Zpět vrátí');vibrate&&vibrate(15);return true;
+}
 function commitDraw(a){
   let it=a.it; if(a.raw&&!a.shaped&&!a.straight){const l=it.p[it.p.length-1];it.p.push([a.raw[0],a.raw[1],l[2]]);}
   if(!a.shaped&&!a.straight)it.p=processPts(it.p);
   it=finalize(Object.assign({},it)); delete it.ps_;
+  if(it.k!=='hl'&&S.scribble!==false&&scribbleErase(a.page,it))return;
+  recStamp(it);
   snapItems(a.page); a.page.items=a.page.items.concat([it]); drawOnMain(a.page,it); changed();
   if(it.k==='sh')checkFrame(a.page,it);
 }
 function commitShape(a){
   let pts=a.kind==='auto'?(recognize(a.raw)||(a.raw.length>1&&dist(a.a,a.b)>4?genShape('line',a.a,a.b):null)):(dist(a.a,a.b)>3?genShape(a.kind,a.a,a.b):null);
   if(!pts)return;
-  const it=finalize({t:'s',id:uid(),k:'sh',c:T.shape.color,w:T.shape.size,fl:!!T.shape.fill&&a.kind!=='line'&&a.kind!=='arrow',da:!!T.shape.dash,p:pts});
+  const it=finalize({t:'s',id:uid(),k:'sh',c:T.shape.color,w:T.shape.size,fl:!!T.shape.fill&&!['line','arrow','darrow','axes'].includes(a.kind),da:!!T.shape.dash,p:pts});recStamp(it);
   snapItems(a.page);a.page.items=a.page.items.concat([it]);drawOnMain(a.page,it);changed();
   checkFrame(a.page,it);
 }
@@ -1369,6 +1436,7 @@ function buildSelBar(){
   selbar.innerHTML='';
   T.fav.slice(0,5).forEach(c=>{const d=document.createElement('button');d.className='cdot';d.style.background=c;d.title='Obarvit';d.setAttribute('aria-label','Obarvit');d.onclick=()=>recolorSel(c);selbar.append(d);});
   selbar.append(b('palette','Další barvy',e=>openColorPop(e.currentTarget,c=>recolorSel(c))));
+  {const st=selItems().filter(it=>it.ra&&nb.audio&&nb.audio.some(a=>a.id===it.ra)).sort((a,b)=>a.rt-b.rt)[0];if(st)selbar.append(b('play','Přehrát nahrávku od tohoto místa',()=>playRecAt(nb.audio.find(a=>a.id===st.ra),st.rt-2)));}
   if(selItems().some(it=>it.t==='s'&&it.k!=='hl'))selbar.append(b('text','Převést rukopis na text',hwToText));
   if(selItems().some(it=>it.t==='s'&&it.k!=='hl'))selbar.append(b('calc','Spočítat příklad',()=>{const pg=sel.page,its=selItems();clearSel();calcState=null;calcItems(pg,its);}));
   selbar.append(b('dup','Duplikovat',dupSel),b('copy','Kopírovat',()=>copySel(false)),b('cut','Vyjmout',()=>copySel(true)),b('front','Do popředí',()=>orderSel(1)),b('backl','Do pozadí',()=>orderSel(-1)),b('trash','Smazat',delSel,'del'),b('check','Hotovo',clearSel));
@@ -1587,7 +1655,7 @@ function openToolOptions(t,anchor){
     p.classList.add('topts');
     const sz=(min,max,step,label='Tloušťka',suffix='')=>slider(p,label,min,max,step,T[t].size,v=>numFmt(v)+suffix,v=>{T[t].size=v;saveT();renderPal();});
     if(t==='pen'){
-      p.append(el('h4',{},'Pero'));chips(p,[['fountain','Plnicí (tlak)'],['ball','Kuličkové'],['marker','Fix']],T.pen.style,v=>{T.pen.style=v;saveT();});
+      p.append(el('h4',{},'Pero'));chips(p,[['fountain','Plnicí (tlak)'],['ball','Kuličkové'],['pencil','Tužka'],['marker','Fix']],T.pen.style,v=>{T.pen.style=v;saveT();});
       sz(0.6,12,0.1);
       slider(p,'Citlivost na tlak',0,100,5,Math.round((T.pen.press??0.8)*100),v=>v+' %',v=>{T.pen.press=v/100;saveT();});
       slider(p,'Vyhlazení tahu',0,3,1,T.pen.smooth??1,v=>['vypnuto','slabé','střední','silné'][v],v=>{T.pen.smooth=v;saveT();});
@@ -1602,7 +1670,7 @@ function openToolOptions(t,anchor){
       toggle(p,'Po gumování se vrátit k předchozímu nástroji',T.eraser.back,v=>{T.eraser.back=v;saveT();});
       const b=el('button',{class:'btn danger'},ic('trash')+'Vymazat stránku');b.onclick=()=>{closePops();clearPage();};p.append(b);
     }else if(t==='shape'){
-      p.append(el('h4',{},'Tvar'));chips(p,[['auto','Automaticky'],['line','Čára'],['arrow','Šipka'],['rect','Obdélník'],['ellipse','Elipsa'],['triangle','Trojúhelník']],T.shape.kind,v=>{T.shape.kind=v;saveT();});
+      p.append(el('h4',{},'Tvar'));chips(p,[['auto','Automaticky'],['line','Čára'],['arrow','Šipka'],['darrow','Oboustranná šipka'],['rect','Obdélník'],['ellipse','Elipsa'],['triangle','Trojúhelník'],['rtriangle','Pravoúhlý trojúhelník'],['pentagon','Pětiúhelník'],['hexagon','Šestiúhelník'],['star','Hvězda'],['axes','Osy x, y']],T.shape.kind,v=>{T.shape.kind=v;saveT();});
       sz(0.6,14,0.1);
       toggle(p,'Vyplnit uzavřené tvary',T.shape.fill,v=>{T.shape.fill=v;saveT();});
       toggle(p,'Čárkovaná čára',T.shape.dash,v=>{T.shape.dash=v;saveT();});
@@ -1647,7 +1715,7 @@ function toast(msg,stay){const t=$('#toast');t.textContent=msg;t.hidden=false;cl
    Stránky
    ========================================================= */
 const newPage=(tpl,paper,land)=>({id:uid(),w:land?PH:PW,h:land?PW:PH,tpl:tpl||S.tpl,paper:paper||S.paper,bg:null,items:[],mark:false});
-function goToPage(i){const p=nb.pages[clamp(i,0,nb.pages.length-1)];oy=-p._top*z;clampView();render();}
+function goToPage(i){if(HL()){flipTo(i,false);return;}const p=nb.pages[clamp(i,0,nb.pages.length-1)];oy=-p._top*z;clampView();render();}
 function addPage(at){const cur=nb.pages[curPageIndex()];snapPages();const p=newPage(cur&&!cur.bg?cur.tpl:S.tpl,cur?cur.paper:S.paper);if(cur&&!cur.bg){p.w=cur.w;p.h=cur.h;}const i=at==null?curPageIndex()+1:at;nb.pages=nb.pages.slice(0,i).concat([p],nb.pages.slice(i));layoutPages();changed();goToPage(i);if(pagesOpen())renderPanel();toast('Stránka přidána');}
 function delPage(i){if(nb.pages.length<2){toast('Sešit musí mít alespoň jednu stránku');return;}clearSel();snapPages();nb.pages=nb.pages.filter((_,k)=>k!==i);layoutPages();clampView();changed();render();renderPanel();}
 function dupPage(i){snapPages();const src=nb.pages[i];const p=Object.assign({},src,{id:uid(),items:src.items.map(it=>Object.assign({},it,{id:uid()}))});nb.pages=nb.pages.slice(0,i+1).concat([p],nb.pages.slice(i+1));layoutPages();changed();render();renderPanel();}
@@ -2051,7 +2119,7 @@ zl.addEventListener('pointerdown',e=>{
   let tool=T.tool;if(e.pointerType==='pen'&&(e.buttons&32))tool='eraser';
   if(tool==='eraser'){ZB.act={type:'erase',page,pointerId:e.pointerId,before:page.items,changed:false,last:[x,y],cur:[x,y],tool};eraseSeg(ZB.act,x,y,ZB.k);if(ZB.act.changed){zbRender();scheduleRender();}return;}
   if(tool!=='hl')tool='pen';const cfg=T[tool],k=tool==='hl'?'hl':(cfg.style==='marker'?'mk':'pen');
-  ZB.act={type:'draw',page,pointerId:e.pointerId,it:{t:'s',id:uid(),k,c:cfg.color,w:cfg.size,ps:cfg.style,pi:k==='pen'?(cfg.style==='ball'?0.4:1)*(cfg.press??0.8):undefined,p:[[x,y,pressureOf(e)]]}};
+  ZB.act={type:'draw',page,pointerId:e.pointerId,it:{t:'s',id:uid(),k,c:cfg.color,w:cfg.size,ps:cfg.style,pi:k==='pen'?(cfg.style==='ball'?0.4:cfg.style==='pencil'?0.75:1)*(cfg.press??0.8):undefined,p:[[x,y,pressureOf(e)]]}};
   zbDrawLive();
 });
 zl.addEventListener('pointermove',e=>{
@@ -3508,6 +3576,8 @@ async function openSettings(){
     const f3=el('label',{class:'field'},'<span>Kreslení prstem</span>');const s3=el('select',{id:'finger'});[['auto','Automaticky (vypne se po použití pera)'],['on','Vždy kreslit prstem'],['off','Prst jen posouvá a přibližuje']].forEach(([v,l])=>s3.append(new Option(l,v,false,v===S.finger)));s3.onchange=()=>{S.finger=s3.value;saveS();};f3.append(s3);b.append(f3);
     const c4=el('label',{class:'check'});const cb4=el('input',{type:'checkbox',id:'calcFr'});cb4.checked=S.calcFrames;cb4.onchange=()=>{S.calcFrames=cb4.checked;saveS();};c4.append(cb4,document.createTextNode('Nabídnout výpočet, když příklad orámuji'));b.append(c4);
     const c2=el('label',{class:'check'});const cb2=el('input',{type:'checkbox',id:'twoTap'});cb2.checked=S.twoTapUndo;cb2.onchange=()=>{S.twoTapUndo=cb2.checked;saveS();};c2.append(cb2,document.createTextNode('Klepnutí dvěma prsty = Zpět, třemi = Znovu'));b.append(c2);
+    const c5=el('label',{class:'check'});const cb5=el('input',{type:'checkbox'});cb5.checked=S.scribble!==false;cb5.onchange=()=>{S.scribble=cb5.checked;saveS();};c5.append(cb5,document.createTextNode('Čmáranice přes napsané ho smaže (bez přepínání na gumu)'));b.append(c5);
+    const f6=el('div',{class:'field'},'<span>Stránky v sešitě</span>');chips(f6,[['v','Svislé posouvání'],['h','Listování do stran']],S.layout==='h'?'h':'v',v=>{if(nb)setLayout(v);else{S.layout=v;saveS();}});b.append(f6);
   },[{label:'Hotovo',cls:'primary',value:true}]);
 }
 function openHelp(){
@@ -3520,6 +3590,10 @@ function openHelp(){
 <li><b>Vyšší matematika:</b> int(x^2;0;1) – určitý integrál (i do inf), der(x^3;2) – derivace v bodě (der(f;a;2) druhá), sum(1/x^2;1;100) – součet, lim(sin(x)/x;0) – limita. Proměnná je vždy x.</li>
 <li><b>Tabulka a rozvrh:</b> menu ⋯ → Vložit tabulku nakreslí mřížku do stránky. V Pozadí stránky najdete šablony Rozvrh hodin a Týdenní plán.</li>
 <li><b>Psaní rukou v tabulce:</b> tlačítko s perem v liště tabulky otevře dole panel. Napište perem text nebo vzorec (např. =SUMA(A1:A5) nebo α = 0,05), po chvilce se převede na znaky a Vložit do buňky ho zapíše a posune se o řádek níž. Rozpoznávání běží offline (číslice, písmena, česká diakritika, matematické znaky – pište znaky odděleně) a učí se vaše písmo: tlačítkem Aa ho natrénujete a každá oprava před vložením se uloží jako nový vzor. Volitelně ho v menu Aa zpřesní Claude. Guma (nebo tlačítko na peru) maže celé tahy. Nad panelem je řada speciálních znaků (řecká písmena, matematika, indexy ², ₁, jednotky) – klepnutím se přidají do buňky.</li>
+<li><b>Listování po stránkách:</b> menu ⋯ → Listování po stránkách. Stránky se pak listují tahem prstu do stran jako v knize, na tabletu na šířku vidíte dvoustranu. Zpět na svislé posouvání ve stejném menu nebo v Nastavení.</li>
+<li><b>Čmáranice maže:</b> přečmárněte perem cokoli napsaného (cik-cak) a smaže se – bez přepínání na gumu. Vypnout jde v Nastavení.</li>
+<li><b>Nahrávka + poznámky:</b> co napíšete během nahrávání, si pamatuje čas. Označte to lasem a klepněte na ▶ – přehraje se, co se v tu chvíli říkalo. Při přehrávání se právě psané poznámky zvýrazní.</li>
+<li><b>Tužka a tvary:</b> u pera je nový typ Tužka. Tvary nově umí hvězdu, pěti- a šestiúhelník, pravoúhlý trojúhelník, oboustrannou šipku a osy x, y.</li>
 <li><b>Rukopis na text (i offline):</b> označte psaný text lasem a klepněte na T. Text se rozpozná přímo v zařízení, zobrazí se k opravě a z oprav se aplikace učí vaše písmo. Tlačítko Zpřesnit Claudem pomůže u psacího písma (online).</li>
 <li><b>Další funkce tabulek:</b> XLOOKUP, TEXTJOIN, SORT, SEQUENCE, ČETNOSTI, LINREGRESE, FORECAST, INTERCEPT, MÍRA.VÝNOSNOSTI.</li>
 <li><b>Matice v tabulce:</b> SOUČIN.MATIC, INVERZE, DETERMINANT, TRANSPOZICE, MATICE.JEDNOTKOVÁ – výsledek se sám rozlije do sousedních buněk (napište vzorec jen do levé horní buňky).</li>
@@ -3594,11 +3668,11 @@ async function startRec(){
   catch(e){toast(window.claude&&window.claude.use?'Mikrofon tu není povolen – otevřete aplikaci přes odkaz z GitHub Pages.':'Přístup k mikrofonu byl zamítnut.');return;}
   const type=['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus','audio/webm'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||'';
   try{REC.mr=new MediaRecorder(REC.stream,type?{mimeType:type,audioBitsPerSecond:32000}:{audioBitsPerSecond:32000});}catch(e){REC.mr=new MediaRecorder(REC.stream);}
-  REC.chunks=[];REC.nb=nb;REC.page=nb?curPageIndex():0;REC.mr.ondataavailable=e=>{if(e.data&&e.data.size)REC.chunks.push(e.data);};
+  REC.chunks=[];REC.nb=nb;REC.sid=uid();REC.page=nb?curPageIndex():0;REC.mr.ondataavailable=e=>{if(e.data&&e.data.size)REC.chunks.push(e.data);};
   REC.mr.onstop=async()=>{const blob=new Blob(REC.chunks,{type:REC.mr.mimeType||type||'audio/webm'});const dur=(Date.now()-REC.t0)/1000;const target=REC.nb;
     REC.stream.getTracks().forEach(t=>t.stop());REC.mr=null;clearInterval(REC.timer);recBar();
     if(blob.size<200||!target){toast('Nahrávka je prázdná.');return;}
-    const src=await readFile(blob);target.audio=(target.audio||[]).concat([{id:uid(),src,dur,created:Date.now(),page:REC.page,name:'Nahrávka '+((target.audio||[]).length+1)}]);
+    const src=await readFile(blob);target.audio=(target.audio||[]).concat([{id:REC.sid||uid(),src,dur,created:Date.now(),page:REC.page,name:'Nahrávka '+((target.audio||[]).length+1)}]);
     target.updated=Date.now();if(target===nb)changed();else{nb=target;flushSave();nb=null;}toast('Nahrávka uložena ('+fmtDur(dur)+') – najdete ji v menu ⋯ → Nahrávky');};
   REC.mr.start(1000);REC.t0=Date.now();REC.timer=setInterval(recBar,500);recBar();
 }
@@ -3637,12 +3711,33 @@ function openRecordings(){
     };draw();
   },[{label:'Zavřít',value:()=>{if(recAudio){recAudio.pause();recAudio=null;}}}]);
 }
+/* přehrávač nahrávky propojený s poznámkami */
+function playRecAt(a,t){
+  if(!a)return;if(recAudio&&recAudio._id!==a.id){recAudio.pause();recAudio=null;}
+  if(!recAudio){recAudio=new Audio(a.src);recAudio._id=a.id;}
+  const go=()=>{try{recAudio.currentTime=Math.max(0,t||0);}catch(e){}recAudio.play().catch(()=>toast('Nahrávku nelze přehrát.'));};
+  if(recAudio.readyState>=1)go();else recAudio.addEventListener('loadedmetadata',go,{once:true});
+  playBar(a);
+}
+function playBar(a){
+  let b=$('#playBar');
+  if(!b){b=el('div',{class:'rec-bar play-bar',id:'playBar',role:'region','aria-label':'Přehrávání nahrávky'});document.body.append(b);
+    b.innerHTML='<button class="rec-stop" id="pbBack" aria-label="O 10 s zpět"></button><button class="rec-stop" id="pbPlay" aria-label="Přehrát nebo pozastavit"></button><button class="rec-stop" id="pbFwd" aria-label="O 10 s dopředu"></button><span id="pbT">0:00</span><span id="pbN" class="pb-n"></span><button class="rec-stop" id="pbX" aria-label="Zavřít"></button>';
+    $('#pbBack').innerHTML=ic('undo');$('#pbFwd').innerHTML=ic('redo');$('#pbX').innerHTML=ic('close');
+    $('#pbBack').onclick=()=>{if(recAudio)recAudio.currentTime=Math.max(0,recAudio.currentTime-10);};
+    $('#pbFwd').onclick=()=>{if(recAudio)recAudio.currentTime+=10;};
+    $('#pbPlay').onclick=()=>{if(!recAudio)return;recAudio.paused?recAudio.play():recAudio.pause();};
+    $('#pbX').onclick=()=>{if(recAudio){recAudio.pause();recAudio=null;}b.remove();if(nb)render();};}
+  $('#pbN').textContent=a.name;
+  const sync=()=>{if(!recAudio||!$('#playBar'))return;$('#pbPlay').innerHTML=ic(recAudio.paused?'play':'pause');const d=isFinite(recAudio.duration)?recAudio.duration:a.dur;$('#pbT').textContent=fmtDur(recAudio.currentTime)+' / '+fmtDur(d);if(nb&&!recAudio.paused)scheduleRender();};
+  ['play','pause','timeupdate','ended'].forEach(ev=>recAudio.addEventListener(ev,sync));sync();
+}
 function closeTop(){const o=document.querySelectorAll('.modal-ov');const t=o[o.length-1];if(t)t.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));}
 
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('search','Hledat v sešitě',searchNotebook);it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě',searchNotebook);it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -3680,6 +3775,7 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase(),mod=e.ctrlKey||e.metaKey;
   if(mod&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return;}
   if(mod&&k==='f'){e.preventDefault();searchNotebook();return;}
+  if(!mod&&HL()&&['arrowright','arrowleft','pagedown','pageup'].includes(k)){e.preventDefault();const st=spread()?2:1;flipTo(curPageIndex()-(curPageIndex()%st)+((k==='arrowright'||k==='pagedown')?st:-st));return;}
   if(mod&&k==='y'){e.preventDefault();redo();return;}
   if(mod&&k==='c'&&sel){copySel(false);return;} if(mod&&k==='x'&&sel){copySel(true);return;}
   if(mod&&k==='v'&&clip){pasteAt(W/2,H/2);return;}
