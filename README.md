@@ -30,6 +30,8 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - Import PDF k anotaci, export do PDF / PNG, záloha a obnova (.json).
 - Gesta: posun a zoom prsty, klepnutí 2 prsty = zpět, 3 prsty = znovu, ignorování dlaně.
 - Optimalizace pro tablet: rychlý posun/zoom z mezipaměti stránek, obrazovka nezhasíná při psaní, celá obrazovka, větší dotykové plochy, světlý/tmavý vzhled.
+- **Plynulejší práce s učebnicemi (PDF):** stránky se dekódují mimo hlavní vlákno ve velikosti podle zoomu, sousední stránky se načítají dopředu, paměť je omezená; obrázky stránek se ukládají zvlášť a jen jednou, takže uložení po každém tahu je okamžité.
+- **Tmavý režim sešitu** (černé okolí stránek, tmavé lišty), přepínač v ⋯ menu i v Nastavení; plynulé animace oken, nabídek a zoomu (dorovnání na šířku po sevření prsty).
 - Funguje offline, data v IndexedDB na zařízení.
 
 ## Struktura

@@ -348,7 +348,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .back-chip{position:fixed;z-index:60;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:6px;height:40px;padding:0 16px 0 10px;border:0;border-radius:20px;background:#2D5BD3;color:#fff;font:600 14px var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.25)}.back-chip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
 .ol-row{display:flex;align-items:center}.ol-row>button:first-child{flex:1;min-width:0}.ol-row>button.cur{font-weight:700}
 .pg-title{font-size:12px;font-weight:600;color:#B07C00;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
-.pgrid{position:fixed;inset:0;z-index:45;background:var(--bg,#EEF0F4);display:flex;flex-direction:column}
+.pgrid{position:fixed;inset:0;z-index:45;background:var(--desk);display:flex;flex-direction:column}
 .pgrid-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--surface);border-bottom:1px solid var(--line)}
 .pgrid-bar b{font-size:16px;white-space:nowrap}.pgrid-bar .sp{flex:1}#pgActs{display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end}#pgActs .del{color:#E03131}
 .pgrid-body{flex:1;overflow-y:auto;touch-action:none;padding:16px}
@@ -408,6 +408,57 @@ input[type=range]{accent-color:var(--accent)}
 .vsz i{width:16px}
 .vsep{width:22px}
 #editor.drawing .fbar,#editor.drawing .vpal{opacity:.15;pointer-events:none}
+/* ---------- tmavý sešit (jako Noteshelf: černé okolí stránek) ---------- */
+body.dark-ui{--desk:#0E0E10;--surface:#1C1C1F;--surface-2:#2A2A2E;--ink:#F2F2F4;--muted:#9C9CA3;--line:#303036;--accent:#E3735C;--accent-2:#3EC3DB;--accent-soft:#3A2520;--accent-ink:#FFFFFF;--danger:#FF6B7D;
+  --bar:#1E1F23;--bar-2:#34353B;--bar-ink:#ECEDF0;--bar-line:rgba(255,255,255,.09);--shadow:0 14px 40px rgba(0,0,0,.6);color-scheme:dark}
+body.dark-ui .fbar,body.dark-ui .vpal{box-shadow:0 6px 24px rgba(0,0,0,.5)}
+body.dark-ui .vdot{box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+body.dark-ui .vadd{border-color:rgba(255,255,255,.28)}
+body.dark-ui .vsz i{background:rgba(255,255,255,.55)}
+body.dark-ui .selbar .cdot{box-shadow:0 0 0 1.5px rgba(255,255,255,.25)}
+body.dark-ui .pgc-th{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.5)}
+body.dark-ui .pg canvas{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 6px 16px rgba(0,0,0,.45)}
+body.dark-ui .zoom{border-color:rgba(255,255,255,.12)}
+body.dark-ui .pg-title,body.dark-ui .pgc-m{color:#F2C94C}
+.pg canvas.lazy,.pgc-th canvas.lazy{background:#fff}
+/* ---------- plynulé animace ---------- */
+:root{--ease-out:cubic-bezier(.2,.8,.2,1);--ease-spring:cubic-bezier(.3,1.3,.5,1)}
+.ib{transition:background-color .16s ease,color .16s ease,transform .12s var(--ease-out),opacity .2s}
+.ib:active:not(:disabled){transform:scale(.9)}
+.fbar .ib[aria-pressed="true"] svg{transition:color .16s ease}
+.btn,.chip,.cbtn,.vdot,.vsz,.tile,.fit,.menu button,.stk,.tpl canvas{transition:background-color .16s ease,box-shadow .18s ease,transform .12s var(--ease-out),color .16s}
+.btn:active,.chip:active,.menu button:active,.tile:active,.fit:active{transform:scale(.97)}
+.cbtn:active,.vdot:active,.stk:active{transform:scale(.86)}
+.vdot[aria-pressed="true"]{transform:scale(1.06)}
+.pop{max-height:calc(100dvh - 16px);overflow-y:auto;overscroll-behavior:contain}
+.pop{animation:popIn .17s var(--ease-out);transform-origin:50% 0}
+@keyframes popIn{from{opacity:0;transform:translateY(-4px) scale(.97)}to{opacity:1;transform:none}}
+.modal-ov{animation:fadeIn .18s ease}
+.modal{animation:modalIn .24s var(--ease-out)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+#toast:not([hidden]){animation:toastIn .26s var(--ease-out)}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px) scale(.96)}to{opacity:1;transform:translate(-50%,0)}}
+.selbar:not([hidden]){animation:fadeIn .14s ease}
+.pages{transition:transform .32s var(--ease-out)!important}
+.pgrid{animation:gridIn .26s var(--ease-out)}
+@keyframes gridIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+.pgc{transition:transform .18s var(--ease-out)}
+.pgc:active{transform:scale(.97)}
+.pgchip{transition:opacity .3s ease,transform .3s var(--ease-out)}
+.pgchip:not(.show){transform:translate(-50%,6px)}
+#editor.ed-in .stage{animation:edIn .34s var(--ease-out)}
+#editor.ed-in .fbar,#editor.ed-in .vpal{animation:fadeIn .4s ease}
+@keyframes edIn{from{opacity:0}to{opacity:1}}
+#lib:not([hidden]){animation:fadeIn .22s ease}
+.study-bar,.back-chip,.rec-bar{animation:toastIn .26s var(--ease-out)}
+.back-chip{animation-name:fadeIn}
+#editor.drawing .fbar,#editor.drawing .vpal{transition:opacity .35s ease .15s}
+.fbar,.vpal{transition:opacity .2s ease}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}}
+/* plátno: vlastní vrstva pro GPU, ať se nepřekresluje se zbytkem stránky */
+.stage canvas{will-change:transform;transform:translateZ(0)}
+
 </style>
 
 <div id="app">
@@ -571,6 +622,8 @@ const PDFJS_W='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker
 
 /* ---------- ikony ---------- */
 const IC={
+ moon:'<path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
  pen:'<path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 6l3 3"/>',
  hl:'<path d="M9.5 14.5L6 20h6l1.5-2.5"/><path d="M8 13.5l7.5-10 5 3.5-7.5 10z"/>',
  eraser:'<path d="M8 20h12"/><path d="M4.6 14.6l9-9a2 2 0 012.8 0l3 3a2 2 0 010 2.8L12 19H9z"/><path d="M9 10l5 5"/>',
@@ -662,12 +715,18 @@ const ic=(n,cls='i')=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true
 /* ---------- úložiště ---------- */
 const store={get(k,d){try{const v=localStorage.getItem('span:'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('span:'+k,JSON.stringify(v));}catch(e){}}};
 const DB={db:null,mem:new Map(),
- async open(){try{this.db=await new Promise((res,rej)=>{const r=indexedDB.open('span-notes',2);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('nb'))d.createObjectStore('nb',{keyPath:'id'});if(!d.objectStoreNames.contains('meta'))d.createObjectStore('meta',{keyPath:'id'});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}catch(e){this.db=null;}},
+ async open(){try{this.db=await new Promise((res,rej)=>{const r=indexedDB.open('span-notes',3);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('bg'))d.createObjectStore('bg',{keyPath:'id'});if(!d.objectStoreNames.contains('nb'))d.createObjectStore('nb',{keyPath:'id'});if(!d.objectStoreNames.contains('meta'))d.createObjectStore('meta',{keyPath:'id'});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}catch(e){this.db=null;}},
  os(m,st='nb'){return this.db.transaction(st,m).objectStore(st);},
  getMeta(id){if(!this.db)return Promise.resolve(store.get('meta:'+id,null));return new Promise(res=>{try{const r=this.os('readonly','meta').get(id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null);}catch(e){res(null);}});},
  putMeta(o){store.set('meta:'+o.id,o);if(!this.db)return Promise.resolve();return new Promise(res=>{try{const r=this.os('readwrite','meta').put(o);r.onsuccess=r.onerror=()=>res();}catch(e){res();}});},
- all(){if(!this.db)return Promise.resolve([...this.mem.values()]);return new Promise(res=>{try{const r=this.os('readonly').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}catch(e){res([]);}});},
- put(nb){if(!this.db){this.mem.set(nb.id,nb);return Promise.resolve(true);}return new Promise(res=>{try{const r=this.os('readwrite').put(nb);r.onsuccess=()=>res(true);r.onerror=()=>res(false);}catch(e){console.warn(e);res(false);}});},
+ all(){if(!this.db)return Promise.resolve([...this.mem.values()]);return new Promise(res=>{try{
+   /* pozadí stránek (PDF) leží zvlášť v úložišti 'bg' – sešit při každém uložení neklonuje megabajty obrázků */
+   const tx=this.db.transaction(['nb','bg'],'readonly');let A=[],B=[];tx.objectStore('nb').getAll().onsuccess=e=>A=e.target.result||[];tx.objectStore('bg').getAll().onsuccess=e=>B=e.target.result||[];
+   tx.oncomplete=()=>{for(const b of B){BGS.str.set(b.id,b.data);BGS.id.set(b.data,b.id);BGS.saved.add(b.id);}A.forEach(bgResolve);res(A);};tx.onerror=tx.onabort=()=>res(A);}catch(e){res([]);}});},
+ put(nb){if(!this.db){this.mem.set(nb.id,nb);return Promise.resolve(true);}return new Promise(res=>{try{
+   const {o,recs}=bgStrip(nb);const tx=this.db.transaction(['nb','bg'],'readwrite');const bs=tx.objectStore('bg');recs.forEach(r=>bs.put(r));tx.objectStore('nb').put(o);
+   tx.oncomplete=()=>{recs.forEach(r=>BGS.saved.add(r.id));res(true);};tx.onerror=tx.onabort=e=>{console.warn(e);res(false);};}catch(e){console.warn(e);res(false);}});},
+ putBgs(recs){if(!this.db||!recs.length)return Promise.resolve();return new Promise(res=>{try{const tx=this.db.transaction('bg','readwrite');const bs=tx.objectStore('bg');recs.forEach(r=>bs.put(r));tx.oncomplete=()=>{recs.forEach(r=>BGS.saved.add(r.id));res();};tx.onerror=tx.onabort=()=>res();}catch(e){res();}});},
  del(id){if(!this.db){this.mem.delete(id);return Promise.resolve();}return new Promise(res=>{try{const r=this.os('readwrite').delete(id);r.onsuccess=r.onerror=()=>res();}catch(e){res();}});}
 };
 
@@ -868,7 +927,8 @@ function drawTemplate(c,p){
 function drawPage(c,p,opt={}){
   c.save();c.beginPath();c.rect(0,0,p.w,p.h);c.clip();
   c.fillStyle=PAPERS[p.paper]||'#fff';c.fillRect(0,0,p.w,p.h);
-  if(p.bg){const im=getImg(p.bg);c.imageSmoothingQuality='high';if(im.complete&&im.naturalWidth)c.drawImage(im,0,0,p.w,p.h);}
+  if(p.bg){if(opt.print){const im=getImg(p.bg);c.imageSmoothingQuality='high';if(im.complete&&im.naturalWidth)c.drawImage(im,0,0,p.w,p.h);}
+    else{const tf=c.getTransform(),px=p.w*Math.hypot(tf.a,tf.b),b=getBg(p,px,opt.thumb?0:(fastMode?2:1));if(b){c.imageSmoothingEnabled=true;c.imageSmoothingQuality=fastMode?'low':'high';c.drawImage(b,0,0,p.w,p.h);}}}
   drawTemplate(c,p);
   const v=opt.vis, ex=opt.exclude, ed=opt.editId;
   const list=T.hl.behind!==false?p.items.filter(i=>i.k==='hl').concat(p.items.filter(i=>i.k!=='hl')):p.items;
@@ -877,7 +937,7 @@ function drawPage(c,p,opt={}){
     if(v){const b=getBounds(it);if(b[2]<v[0]||b[0]>v[2]||b[3]<v[1]||b[1]>v[3])continue;}
     drawItem(c,it,p);
   }
-  if(!opt.print)for(const it of p.items)if(it.lk&&!(ex&&ex.has(it.id)))drawLinkBadge(c,it);
+  if(!opt.print&&!opt.noBadge)for(const it of p.items)if(it.lk&&!(ex&&ex.has(it.id)))drawLinkBadge(c,it);
   c.restore();
 }
 
@@ -963,7 +1023,7 @@ function flipAfterPan(vx){const i=curPageIndex(),st=spread()?2:1;let t=i-(i%st);
 function setLayout(m){const i=nb?curPageIndex():0;S.layout=m;saveS();if(!nb)return;layoutPages();z=fitZoom();if(HL()){flipTo(i,false);}else{ox=W/2;goToPage(i);}toast(m==='h'?'Listování po stránkách – táhněte prstem do stran':'Svislé posouvání stránek');}
 function resize(){
   if(!nb)return;
-  const r=stage.getBoundingClientRect(); if(r.width<10)return;
+  const r={width:stage.clientWidth,height:stage.clientHeight}; if(r.width<10)return;
   const first=!W; W=r.width; H=r.height; dpr=Math.min(window.devicePixelRatio||1,3);
   for(const c of [board,live]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);c.style.width=W+'px';c.style.height=H+'px';}
   if(first)fitWidth(); clampView(); render();
@@ -996,12 +1056,13 @@ let fastMode=false,fastT=0;const pcache=new Map();
 function setFast(){fastMode=true;clearTimeout(fastT);}
 function endFast(delay=0){clearTimeout(fastT);fastT=setTimeout(()=>{if(!fastMode)return;fastMode=false;render();},delay);}
 function pageBitmap(p){
-  const cap=Math.sqrt(9e6/(p.w*p.h)),want=Math.min(z*dpr,cap);let c=pcache.get(p.id);
-  if(c&&c.items===p.items&&c.tpl===p.tpl&&c.paper===p.paper&&c.bg===p.bg&&c.w===p.w&&Math.abs(c.scale-want)/want<0.12)return c.cv;
-  const cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(p.w*want));cv.height=Math.max(1,Math.round(p.h*want));
-  const x=cv.getContext('2d');x.scale(want,want);drawPage(x,p,{});
-  pcache.delete(p.id);pcache.set(p.id,{cv,items:p.items,tpl:p.tpl,paper:p.paper,bg:p.bg,w:p.w,scale:want});
-  if(pcache.size>5)pcache.delete(pcache.keys().next().value);
+  const cap=Math.sqrt(4.2e6/(p.w*p.h)),want=Math.min(z*dpr,cap);let c=pcache.get(p.id);
+  if(c&&c.items===p.items&&c.tpl===p.tpl&&c.paper===p.paper&&c.bg===p.bg&&c.w===p.w&&(fastMode?c.scale>=want*0.6:Math.abs(c.scale-want)/want<0.12))return c.cv;
+  const W2=Math.max(1,Math.round(p.w*want)),H2=Math.max(1,Math.round(p.h*want));
+  const cv=c&&c.cv.width===W2&&c.cv.height===H2?c.cv:document.createElement('canvas');cv.width=W2;cv.height=H2;
+  const x=cv.getContext('2d');x.setTransform(want,0,0,want,0,0);drawPage(x,p,{});
+  pcache.delete(p.id);pcache.set(p.id,{cv,items:p.items,tpl:p.tpl,paper:p.paper,bg:p.bg,bgSrc:p.bg,w:p.w,scale:want});
+  if(pcache.size>6)pcache.delete(pcache.keys().next().value);
   return cv;
 }
 function scheduleRender(){if(needRender)return;needRender=true;requestAnimationFrame(()=>{if(needRender)render();});}
@@ -1014,14 +1075,16 @@ function render(){
     if(p._top+p.h<wy0||p._top>wy1)continue;
     if(HL()&&(p._left*z+ox>W||(p._left+p.w)*z+ox<0))continue;
     const m=pageMat(p);
-    c.save();c.shadowColor='rgba(18,28,56,.20)';c.shadowBlur=14;c.shadowOffsetY=3;c.fillStyle=PAPERS[p.paper]||'#fff';c.fillRect(m[4],m[5],p.w*z,p.h*z);c.restore();
-    if(fastMode&&!(sel&&sel.page===p)&&!(editing&&editing.page===p)){c.imageSmoothingQuality='high';c.drawImage(pageBitmap(p),m[4],m[5],p.w*z,p.h*z);continue;}
+    pageShadow(c,m[4],m[5],p.w*z,p.h*z);c.fillStyle=PAPERS[p.paper]||'#fff';c.fillRect(m[4],m[5],p.w*z,p.h*z);
+    if(fastMode&&heavyPage(p)&&!(sel&&sel.page===p)&&!(editing&&editing.page===p)){c.imageSmoothingQuality='low';c.drawImage(pageBitmap(p),m[4],m[5],p.w*z,p.h*z);continue;}
     c.save(); setTf(c,m);
     drawPage(c,p,{vis:[-m[4]/z,-m[5]/z,(W-m[4])/z,(H-m[5])/z],exclude:sel&&sel.page===p?sel.ids:null,editId:editing&&editing.page===p?editing.id:null});
     c.restore();
   }
-  drawOverlay(); updatePageInd(); if(editing)positionTA(); if(ZB.on&&!ZB.act)zbRender(); if(calcState)positionCalc(); if($('#calcChip'))hideCalcChip(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
+  drawOverlay(); updatePageInd(); if(!fastMode)warmNeighbors(); if(editing)positionTA(); if(ZB.on&&!ZB.act)zbRender(); if(calcState)positionCalc(); if($('#calcChip'))hideCalcChip(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
 }
+function pageShadow(c,x,y,w,h){if(document.body.classList.contains('dark-ui')){c.fillStyle='rgba(255,255,255,.07)';c.fillRect(x-1,y-1,w+2,h+2);return;}
+  c.fillStyle='rgba(18,28,56,.05)';c.fillRect(x-3,y-1,w+6,h+7);c.fillStyle='rgba(18,28,56,.07)';c.fillRect(x-1.5,y,w+3,h+4);c.fillStyle='rgba(18,28,56,.10)';c.fillRect(x-.5,y,w+1,h+1.5);}
 let deskCol=null; function getDesk(){if(!deskCol)deskCol=getComputedStyle(document.body).getPropertyValue('--desk').trim()||'#E4E8EE';return deskCol;}
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{deskCol=null;scheduleRender();});
 function drawOnMain(p,it){const c=bctx;c.save();setTf(c,pageMat(p));c.beginPath();c.rect(0,0,p.w,p.h);c.clip();drawItem(c,it,p);c.restore();}
@@ -1112,7 +1175,7 @@ stage.addEventListener('pointermove',onMove);
 stage.addEventListener('pointerup',onUp);
 stage.addEventListener('pointercancel',onCancel);
 stage.addEventListener('contextmenu',e=>e.preventDefault());
-stage.addEventListener('wheel',e=>{e.preventDefault();stageRect=stage.getBoundingClientRect();if(e.ctrlKey||e.metaKey){setFast();const[sx,sy]=sp(e);zoomAt(sx,sy,z*Math.exp(-e.deltaY*0.01));}else if(hFits()){wAcc+=e.deltaY+e.deltaX;const now=performance.now();if(Math.abs(wAcc)>60&&now-wLast>380){wLast=now;const st=spread()?2:1,i=curPageIndex();flipTo(i-(i%st)+(wAcc>0?st:-st));wAcc=0;}return;}else{setFast();ox-=e.deltaX;oy-=e.deltaY;clampView();scheduleRender();}endFast(180);},{passive:false});
+stage.addEventListener('wheel',e=>{e.preventDefault();stageRect=stage.getBoundingClientRect();if(e.ctrlKey||e.metaKey){setFast();const[sx,sy]=sp(e);zoomAt(sx,sy,z*Math.exp(-e.deltaY*0.01));endFast(180);}else if(hFits()){wAcc+=e.deltaY+e.deltaX;const now=performance.now();if(Math.abs(wAcc)>60&&now-wLast>380){wLast=now;const st=spread()?2:1,i=curPageIndex();flipTo(i-(i%st)+(wAcc>0?st:-st));wAcc=0;}return;}else{setFast();ox-=e.deltaX;oy-=e.deltaY;clampView();scheduleRender();}endFast(180);},{passive:false});
 let wAcc=0,wLast=0;
 
 function onDown(e){
@@ -1194,7 +1257,7 @@ function touchUp(){
     if(touches.size===0){
       const dt=performance.now()-gest.t0;
       if(!gest.moved&&dt<380&&S.twoTapUndo&&performance.now()-lastPen>400){if(gest.fingers>=3)redo();else undo();}
-      gest=null;endFast();
+      gest=null;if(!settleZoom())endFast();
     }
   }else if(gest.type==='pan'){clearTimeout(lpTimer);if(!gest.moved&&performance.now()-gest.t0<350)tapAt(gest.lx,gest.ly);if(gest.moved&&hFits())flipAfterPan(performance.now()-gest.lt<80?gest.vx:0);else if(!(gest.moved&&performance.now()-gest.lt<60&&startInertia(gest.vx,gest.vy)))endFast();gest=null;}
 }
@@ -1643,8 +1706,8 @@ function bumpFav(c){
 }
 const lum=hex=>{const h=hex.replace('#','');if(h.length<6)return 1;const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255;return 0.2126*r+0.7152*g+0.0722*b;};
 function updateToolbar(){
-  const col=['pen','hl','shape','text'].includes(T.tool)?curColor():'#23262D',tc=lum(col)>0.62?'#23262D':col;
-  document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===T.tool;b.setAttribute('aria-pressed',String(on));b.style.setProperty('--tool-c',on?tc:'#23262D');});
+  const dk=document.body.classList.contains('dark-ui'),col=['pen','hl','shape','text'].includes(T.tool)?curColor():null,L=col?lum(col):0,tc=!col||(dk?L<0.2:L>0.62)?'var(--bar-ink)':col;
+  document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===T.tool;if(b.getAttribute('aria-pressed')!==String(on))b.setAttribute('aria-pressed',String(on));b.style.setProperty('--tool-c',on?tc:'var(--bar-ink)');});
   $('#bRuler').setAttribute('aria-pressed',String(ruler.on));$('#bZoom').setAttribute('aria-pressed',String(ZB.on));$('#bFinger').setAttribute('aria-pressed',String(fingerDraws()));
   renderPal();
 }
@@ -1788,7 +1851,9 @@ function toast(msg,stay){const t=$('#toast');t.textContent=msg;t.hidden=false;cl
    Stránky
    ========================================================= */
 const newPage=(tpl,paper,land)=>({id:uid(),w:land?PH:PW,h:land?PW:PH,tpl:tpl||S.tpl,paper:paper||S.paper,bg:null,items:[],mark:false});
-function goToPage(i){if(HL()){flipTo(i,false);return;}const p=nb.pages[clamp(i,0,nb.pages.length-1)];oy=-p._top*z;clampView();render();}
+function goToPage(i,anim){if(HL()){flipTo(i,!!anim);return;}const p=nb.pages[clamp(i,0,nb.pages.length-1)];const ty=-p._top*z;
+  if(anim&&W&&Math.abs(ty-oy)<H*6&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const o0=oy;oy=ty;clampView();const t=oy;oy=o0;animView(z,ox,t,300);return;}
+  oy=ty;clampView();render();}
 function addPage(at){const cur=nb.pages[curPageIndex()];snapPages();const p=newPage(cur&&!cur.bg?cur.tpl:S.tpl,cur?cur.paper:S.paper);if(cur&&!cur.bg){p.w=cur.w;p.h=cur.h;}const i=at==null?curPageIndex()+1:at;nb.pages=nb.pages.slice(0,i).concat([p],nb.pages.slice(i));layoutPages();changed();goToPage(i);if(pagesOpen())renderPanel();toast('Stránka přidána');}
 function delPage(i){if(nb.pages.length<2){toast('Sešit musí mít alespoň jednu stránku');return;}clearSel();snapPages();nb.pages=nb.pages.filter((_,k)=>k!==i);layoutPages();clampView();changed();render();renderPanel();}
 function dupPage(i){snapPages();const src=nb.pages[i];const p=Object.assign({},src,{id:uid(),items:src.items.map(it=>Object.assign({},it,{id:uid()}))});nb.pages=nb.pages.slice(0,i+1).concat([p],nb.pages.slice(i+1));layoutPages();changed();render();renderPanel();}
@@ -1796,13 +1861,14 @@ function movePage(i,d){const j=i+d;if(j<0||j>=nb.pages.length)return;snapPages()
 const pagesOpen=()=>$('#pages').classList.contains('open');
 let panelT=0, marksOnly=false;
 function schedulePanel(){clearTimeout(panelT);panelT=setTimeout(renderPanel,400);}
+let panelIO=null;
 function renderPanel(){
-  const list=$('#pagesList');list.innerHTML='';const ci=curPageIndex();
+  const list=$('#pagesList');const st=list.scrollTop;list.innerHTML='';if(panelIO)panelIO.disconnect();panelIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){panelIO.unobserve(e.target);e.target._fill&&e.target._fill();}}),{root:list,rootMargin:'400px'});
+  requestAnimationFrame(()=>{list.scrollTop=st;});const ci=curPageIndex();
   nb.pages.forEach((p,i)=>{
     if(marksOnly&&!p.mark)return;
-    const w=150,s=w/p.w,k=Math.min(3,devicePixelRatio||1)*1.2,c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(p.h*s*k);
-    const x=c.getContext('2d');x.scale(s*k,s*k);drawPage(x,p,{});
-    const row=el('div',{class:'pg'+(i===ci?' cur':'')});c.onclick=()=>goToPage(i);c.title='Přejít na stránku '+(i+1);row.append(c);
+    const c=lazyThumb(p,150,panelIO);
+    const row=el('div',{class:'pg'+(i===ci?' cur':'')});c.onclick=()=>goToPage(i,true);c.title='Přejít na stránku '+(i+1);row.append(c);
     const r=el('div',{class:'pg-row'});
     const b=(icn,l,fn,cls='')=>{const e=el('button',{class:'ib '+cls,title:l,'aria-label':l},ic(icn));e.onclick=fn;return e;};
     r.append(b('up','Posunout výš',()=>movePage(i,-1)),b('dn','Posunout níž',()=>movePage(i,1)),el('b',{},String(i+1)),b('star',p.mark?'Odebrat záložku':'Záložka',()=>bookmarkPage(i),p.mark?'marked':''),b('dup','Duplikovat',()=>dupPage(i)),b('trash','Smazat',()=>delPage(i)));
@@ -1810,7 +1876,7 @@ function renderPanel(){
   });
   if(marksOnly&&!list.children.length)list.append(el('p',{class:'lib-note'},'Zatím žádné záložky. Klepněte na hvězdičku u stránky.'));
 }
-function togglePanel(open){$('#pages').classList.toggle('open',open);if(open)renderPanel();}
+function togglePanel(open){$('#pages').classList.toggle('open',open);if(open){renderPanel();requestAnimationFrame(()=>requestAnimationFrame(()=>{const c=$('#pagesList .pg.cur');if(c)c.scrollIntoView({block:'center'});}));}}
 
 function tplPreview(tpl,paper){const c=document.createElement('canvas');c.width=156;c.height=220;const x=c.getContext('2d');x.scale(156/PW,220/PH);const p={w:PW,h:PH,tpl,paper,items:[]};x.fillStyle=PAPERS[paper];x.fillRect(0,0,PW,PH);x.lineWidth=3;drawTemplate(x,p);return c;}
 function pickTemplate(body,state){
@@ -1849,8 +1915,8 @@ async function saveFile(name,blob){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();toast('Soubor stažen');setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},3000);
 }
 const safeName=s=>(s||'sesit').replace(/[\\/:*?"<>|]+/g,'').trim().slice(0,80)||'sesit';
-function preload(p){const srcs=[p.bg].concat(p.items.filter(i=>i.t==='i').map(i=>i.src)).filter(Boolean);return Promise.all(srcs.map(s=>{const im=getImg(s);return im.complete&&im.naturalWidth?0:new Promise(r=>{im.addEventListener('load',r,{once:true});im.addEventListener('error',r,{once:true});});}));}
-async function pageCanvas(p,scale){await preload(p);const c=document.createElement('canvas');c.width=Math.round(p.w*scale);c.height=Math.round(p.h*scale);const x=c.getContext('2d');x.scale(scale,scale);drawPage(x,p,{print:true});return c;}
+function preload(p,noBg){const srcs=[noBg?null:p.bg].concat(p.items.filter(i=>i.t==='i').map(i=>i.src)).filter(Boolean);return Promise.all(srcs.map(s=>{const im=getImg(s);return im.complete&&im.naturalWidth?0:new Promise(r=>{im.addEventListener('load',r,{once:true});im.addEventListener('error',r,{once:true});});}));}
+async function pageCanvas(p,scale){await preload(p);const c=document.createElement('canvas');c.width=Math.round(p.w*scale);c.height=Math.round(p.h*scale);const x=c.getContext('2d');x.scale(scale,scale);drawPage(x,p,{print:true});if(p.bg)imgCache.delete(p.bg);return c;}
 async function exportPDF(n){
   try{
     toast('Připravuji PDF…',true); await loadScript(JSPDF); const {jsPDF}=window.jspdf; let doc;
@@ -1929,8 +1995,8 @@ function thumbEl(n){
   const key=n.id+':'+n.updated+':'+n.pages.length,c=thumbs.get(n.id);
   if(c&&c.key===key){const im=new Image();im.alt='';im.src=c.url;return im;}
   const w=Math.round(240*Math.min(2.5,devicePixelRatio||1)),s=w/p.w,cv=document.createElement('canvas');cv.width=w;cv.height=Math.round(p.h*s);
-  const draw=()=>{const x=cv.getContext('2d');x.setTransform(s,0,0,s,0,0);drawPage(x,p,{});};
-  draw();preload(p).then(()=>{draw();try{thumbs.set(n.id,{key,url:cv.toDataURL('image/jpeg',0.93)});}catch(e){}});
+  const draw=()=>{const x=cv.getContext('2d');x.setTransform(s,0,0,s,0,0);drawPage(x,p,{thumb:true,noBadge:true});};
+  draw();Promise.all([preload(p,true),p.bg?bgReady(p,w):0]).then(()=>{draw();try{thumbs.set(n.id,{key,url:cv.toDataURL('image/jpeg',0.93)});}catch(e){}});
   return cv;
 }
 
@@ -2133,7 +2199,7 @@ let wake=null;
 async function requestWake(){try{if(navigator.wakeLock&&!wake&&document.visibilityState==='visible'){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null;});}}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nb)requestWake();});
 function toggleFullscreen(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>toast('Celá obrazovka tady není dostupná.'));else if(!r)toast('Celá obrazovka tady není dostupná.');}}catch(e){toast('Celá obrazovka tady není dostupná.');}}
-function openNotebook(n){document.body.classList.add('light-ui');deskCol=null;
+function openNotebook(n){applyEdTheme();edEnter();
   requestWake();pcache.clear();commitText();nb=n;nb.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});
   H_.undo=[];H_.redo=[];sel=null;act=null;W=0;ruler.on=false;
   layoutPages();$('#lib').hidden=true;$('#editor').hidden=false;
@@ -2141,7 +2207,7 @@ function openNotebook(n){document.body.classList.add('light-ui');deskCol=null;
   requestAnimationFrame(()=>{resize();if(n._lastY!=null){oy=n._lastY;clampView();render();}});
   n._lastSnap=Date.now();setTimeout(()=>verOnOpen(n).catch(()=>{}),1500);
 }
-function closeNotebook(){closePageGrid();if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui');if(ZB.on)toggleZoom(false);closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+function closeNotebook(){closePageGrid();if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui','dark-ui');if(ZB.on)toggleZoom(false);closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
 
 /* =========================================================
    Lupa psaní (zoom box) – píšete velkým písmem dole, na stránku se zapíše zmenšeně
@@ -3653,7 +3719,8 @@ addEventListener('resize',()=>{if(XL.doc)xlRender();});
 /* ---------- nastavení, nápověda, menu ---------- */
 async function openSettings(){
   await modal('Nastavení',b=>{
-    const ft=el('div',{class:'field'},'<span>Vzhled aplikace</span>');chips(ft,[['light','Světlý'],['dark','Tmavý'],['system','Podle systému']],S.theme,v=>{S.theme=v;saveS();applyTheme();});b.append(ft);
+    const ft=el('div',{class:'field'},'<span>Vzhled aplikace</span>');chips(ft,[['light','Světlý'],['dark','Tmavý'],['system','Podle systému']],S.theme,v=>{S.theme=v;saveS();applyTheme();if(nb){applyEdTheme();updateToolbar();render();}});b.append(ft);
+    const fe=el('div',{class:'field'},'<span>Okolí stránek v sešitě</span>');chips(fe,[['app','Jako aplikace'],['dark','Tmavé'],['light','Světlé']],S.edTheme||'app',v=>setEdTheme(v));b.append(fe);
     const f1=el('label',{class:'field'},`<span>Kolečko nástrojů – doba podržení: <b id="holdV">${S.holdMs} ms</b></span>`);const r=el('input',{type:'range',id:'holdMs',min:'250',max:'1000',step:'50',value:String(S.holdMs)});r.oninput=()=>{S.holdMs=+r.value;$('#holdV').textContent=r.value+' ms';saveS();};f1.append(r);b.append(f1);
     const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
     const f2=el('label',{class:'field'},'<span>Když po nakreslení tahu pero podržím</span>');const s2=el('select',{id:'afterHold'});[['shape','Převést na přesný tvar'],['menu','Otevřít kolečko'],['off','Nic nedělat']].forEach(([v,l])=>s2.append(new Option(l,v,false,v===S.afterHold)));s2.onchange=()=>{S.afterHold=s2.value;saveS();};f2.append(s2);b.append(f2);
@@ -3829,7 +3896,7 @@ function closeTop(){const o=document.querySelectorAll('.modal-ov');const t=o[o.l
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);{const d=edDark();it(d?'sun':'moon',d?'Světlé okolí stránek':'Tmavé okolí stránek',()=>setEdTheme(d?'light':'dark'));}it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -3995,9 +4062,10 @@ function goToBB(i,b){const p=nb.pages[i];if(HL())flipTo(i,false);else goToPage(i
    ========================================================= */
 const thumbCache=new WeakMap();
 function pageThumb(p,w){
-  const hit=thumbCache.get(p);if(hit&&hit.items===p.items&&hit.tpl===p.tpl&&hit.paper===p.paper&&hit.w===w)return hit.cv;
+  let m=thumbCache.get(p);if(!m){m=new Map();thumbCache.set(p,m);}const hit=m.get(w);
+  if(hit&&hit.items===p.items&&hit.tpl===p.tpl&&hit.paper===p.paper&&hit.bg===p.bg)return hit.cv;
   const s=w/p.w,k=Math.min(2,devicePixelRatio||1),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(p.h*s*k);
-  const x=c.getContext('2d');x.scale(s*k,s*k);drawPage(x,p,{print:true});thumbCache.set(p,{items:p.items,tpl:p.tpl,paper:p.paper,w,cv:c});return c;
+  thumbDraw(c,p,s*k);m.set(w,{items:p.items,tpl:p.tpl,paper:p.paper,bg:p.bg,cv:c});return c;
 }
 let PG=null;
 function openPageGrid(){
@@ -4084,7 +4152,7 @@ function verReq(mode,fn){return new Promise(res=>{if(!DB.db){res(null);return;}t
 async function verList(id){const a=await verReq('readonly',os=>os.getAll(verRange(id)));return (a||[]).sort((x,y)=>y.t-x.t);}
 async function verSnap(n,why){
   if(!DB.db||!n||n.kind==='sheet'||!n.pages)return false;const t=Date.now();
-  const data=JSON.stringify(n,(k,v)=>k[0]==='_'?undefined:v);
+  const {o,recs}=bgStrip(n);await DB.putBgs(recs);const data=JSON.stringify(o,(k,v)=>k[0]==='_'?undefined:v);
   const ok=await verReq('readwrite',os=>os.put({id:'v:'+n.id+':'+t,t,why,pages:n.pages.length,size:data.length,data}));
   n._lastSnap=t;
   const keys=(await verReq('readonly',os=>os.getAllKeys(verRange(n.id))))||[];
@@ -4104,7 +4172,7 @@ async function openVersions(){
     const L=el('div',{class:'ver-list'});
     if(!list.length)L.append(el('p',{class:'lib-note'},'Zatím žádné uložené verze.'));
     list.forEach(r=>{const row=el('div',{class:'ver-row'});
-      const th=el('div',{class:'ver-th'});try{const d=JSON.parse(r.data);const p=d.pages[0];p.items=(p.items||[]).map(finalizeLoaded);th.append(pageThumb(p,64));}catch(e){}
+      const th=el('div',{class:'ver-th'});try{const d=bgResolve(JSON.parse(r.data));const p=d.pages[0];p.items=(p.items||[]).map(finalizeLoaded);th.append(pageThumb(p,64));}catch(e){}
       const info=el('div',{class:'ver-i'},`<b>${fmtWhen(r.t)}</b><span>${esc(r.why||'')} · ${r.pages} ${r.pages===1?'stránka':r.pages<5?'stránky':'stránek'}</span>`);
       const a=el('button',{class:'btn'},'Kopie');a.title='Otevřít jako nový sešit';a.onclick=()=>verAsCopy(r,b);
       const o=el('button',{class:'btn primary'},'Obnovit');o.onclick=()=>verRestore(r,b);
@@ -4114,13 +4182,13 @@ async function openVersions(){
 }
 async function verRestore(r,b){
   if(!nb)return;const ok=await modal('Obnovit verzi',x=>x.append(el('p',{},'Obnovit sešit do stavu z '+fmtWhen(r.t)+'? Současný stav se předtím uloží jako verze, takže o nic nepřijdete.')),[{label:'Zrušit'},{label:'Obnovit',cls:'primary',value:true}]);
-  if(!ok)return;await verSnap(nb,'Před obnovením');const d=JSON.parse(r.data);
+  if(!ok)return;await verSnap(nb,'Před obnovením');const d=await bgResolveAsync(JSON.parse(r.data));
   nb.pages=d.pages.map(p=>Object.assign(p,{items:(p.items||[]).map(finalizeLoaded)}));nb.audio=d.audio||[];
   H_.undo=[];H_.redo=[];updUndo();pcache.clear();ocrCache.clear();clearSel();layoutPages();clampView();changed();flushSave();render();
   const ov=b.closest('.modal-ov');if(ov)ov.querySelector('.modal-foot .btn').click();toast('Obnoveno – verze z '+fmtWhen(r.t));
 }
 async function verAsCopy(r,b){
-  const d=JSON.parse(r.data);d.id=uid();d.title=(d.title||'Sešit')+' ('+fmtWhen(r.t)+')';d.created=d.updated=Date.now();d.fav=false;d.trashed=null;
+  const d=await bgResolveAsync(JSON.parse(r.data));d.id=uid();d.title=(d.title||'Sešit')+' ('+fmtWhen(r.t)+')';d.created=d.updated=Date.now();d.fav=false;d.trashed=null;
   d.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});await DB.put(d);notebooks.push(d);
   const ov=b.closest('.modal-ov');if(ov)ov.querySelector('.modal-foot .btn').click();toast('Kopie vytvořena v knihovně: '+d.title);
 }
@@ -4165,6 +4233,118 @@ function selImageMenu(anchor){
   ]);
 }
 
+/* =========================================================
+   Výkon: pozadí stránek (PDF, učebnice) – dekódování mimo hlavní vlákno,
+   zmenšené úrovně podle potřebné velikosti a omezená paměť (LRU)
+   ========================================================= */
+const BG={m:new Map(),bytes:0,MAX:((navigator.deviceMemory||4)>=6?220:140)*1e6,q:[],run:0,ok:typeof createImageBitmap==='function'};
+const BG_L=[320,640,1280,2048,Infinity];
+function bgEnt(src){let e=BG.m.get(src);if(!e){e={src,lv:new Map(),pend:new Set(),t:0,ar:1.414,nat:0,blob:null,cb:[]};BG.m.set(src,e);}e.t=performance.now();return e;}
+function bgWant(px,e){let L=Infinity;for(const l of BG_L)if(l>=px*0.92){L=l;break;}if(e.nat&&L>=e.nat)L=Infinity;return L;}
+/* nejlepší dostupná úroveň (nejmenší dostatečná, jinak největší menší); chybějící se zařadí k dekódování */
+function getBg(p,px,prio=1){
+  const e=bgEnt(p.bg);e.ar=p.h/p.w;const L=bgWant(px,e);let best=null,bl=-1;
+  for(const[l,b] of e.lv){if(l>=L){if(bl<L||l<bl){best=b;bl=l;}}else if(bl<L&&l>bl){best=b;bl=l;}}
+  if(bl<L)bgQueue(e,L,prio);
+  return best;
+}
+function bgReady(p,px){return new Promise(res=>{const e=bgEnt(p.bg);const b=getBg(p,px,0);const L=bgWant(px,e);if(b&&[...e.lv.keys()].some(l=>l>=L))return res();e.cb.push(res);setTimeout(res,8000);});}
+function bgQueue(e,L,prio){
+  if(e.pend.has(L))return;e.pend.add(L);
+  const job={e,L};prio?BG.q.unshift(job):BG.q.push(job);bgPump();
+}
+function bgPump(){
+  while(BG.run<2&&BG.q.length){const j=BG.q.shift();BG.run++;bgDecode(j.e,j.L).catch(()=>{}).finally(()=>{BG.run--;j.e.pend.delete(j.L);bgPump();});}
+}
+async function bgDecode(e,L){
+  if(e.lv.has(L))return;
+  let bmp=null;
+  if(BG.ok){
+    try{
+      if(!e.blob)e.blob=dataBlob(e.src);
+      bmp=L===Infinity?await createImageBitmap(e.blob):await createImageBitmap(e.blob,{resizeWidth:L,resizeHeight:Math.max(1,Math.round(L*e.ar)),resizeQuality:'high'});
+    }catch(err){bmp=null;}
+  }
+  if(!bmp){/* záloha pro starší prohlížeče: klasický obrázek */
+    const im=new Image();im.src=e.src;try{await im.decode();}catch(err){}
+    if(!im.naturalWidth)return;bmp=im;L=Infinity;
+  }
+  if(L===Infinity){e.nat=bmp.width;/* menší úrovně, které jsou větší než originál, už nejsou potřeba */
+    for(const[l,b] of [...e.lv])if(l>=e.nat){bgFree(e,l,b);} }
+  e.lv.set(L,bmp);BG.bytes+=bmp.width*bmp.height*4;e.t=performance.now();
+  bgEvict(e);
+  const cbs=e.cb;e.cb=[];cbs.forEach(f=>{try{f();}catch(err){}});
+  bgArrived(e.src);
+}
+function dataBlob(src){src=src.split('#')[0];if(!src.startsWith('data:'))throw new Error('url');const i=src.indexOf(','),meta=src.slice(5,i),d=src.slice(i+1);
+  if(!/;base64/.test(meta))return new Blob([decodeURIComponent(d)],{type:meta.split(';')[0]});const bin=atob(d),u=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)u[k]=bin.charCodeAt(k);return new Blob([u],{type:meta.split(';')[0]});}
+function bgFree(e,l,b){e.lv.delete(l);BG.bytes-=b.width*b.height*4;try{b.close&&b.close();}catch(err){}}
+function bgEvict(keep){
+  if(BG.bytes<=BG.MAX)return;
+  /* nejdřív velké úrovně nejdéle nepoužitých stránek, malé náhledové (320) se drží nejdéle */
+  const ents=[...BG.m.values()].filter(x=>x!==keep&&x.lv.size).sort((a,b)=>a.t-b.t);
+  for(const x of ents){for(const[l,b] of [...x.lv].sort((a,b)=>b[0]-a[0])){if(l<=320&&BG.bytes<BG.MAX*1.3)continue;bgFree(x,l,b);if(BG.bytes<=BG.MAX*0.85)return;}}
+}
+let bgArrT=0;const bgArrSet=new Set();
+function bgArrived(src){bgArrSet.add(src);if(bgArrT)return;bgArrT=requestAnimationFrame(()=>{bgArrT=0;const s=new Set(bgArrSet);bgArrSet.clear();
+  if(nb){for(const[id,c] of pcache)if(s.has(c.bgSrc))pcache.delete(id);scheduleRender();}
+  thumbWait.forEach((f,cv)=>{if(s.has(f.src)){thumbWait.delete(cv);f.redraw();}});
+});}
+/* náhledy stránek: kreslí se hned (s tím, co je k dispozici) a dokreslí se, až dorazí pozadí */
+const thumbWait=new Map();
+function thumbDraw(cv,p,scale){
+  const x=cv.getContext('2d');x.setTransform(scale,0,0,scale,0,0);x.clearRect(0,0,p.w,p.h);drawPage(x,p,{print:false,thumb:true,noBadge:true});
+  if(p.bg){const e=bgEnt(p.bg),L=bgWant(p.w*scale,e);if(![...e.lv.keys()].some(l=>l>=L))thumbWait.set(cv,{src:p.bg,redraw:()=>{if(cv.isConnected||cv._keep)thumbDraw(cv,p,scale);}});}
+}
+/* zahřátí: dekódovat pozadí sousedních stránek dřív, než na ně uživatel dojede */
+let warmT=0;
+function warmNeighbors(){
+  clearTimeout(warmT);warmT=setTimeout(()=>{
+    if(!nb||fastMode)return;const i=curPageIndex();
+    for(const d of [1,-1,2,-2,3]){const p=nb.pages[i+d];if(p&&p.bg)getBg(p,p.w*z*dpr,0);}
+    /* těžké stránky (hodně tahů) předpřipravit jako bitmapu pro plynulý posun */
+    const ric=window.requestIdleCallback||(f=>setTimeout(f,60));
+    ric(()=>{if(!nb||fastMode)return;for(const d of [0,1,-1]){const p=nb.pages[i+d];if(p&&heavyPage(p))pageBitmap(p);}});
+  },120);
+}
+const heavyPage=p=>p.items.length>220;
+
+/* plynulá animace pohledu (zoom tlačítky, skok na stránku, dorovnání po gestu) */
+let viewRAF=0;
+function animView(tz,tox,toy,D=280,done){
+  cancelInertia();if(viewRAF)cancelAnimationFrame(viewRAF);
+  const z0=z,x0=ox,y0=oy,t0=performance.now();setFast();
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;if(reduce)D=1;
+  const step=now=>{const k=Math.min(1,(now-t0)/D),e=k<1?1-Math.pow(1-k,3):1;
+    /* zoom interpolovat logaritmicky – působí rovnoměrně */
+    z=z0*Math.pow(tz/z0,e);ox=x0+(tox-x0)*e;oy=y0+(toy-y0)*e;clampView();render();
+    if(k<1)viewRAF=requestAnimationFrame(step);else{viewRAF=0;endFast();done&&done();}};
+  viewRAF=requestAnimationFrame(step);
+}
+function zoomAnim(sx,sy,nz,D=240){nz=clamp(nz,0.2,6);const k=nz/z;animView(nz,sx-(sx-ox)*k,sy-(sy-oy)*k,D);}
+/* po sevření prsty: mírně pod šířkou obrazovky → dorovnat na šířku; přes limit → vrátit */
+function settleZoom(){
+  if(!nb||HL())return false;const fz=clamp(W/maxPW,0.2,3);
+  if(z<fz&&z>fz*0.8){const cy=(H/2-oy)/z;animView(fz,W/2,H/2-cy*fz,220);return true;}
+  return false;
+}
+
+/* ---------- tmavý / světlý sešit ---------- */
+function edDark(){const t=S.edTheme||'app';if(t==='dark')return true;if(t==='light')return false;
+  const a=document.documentElement.getAttribute('data-theme');return a?a==='dark':matchMedia('(prefers-color-scheme: dark)').matches;}
+function applyEdTheme(){const b=document.body,d=edDark();b.classList.toggle('dark-ui',d);b.classList.toggle('light-ui',!d);deskCol=null;
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',d?'#0E0E10':'#E8EBF0');}
+function setEdTheme(v){S.edTheme=v;saveS();if(nb){applyEdTheme();updateToolbar();pcache.clear();render();}}
+function edEnter(){const e=$('#editor');e.classList.remove('ed-in');void e.offsetWidth;e.classList.add('ed-in');setTimeout(()=>e.classList.remove('ed-in'),420);}
+/* líný náhled: prázdné plátno správné velikosti, dokreslí se až při zobrazení */
+function lazyThumb(p,w,io){
+  const m=thumbCache.get(p),hit=m&&m.get(w);
+  if(hit&&hit.items===p.items&&hit.tpl===p.tpl&&hit.paper===p.paper&&hit.bg===p.bg)return hit.cv;
+  const k=Math.min(2,devicePixelRatio||1),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(p.h*w/p.w*k);c.className='lazy';
+  c._fill=()=>{const t=pageThumb(p,w);t.onclick=c.onclick;t.title=c.title;t.className='';if(c.isConnected)c.replaceWith(t);};
+  io.observe(c);return c;
+}
+
 /* ---------- propojení UI ---------- */
 let pdfInto=false;
 [['bBack','back'],['bPages','grid'],['bUndo','undo'],['bRedo','redo'],['bImage','image'],['bRuler','ruler'],['bAddPg','plus'],['bFinger','hand'],['bMore','more'],['bMarks','star'],['bPagesClose','close'],['bSide','sidebar'],['bLibAdd','plus'],['bLibMore','more']].forEach(([id,i])=>{$('#'+id).innerHTML=ic(i);});
@@ -4206,7 +4386,7 @@ document.addEventListener('keydown',e=>{
   if(k==='escape'){if(radial.open)closeRadial();else clearSel();return;}
   if(mod)return;
   const map={p:'pen',h:'hl',e:'eraser',l:'lasso',s:'shape',t:'text',k:'laser',u:'tape'};if(map[k])setTool(map[k]);if(k==='r')toggleRuler();
-  if(k==='+'||k==='=')zoomAt(W/2,H/2,z*1.2);if(k==='-')zoomAt(W/2,H/2,z/1.2);
+  if(k==='+'||k==='=')zoomAnim(W/2,H/2,z*1.25);if(k==='-')zoomAnim(W/2,H/2,z/1.25);
 });
 document.addEventListener('paste',e=>{if(!nb||editing)return;const f=[...(e.clipboardData&&e.clipboardData.files||[])].find(f=>f.type.startsWith('image/'));if(f){e.preventDefault();insertImage(f);}});
 
@@ -4236,6 +4416,25 @@ function makeWelcome(){
   p2.items=[tx(80,60,30,'Volná stránka na zkoušení',{f:'hand',c:'#868E96'})];
   return {id:uid(),title:'Vítejte ve Span',cover:'#2D5BD3',created:Date.now(),updated:Date.now(),pages:[p1,p2]};
 }
+const BGS={id:new Map(),str:new Map(),saved:new Set()};
+function bgIdOf(str){let id=BGS.id.get(str);if(!id){id='b'+uid();BGS.id.set(str,id);BGS.str.set(id,str);}return id;}
+const bigBg=p=>typeof p.bg==='string'&&p.bg.length>4096;
+/* kopie sešitu pro uložení: místo obrázku pozadí jen odkaz (bgRef) + seznam dosud neuložených obrázků */
+function bgStrip(n){if(!n.pages)return {o:n,recs:[]};const recs=[],seen=new Set();
+  const pages=n.pages.map(p=>{if(!bigBg(p))return p;const id=bgIdOf(p.bg);if(!BGS.saved.has(id)&&!seen.has(id)){seen.add(id);recs.push({id,data:p.bg});}const q=Object.assign({},p);delete q.bg;q.bgRef=id;return q;});
+  return {o:Object.assign({},n,{pages}),recs};}
+function bgResolve(n){if(n&&n.pages)n.pages.forEach(p=>{if(p.bgRef){const d=BGS.str.get(p.bgRef);if(d)p.bg=d;delete p.bgRef;}});return n;}
+async function bgResolveAsync(n){const miss=(n.pages||[]).filter(p=>p.bgRef&&!BGS.str.has(p.bgRef)).map(p=>p.bgRef);
+  if(miss.length&&DB.db)await new Promise(res=>{try{const tx=DB.db.transaction('bg','readonly'),os=tx.objectStore('bg');miss.forEach(id=>os.get(id).onsuccess=e=>{const r=e.target.result;if(r){BGS.str.set(r.id,r.data);BGS.id.set(r.data,r.id);BGS.saved.add(r.id);}});tx.oncomplete=tx.onerror=tx.onabort=()=>res();}catch(e){res();}});
+  return bgResolve(n);}
+/* úklid: obrázky pozadí, na které už nic neodkazuje (smazané stránky a sešity) */
+async function bgCleanup(){if(!DB.db)return;const used=new Set();notebooks.forEach(n=>(n.pages||[]).forEach(p=>{if(bigBg(p)){const id=BGS.id.get(p.bg);if(id)used.add(id);}}));
+  const vers=await new Promise(res=>{try{const r=DB.os('readonly','meta').getAll(IDBKeyRange.bound('v:','v:￿'));r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}catch(e){res([]);}});
+  vers.forEach(v=>{const re=/"bgRef":"([^"]+)"/g;let m;while((m=re.exec(v.data||'')))used.add(m[1]);});
+  const keys=await new Promise(res=>{try{const r=DB.os('readonly','bg').getAllKeys();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}catch(e){res([]);}});
+  const dead=keys.filter(k=>!used.has(k));if(!dead.length)return;
+  await new Promise(res=>{try{const tx=DB.db.transaction('bg','readwrite'),os=tx.objectStore('bg');dead.forEach(k=>os.delete(k));tx.oncomplete=tx.onerror=tx.onabort=()=>res();}catch(e){res();}});
+  dead.forEach(k=>{const d=BGS.str.get(k);BGS.str.delete(k);BGS.saved.delete(k);if(d&&BGS.id.get(d)===k)BGS.id.delete(d);});}
 async function init(){
   applyTheme();
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{});}catch(e){}
@@ -4246,7 +4445,7 @@ async function init(){
   else{lib.cats=[{id:uid(),name:'Škola',color:'#2D5BD3'},{id:uid(),name:'Práce',color:'#1F7A5C'},{id:uid(),name:'Osobní',color:'#D9822B'}];await saveLib();}
   if(!notebooks.length&&!store.get('welcomed',false)){const w=makeWelcome();await DB.put(w);notebooks=[w];store.set('welcomed',true);}
   const old=Date.now()-30*864e5;for(const n of notebooks.filter(n=>n.trashed&&n.trashed<old)){await DB.del(n.id);}notebooks=notebooks.filter(n=>!(n.trashed&&n.trashed<old));
-  renderLib();
+  renderLib();setTimeout(()=>bgCleanup().catch(()=>{}),6000);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{tlCache=new WeakMap();if(nb)render();});
   try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!(window.claude&&window.claude.use)&&!/claude/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}
 }
