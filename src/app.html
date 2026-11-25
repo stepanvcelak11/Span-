@@ -4054,6 +4054,11 @@ async function openSettings(){
     const c2=el('label',{class:'check'});const cb2=el('input',{type:'checkbox',id:'twoTap'});cb2.checked=S.twoTapUndo;cb2.onchange=()=>{S.twoTapUndo=cb2.checked;saveS();};c2.append(cb2,document.createTextNode('Klepnutí dvěma prsty = Zpět, třemi = Znovu'));b.append(c2);
     const c5=el('label',{class:'check'});const cb5=el('input',{type:'checkbox'});cb5.checked=S.scribble!==false;cb5.onchange=()=>{S.scribble=cb5.checked;saveS();};c5.append(cb5,document.createTextNode('Čmáranice přes napsané ho smaže (bez přepínání na gumu)'));b.append(c5);
     b0.append(el('p',{class:'shint app-ver'},'Verze aplikace: '+(APP_BUILD.startsWith('__')?'vývojová':APP_BUILD)));
+    {/* diagnostika okna – pomáhá zjistit, odkud je prázdný proužek nahoře */
+     const pr=el('div',{style:'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:1px;visibility:hidden'});document.body.append(pr);const st=Math.round(pr.getBoundingClientRect().height);pr.remove();
+     const mode=['fullscreen','standalone','minimal-ui'].find(m=>matchMedia('(display-mode: '+m+')').matches)||'prohlížeč';
+     const host=/claude/.test(location.hostname)?'claude.ai':(location.hostname||'soubor');
+     b0.append(el('p',{class:'shint app-ver'},`Spuštěno z: ${esc(host)} · režim: ${mode} · okno ${innerWidth}×${innerHeight} z obrazovky ${screen.width}×${screen.height} · horní okraj ${st} px${window!==window.top?' · uvnitř rámu':''}`));}
     grp('Sešit','book');
     const f6=el('div',{class:'field'},'<span>Stránky v sešitě</span>');chips(f6,[['v','Svislé posouvání'],['h','Listování do stran']],S.layout==='h'?'h':'v',v=>{if(nb)setLayout(v);else{S.layout=v;saveS();}});b.append(f6);
   },[{label:'Hotovo',cls:'primary',value:true}]);
