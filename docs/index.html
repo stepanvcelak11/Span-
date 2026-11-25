@@ -542,6 +542,7 @@ body.dark-ui .fbar,body.dark-ui .vpal{box-shadow:0 0 0 .5px rgba(255,255,255,.06
 .pages{border-radius:var(--r-l)!important}
 .pgchip{border-radius:999px}
 /* úsporný režim: bez animací a přechodů */
+#bFinger[aria-pressed="false"]::after{content:"";position:absolute;left:50%;top:50%;width:26px;height:2px;border-radius:2px;background:currentColor;transform:translate(-50%,-50%) rotate(-45deg);box-shadow:0 0 0 1.5px var(--bar)}
 .eco *,.eco *::before,.eco *::after{animation:none!important;transition:none!important}
 .eco .stage canvas{will-change:auto}
 /* plátno: vlastní vrstva pro GPU, ať se nepřekresluje se zbytkem stránky */
@@ -608,7 +609,7 @@ body.dark-ui .fbar,body.dark-ui .vpal{box-shadow:0 0 0 .5px rgba(255,255,255,.06
     <div class="fbar fr">
       <button class="ib" id="bAddPg" title="Přidat stránku" aria-label="Přidat stránku"></button>
       <button class="ib" id="bZoom" title="Lupa psaní" aria-label="Lupa psaní"></button>
-      <button class="ib" id="bFinger" title="Kreslení prstem" aria-label="Kreslení prstem"></button>
+      <button class="ib" id="bFinger" title="Psaní prstem (zapnout / vypnout)" aria-label="Psaní prstem"></button>
       <button class="ib" id="bMore" title="Další" aria-label="Další volby"></button>
     </div>
     <div class="zoom" id="zoomBox" hidden aria-label="Lupa psaní">
@@ -1265,6 +1266,7 @@ const vibrate=ms=>{try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}};
 
 stage.addEventListener('pointerdown',onDown);
 stage.addEventListener('pointermove',onMove);
+stage.addEventListener('pointerover',e=>{if(e.pointerType==='pen')lastPen=performance.now();});
 stage.addEventListener('pointerup',onUp);
 stage.addEventListener('pointercancel',onCancel);
 stage.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1278,6 +1280,7 @@ function onDown(e){
   if(e.pointerType==='pen'){lastPen=performance.now();if(!S.penSeen){S.penSeen=true;saveS();}}
   cancelInertia();
   const [sx,sy]=sp(e);
+  if(e.pointerType==='touch'&&isPalm(e)){palmIds.add(e.pointerId);return;}
   if(e.pointerType==='touch'){
     touches.set(e.pointerId,{x:sx,y:sy,x0:sx,y0:sy,t:performance.now()});
     if(act&&act.ptype!=='touch')return;                 // dlaň při psaní perem
@@ -1290,7 +1293,13 @@ function onDown(e){
   if(e.pointerType==='pen'){gest=null;clearTimeout(lpTimer);}
   beginAct(e,sx,sy);
 }
+/* Dlaň: velká plocha dotyku, nebo dotyk krátce po peru / když pero visí nad displejem → ignorovat úplně */
+const palmIds=new Set();
+const isPalm=e=>{if(S.palm===false)return false;const sz=Math.max(e.width||0,e.height||0);if(sz>70)return true;
+  return S.penSeen&&performance.now()-lastPen<500;};
 function onMove(e){
+  if(palmIds.has(e.pointerId))return;
+  if(e.pointerType==='pen')lastPen=performance.now();
   if(!stageRect)stageRect=stage.getBoundingClientRect();
   const [sx,sy]=sp(e);
   if(e.pointerType==='touch'){const t=touches.get(e.pointerId);if(t){t.x=sx;t.y=sy;}
@@ -1303,12 +1312,14 @@ function onMove(e){
 }
 stage.addEventListener('pointerleave',()=>{if(hoverPt){hoverPt=null;drawOverlay();}});
 function onUp(e){
+  if(palmIds.delete(e.pointerId))return;
   if(e.pointerType==='touch'){touches.delete(e.pointerId);
     if(act&&act.pointerId===e.pointerId){endAct(e);return;}
     if(gest)touchUp();return;}
   if(act&&act.pointerId===e.pointerId)endAct(e);
 }
 function onCancel(e){
+  if(palmIds.delete(e.pointerId))return;
   if(e.pointerType==='touch'){touches.delete(e.pointerId);if(!touches.size){gest=null;clearTimeout(lpTimer);endFast();}}
   if(act&&act.pointerId===e.pointerId)abortAct();
 }
@@ -3832,7 +3843,10 @@ async function openSettings(){
     const f1=el('label',{class:'field'},`<span>Kolečko nástrojů – doba podržení: <b id="holdV">${S.holdMs} ms</b></span>`);const r=el('input',{type:'range',id:'holdMs',min:'250',max:'1000',step:'50',value:String(S.holdMs)});r.oninput=()=>{S.holdMs=+r.value;$('#holdV').textContent=r.value+' ms';saveS();};f1.append(r);b.append(f1);
     const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
     const f2=el('label',{class:'field'},'<span>Když po nakreslení tahu pero podržím</span>');const s2=el('select',{id:'afterHold'});[['shape','Převést na přesný tvar'],['menu','Otevřít kolečko'],['off','Nic nedělat']].forEach(([v,l])=>s2.append(new Option(l,v,false,v===S.afterHold)));s2.onchange=()=>{S.afterHold=s2.value;saveS();};f2.append(s2);b.append(f2);
-    const f3=el('label',{class:'field'},'<span>Kreslení prstem</span>');const s3=el('select',{id:'finger'});[['auto','Automaticky (vypne se po použití pera)'],['on','Vždy kreslit prstem'],['off','Prst jen posouvá a přibližuje']].forEach(([v,l])=>s3.append(new Option(l,v,false,v===S.finger)));s3.onchange=()=>{S.finger=s3.value;saveS();};f3.append(s3);b.append(f3);
+    const f3=el('div',{class:'field'},'<span>Psaní rukou (prstem)</span>');chips(f3,[['off','Jen perem'],['on','Perem i prstem'],['auto','Automaticky']],S.finger,v=>{S.finger=v;saveS();if(nb)updateToolbar();});b.append(f3);
+    b.append(el('p',{class:'shint'},'<b>Jen perem:</b> prst a ruka stránku jen posouvají a přibližují, nikdy nepíšou. <b>Automaticky:</b> prstem se píše, dokud tablet nepozná pero. Rychlé přepnutí je i tlačítkem s rukou v horní liště sešitu.'));
+    b.append(el('p',{class:'shint pen-st'},S.penSeen?'✓ Tablet vaše pero rozpoznal jako pero.':'Pero zatím nebylo rozpoznáno – zkuste s ním napsat čáru. Pokud se ani pak nerozpozná, jde o pasivní stylus, který se tváří jako prst; pak nechte „Perem i prstem“.'));
+    const c6=el('label',{class:'check'});const cb6=el('input',{type:'checkbox'});cb6.checked=S.palm!==false;cb6.onchange=()=>{S.palm=cb6.checked;saveS();};c6.append(cb6,document.createTextNode('Ignorovat položenou dlaň (velký dotyk a dotyk při psaní perem)'));b.append(c6);
     const c4=el('label',{class:'check'});const cb4=el('input',{type:'checkbox',id:'calcFr'});cb4.checked=S.calcFrames;cb4.onchange=()=>{S.calcFrames=cb4.checked;saveS();};c4.append(cb4,document.createTextNode('Nabídnout výpočet, když příklad orámuji'));b.append(c4);
     const c2=el('label',{class:'check'});const cb2=el('input',{type:'checkbox',id:'twoTap'});cb2.checked=S.twoTapUndo;cb2.onchange=()=>{S.twoTapUndo=cb2.checked;saveS();};c2.append(cb2,document.createTextNode('Klepnutí dvěma prsty = Zpět, třemi = Znovu'));b.append(c2);
     const c5=el('label',{class:'check'});const cb5=el('input',{type:'checkbox'});cb5.checked=S.scribble!==false;cb5.onchange=()=>{S.scribble=cb5.checked;saveS();};c5.append(cb5,document.createTextNode('Čmáranice přes napsané ho smaže (bez přepínání na gumu)'));b.append(c5);
@@ -4499,7 +4513,7 @@ $('#fCam').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)insertI
 $('#bRuler').onclick=toggleRuler;
 $('#bAddPg').onclick=()=>addPage();
 $('#bZoom').innerHTML=ic('zoomBox');$('#bZoom').onclick=()=>toggleZoom();
-$('#bFinger').onclick=()=>{S.finger=fingerDraws()?'off':'on';saveS();updateToolbar();toast(fingerDraws()?'Kreslení prstem zapnuto':'Prst jen posouvá a přibližuje');};
+$('#bFinger').onclick=()=>{S.finger=fingerDraws()?'off':'on';saveS();updateToolbar();toast(fingerDraws()?'Píše se perem i prstem':'Píše se jen perem – ruka jen posouvá a přibližuje');};
 $('#bPages').onclick=()=>togglePanel(!pagesOpen());$('#bPagesClose').onclick=()=>togglePanel(false);
 $('#bGrid').innerHTML=ic('grid');$('#bGrid').onclick=openPageGrid;
 $('#bMarks').onclick=()=>{marksOnly=!marksOnly;$('#bMarks').setAttribute('aria-pressed',String(marksOnly));renderPanel();};

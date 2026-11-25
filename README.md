@@ -35,6 +35,7 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - **Úspora baterie:** obrazovka se drží rozsvícená jen při práci (2,5 min od dotyku), živá vrstva se kreslí max. 1× za snímek a prázdná se nepřekresluje, laser bez drahého rozmazání; **úsporný režim** (sám pod 20 % baterie) – nižší rozlišení plátna, bez animací, méně přednačítání.
 - Nový vzhled: jemnější plochy, jednotné zaoblení, kompaktní rychlé akce, nastavení ve skupinách.
 - **Offline:** knihovny (PDF, Excel, grafy, export) jsou přibalené ve složce `docs/lib`, service worker po prvním otevření uloží aplikaci, knihovny i písma – nainstalovaná aplikace (Přidat na plochu) funguje celá bez internetu. Knihovna → ⋯ → Offline režim ukáže stav.
+- **Jen perem:** Nastavení → Pero a gesta → Psaní rukou: Jen perem / Perem i prstem / Automaticky (+ přepínač s rukou v liště); odmítnutí dlaně – velký dotyk a dotyk při psaní nebo držení pera nad displejem se ignoruje.
 - Funguje offline, data v IndexedDB na zařízení.
 
 ## Struktura
