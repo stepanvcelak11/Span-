@@ -32,6 +32,8 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - Optimalizace pro tablet: rychlý posun/zoom z mezipaměti stránek, obrazovka nezhasíná při psaní, celá obrazovka, větší dotykové plochy, světlý/tmavý vzhled.
 - **Plynulejší práce s učebnicemi (PDF):** stránky se dekódují mimo hlavní vlákno ve velikosti podle zoomu, sousední stránky se načítají dopředu, paměť je omezená; obrázky stránek se ukládají zvlášť a jen jednou, takže uložení po každém tahu je okamžité.
 - **Tmavý režim sešitu** (černé okolí stránek, tmavé lišty), přepínač v ⋯ menu i v Nastavení; plynulé animace oken, nabídek a zoomu (dorovnání na šířku po sevření prsty).
+- **Úspora baterie:** obrazovka se drží rozsvícená jen při práci (2,5 min od dotyku), živá vrstva se kreslí max. 1× za snímek a prázdná se nepřekresluje, laser bez drahého rozmazání; **úsporný režim** (sám pod 20 % baterie) – nižší rozlišení plátna, bez animací, méně přednačítání.
+- Nový vzhled: jemnější plochy, jednotné zaoblení, kompaktní rychlé akce, nastavení ve skupinách.
 - Funguje offline, data v IndexedDB na zařízení.
 
 ## Struktura

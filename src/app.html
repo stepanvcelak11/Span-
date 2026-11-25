@@ -444,6 +444,94 @@ body.dark-ui .pg-title,body.dark-ui .pgc-m{color:#F2C94C}
 #editor.drawing .fbar,#editor.drawing .vpal{transition:opacity .35s ease .15s}
 .fbar,.vpal{transition:opacity .2s ease}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}}
+/* =========================================================
+   Vzhled 2: jemnější plochy, jednotné zaoblení, klidnější typografie
+   (bez rozmazání pozadí a stínových animací – šetří GPU a baterii)
+   ========================================================= */
+:root{--r-s:10px;--r-m:14px;--r-l:20px;--r-xl:26px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--desk:#0B0B0D;--surface:#17171A;--surface-2:#222226;--line:#2B2B30;--muted:#8E8E96} }
+:root[data-theme="dark"]{--desk:#0B0B0D;--surface:#17171A;--surface-2:#222226;--line:#2B2B30;--muted:#8E8E96}
+:root:not([data-theme="dark"]){--desk:#F2F2F5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--desk:#0B0B0D}}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+/* knihovna – boční panel */
+.side{background:var(--surface);gap:10px}
+.brand-t{display:flex;align-items:center;gap:12px;font-size:32px;margin:4px 6px 10px}
+.brand-t::before{content:"";width:34px;height:34px;border-radius:10px;flex:none;
+  background:linear-gradient(135deg,var(--accent) 0 50%,var(--accent-2) 50% 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.tiles{gap:8px}
+.tile{height:84px;border-radius:var(--r-m);font-size:14.5px;font-weight:600;padding:13px}
+.tile svg{width:22px;height:22px}
+.tile:not([aria-current="true"]):hover{background:color-mix(in srgb,var(--surface-2) 80%,var(--ink) 6%)}
+.sec{padding:16px 2px 4px 10px}
+.sec h3{font-size:20px}
+.sec .ib{width:34px;height:34px;border-radius:10px}
+.fit{min-height:46px;border-radius:12px;padding:0 14px;font-size:15px;font-weight:500}
+.fit[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.fit .cnt{font-size:13px;color:var(--muted);opacity:1}
+.fit[aria-current="true"] .cnt{color:inherit}
+/* knihovna – hlavní část */
+.lib-in{gap:18px}
+.search{border-radius:999px;height:44px;padding:0 16px;background:var(--surface);transition:border-color .16s,background-color .16s}
+.search:focus-within{border-color:var(--accent-2)}
+.sortsel{border-radius:999px;padding:0 14px}
+.ltitle{font-size:38px;margin:2px 0 0}
+.quick{grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:10px}
+.qa{min-height:62px;padding:0 14px;border-radius:var(--r-m);gap:12px;font-size:14.5px;background:var(--surface);transition:background-color .16s,border-color .16s,transform .12s var(--ease-out)}
+.qa:hover{border-color:color-mix(in srgb,var(--line) 60%,var(--ink) 18%)}
+.qa .qi{width:38px;height:38px;border-radius:11px;background:color-mix(in srgb,currentColor 15%,transparent)}
+.qa .qi svg{width:22px;height:22px}
+.qa:active{transform:scale(.97)}
+.grid{gap:30px 24px;margin-top:6px}
+.grid-h{grid-column:1/-1;font:600 12px var(--f-body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:4px 0 -14px}
+.nthumb,.fthumb{transition:transform .22s var(--ease-out)}
+@media (hover:hover){.tcard:hover .nthumb,.tcard:hover .fthumb{transform:translateY(-3px)}}
+.nthumb{border-radius:5px 12px 12px 5px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 2px 4px rgba(0,0,0,.08),0 12px 28px rgba(0,0,0,.18)}
+.nthumb::after{content:"";position:absolute;left:9px;top:0;bottom:0;width:6px;background:linear-gradient(90deg,rgba(0,0,0,.14),transparent);z-index:1;pointer-events:none}
+.fthumb{border-radius:var(--r-l);background:var(--surface);border:1px solid var(--line)}
+.cap .t{font-size:15px}
+.cap .s{color:var(--muted);font-size:13px}
+.empty{border-radius:var(--r-l);background:color-mix(in srgb,var(--surface) 50%,transparent)}
+.lib-note{opacity:.8}
+/* tlačítka, čipy, nabídky, okna */
+.btn{border-radius:12px;height:44px;padding:0 18px}
+.btn.primary{box-shadow:0 1px 0 rgba(255,255,255,.18) inset}
+.chip{border-radius:999px;height:36px;padding:0 14px;background:var(--surface-2);border-color:transparent}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.pop{border-radius:18px;padding:10px}
+.menu{min-width:240px;padding:2px}
+.menu button{min-height:44px;padding:0 12px;border-radius:11px;gap:14px}
+.menu button svg{color:var(--muted);width:20px;height:20px}
+.menu button.danger svg{color:var(--danger)}
+.menu hr{margin:5px 8px}
+.modal-ov{background:rgba(6,8,14,.5)}
+.modal{border-radius:var(--r-xl);border:1px solid var(--line)}
+.modal h2{padding:22px 24px 8px;font-size:21px}
+.modal-body{padding:10px 24px 8px}
+.modal-foot{padding:16px 24px 22px}
+.field>span{font-size:11.5px;letter-spacing:.06em}
+.field input[type=text],.field select{border-radius:12px;height:44px}
+input[type=range]{accent-color:var(--accent)}
+/* nastavení ve skupinách */
+.modal-body.settings{gap:12px}
+.sgroup{background:var(--surface-2);border-radius:var(--r-l);padding:14px 16px 16px;display:flex;flex-direction:column;gap:14px}
+.sgroup h3{margin:0;display:flex;align-items:center;gap:10px;font:600 15px var(--f-body);color:var(--ink)}
+.sgroup h3 svg{width:19px;height:19px;color:var(--accent)}
+.sgroup .chip{background:var(--surface)}
+.sgroup .field input[type=text],.sgroup .field select{background:var(--surface)}
+.field>.row{display:flex;flex-wrap:wrap;gap:8px}
+.shint{margin:-4px 0 0;font-size:12.5px;line-height:1.5;color:var(--muted)}
+/* editor – plovoucí lišty */
+.fbar{border-radius:16px;padding:4px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 24px rgba(20,24,40,.14)}
+.fbar .ib{border-radius:12px}
+.vpal{border-radius:30px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 24px rgba(20,24,40,.14)}
+body.dark-ui .fbar,body.dark-ui .vpal{box-shadow:0 0 0 .5px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.55)}
+.pages{border-radius:var(--r-l)!important}
+.pgchip{border-radius:999px}
+/* úsporný režim: bez animací a přechodů */
+.eco *,.eco *::before,.eco *::after{animation:none!important;transition:none!important}
+.eco .stage canvas{will-change:auto}
 /* plátno: vlastní vrstva pro GPU, ať se nepřekresluje se zbytkem stránky */
 .stage canvas{will-change:transform;transform:translateZ(0)}
 
@@ -610,6 +698,7 @@ const PDFJS_W='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker
 
 /* ---------- ikony ---------- */
 const IC={
+ battery:'<rect x="2.5" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3M6 10v4M9.5 10v4"/>',
  moon:'<path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/>',
  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
  pen:'<path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 6l3 3"/>',
@@ -719,7 +808,7 @@ const DB={db:null,mem:new Map(),
 };
 
 /* ---------- nastavení a nástroje ---------- */
-const S=Object.assign({calcFrames:true,theme:'dark',holdMs:450,radial:true,afterHold:'shape',finger:'auto',twoTapUndo:true,tpl:'lined',paper:'white',penSeen:false},store.get('settings',{}));
+const S=Object.assign({eco:'auto',calcFrames:true,theme:'dark',holdMs:450,radial:true,afterHold:'shape',finger:'auto',twoTapUndo:true,tpl:'lined',paper:'white',penSeen:false},store.get('settings',{}));
 const saveS=()=>store.set('settings',S);
 if(!S.v3){S.v3=true;S.theme='dark';store.set('settings',S);}
 const hostTheme=document.documentElement.getAttribute('data-theme');
@@ -1012,7 +1101,7 @@ function setLayout(m){const i=nb?curPageIndex():0;S.layout=m;saveS();if(!nb)retu
 function resize(){
   if(!nb)return;
   const r={width:stage.clientWidth,height:stage.clientHeight}; if(r.width<10)return;
-  const first=!W; W=r.width; H=r.height; dpr=Math.min(window.devicePixelRatio||1,3);
+  const first=!W; W=r.width; H=r.height; dpr=Math.min(window.devicePixelRatio||1,ECO()?1.5:3);
   for(const c of [board,live]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);c.style.width=W+'px';c.style.height=H+'px';}
   if(first)fitWidth(); clampView(); render();
 }
@@ -1077,9 +1166,14 @@ let deskCol=null; function getDesk(){if(!deskCol)deskCol=getComputedStyle(docume
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{deskCol=null;scheduleRender();});
 function drawOnMain(p,it){const c=bctx;c.save();setTf(c,pageMat(p));c.beginPath();c.rect(0,0,p.w,p.h);c.clip();drawItem(c,it,p);c.restore();}
 
+let ovRAF=0,ovDirty=true;
+function ovSched(){if(!ovRAF)ovRAF=requestAnimationFrame(()=>{ovRAF=0;drawOverlay();});}
 function drawOverlay(){
-  const c=lctx; c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,live.width,live.height);
-  if(!nb)return;
+  if(ovRAF){cancelAnimationFrame(ovRAF);ovRAF=0;}
+  const c=lctx;
+  const any=nb&&(sel||act||(hoverPt&&T.tool==='eraser')||ZB.on||ruler.on||laser.length||flashBB||(recAudio&&!recAudio.paused));
+  if(!any){if(ovDirty){c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,live.width,live.height);ovDirty=false;}return;}
+  ovDirty=true;c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,live.width,live.height);
   drawRecHL();drawFlash();
   if(sel){
     c.save(); setTf(c,mul(pageMat(sel.page),sel.m));
@@ -1126,8 +1220,7 @@ const LASER={red:'255,40,60',green:'30,200,90',blue:'40,120,255'};
 function drawLaser(c){
   const L=LASER[T.laserC]||LASER.red;
   const now=performance.now(); c.setTransform(dpr,0,0,dpr,0,0); c.lineCap='round'; c.lineJoin='round';
-  for(let i=1;i<laser.length;i++){const a=laser[i-1],b=laser[i];if(b.t-a.t>120)continue;const k=1-(now-b.t)/850;c.strokeStyle=`rgba(${L},${0.9*k})`;c.lineWidth=6*k+1;c.shadowColor=`rgba(${L},.8)`;c.shadowBlur=12;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();}
-  c.shadowBlur=0;
+  for(let i=1;i<laser.length;i++){const a=laser[i-1],b=laser[i];if(b.t-a.t>120)continue;const k=1-(now-b.t)/850;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle=`rgba(${L},${0.22*k})`;c.lineWidth=16*k+3;c.stroke();c.strokeStyle=`rgba(${L},${0.9*k})`;c.lineWidth=6*k+1;c.stroke();}
 }
 
 /* =========================================================
@@ -1193,7 +1286,7 @@ function onMove(e){
     if(gest)touchMove(e,sx,sy);return;}
   if(act&&act.pointerId===e.pointerId)moveAct(e,sx,sy);
   else if(radial.open)radialHover(sx,sy);
-  else if(T.tool==='eraser'&&(e.pointerType==='pen'||e.pointerType==='mouse')){hoverPt=[sx,sy];drawOverlay();}
+  else if(T.tool==='eraser'&&(e.pointerType==='pen'||e.pointerType==='mouse')){hoverPt=[sx,sy];ovSched();}
   else if(hoverPt){hoverPt=null;drawOverlay();}
 }
 stage.addEventListener('pointerleave',()=>{if(hoverPt){hoverPt=null;drawOverlay();}});
@@ -1348,11 +1441,11 @@ function moveAct(e,sx,sy){
       else{for(const ev of list){const[px,py]=sp(ev);addPoint(act,px,py,pressureOf(ev));}
         const pr=e.getPredictedEvents?e.getPredictedEvents():[];act.pred=pr.slice(0,3).map(ev=>{const[px,py]=sp(ev);const q=toLocal(px,py,act.page);return [q[0],q[1],it.p[it.p.length-1][2]];});}
       if(Math.hypot(sx-act.stillAt[0],sy-act.stillAt[1])>4){act.stillAt=[sx,sy];if(act.far)armStill();}
-      drawOverlay();break;}
-    case 'shape':{const[x,y]=toLocal(sx,sy,act.page);act.b=[x,y];if(act.kind==='auto'){for(const ev of list){const[px,py]=sp(ev);const q=toLocal(px,py,act.page);const l=act.raw[act.raw.length-1];if(dist(q,l)*z>1)act.raw.push([q[0],q[1],0.5]);}}drawOverlay();break;}
-    case 'erase':{for(const ev of list){const[px,py]=sp(ev);const[x,y]=toLocal(px,py,act.page);eraseSeg(act,x,y);}if(act.changed)scheduleRender();else drawOverlay();break;}
-    case 'tape':{const[x,y]=toLocal(sx,sy,act.page);act.b=[x,y];if(dist(act.a,act.b)*z>6)act.far=true;drawOverlay();break;}
-    case 'lasso':{const[x,y]=toLocal(sx,sy,act.page);const l=act.poly[act.poly.length-1];if(dist([x,y],l)*z>2)act.poly.push([x,y]);drawOverlay();break;}
+      ovSched();break;}
+    case 'shape':{const[x,y]=toLocal(sx,sy,act.page);act.b=[x,y];if(act.kind==='auto'){for(const ev of list){const[px,py]=sp(ev);const q=toLocal(px,py,act.page);const l=act.raw[act.raw.length-1];if(dist(q,l)*z>1)act.raw.push([q[0],q[1],0.5]);}}ovSched();break;}
+    case 'erase':{for(const ev of list){const[px,py]=sp(ev);const[x,y]=toLocal(px,py,act.page);eraseSeg(act,x,y);}if(act.changed)scheduleRender();else ovSched();break;}
+    case 'tape':{const[x,y]=toLocal(sx,sy,act.page);act.b=[x,y];if(dist(act.a,act.b)*z>6)act.far=true;ovSched();break;}
+    case 'lasso':{const[x,y]=toLocal(sx,sy,act.page);const l=act.poly[act.poly.length-1];if(dist([x,y],l)*z>2)act.poly.push([x,y]);ovSched();break;}
     case 'seldrag':selDragMove(sx,sy);break;
     case 'ruler':rulerDrag(act,sx,sy);break;
     case 'zbmove':ZB.x=act.x0+(sx-act.sx0)/z;ZB.y=act.y0+(sy-act.sy0)/z;zbClamp();zbRender();drawOverlay();break;
@@ -2048,7 +2141,7 @@ function renderLib(){
   list.forEach(n=>g.append(nbCard(n,q)));
   if(!folders.length&&!list.length&&empty)g.append(el('div',{class:'empty'},esc(empty)));
 }
-$('#q').addEventListener('input',renderLib);
+let qT=0;$('#q').addEventListener('input',()=>{clearTimeout(qT);qT=setTimeout(renderLib,140);});
 $('#sort').addEventListener('change',e=>{LV.sort=e.target.value;saveLV();renderLib();});
 $('#sideShade').addEventListener('click',()=>{LV.side=false;saveLV();renderLib();});
 function cardMore(card,fn){const m=el('button',{class:'ib more',title:'Možnosti','aria-label':'Možnosti'},ic('more'));m.onclick=e=>{e.stopPropagation();fn(m);};card.append(m);}
@@ -2183,8 +2276,13 @@ async function newNotebook(){
   const n={id:uid(),title,cover:st.cover,folder:st.folder,cat:st.cat,fav:false,created:Date.now(),updated:Date.now(),pages:[newPage(st.tpl,st.paper,st.land)]};
   await DB.put(n);notebooks.push(n);openNotebook(n);
 }
-let wake=null;
-async function requestWake(){try{if(navigator.wakeLock&&!wake&&document.visibilityState==='visible'){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null;});}}catch(e){}}
+let wake=null,wakeT=0,wakeBusy=false;
+/* Obrazovka zůstane rozsvícená jen během práce – po 2,5 min bez dotyku ji systém může zhasnout (šetří baterii). */
+async function requestWake(){clearTimeout(wakeT);if(ECO()){releaseWake();return;}wakeT=setTimeout(releaseWake,150000);
+  try{if(navigator.wakeLock&&!wake&&!wakeBusy&&document.visibilityState==='visible'){wakeBusy=true;wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null;});}}catch(e){}wakeBusy=false;}
+function releaseWake(){clearTimeout(wakeT);try{if(wake){wake.release();wake=null;}}catch(e){}}
+let wakePokeT=0;
+document.addEventListener('pointerdown',()=>{if(!nb&&!XL.doc)return;const t=performance.now();if(t-wakePokeT<4000)return;wakePokeT=t;requestWake();},{passive:true,capture:true});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nb)requestWake();});
 function toggleFullscreen(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>toast('Celá obrazovka tady není dostupná.'));else if(!r)toast('Celá obrazovka tady není dostupná.');}}catch(e){toast('Celá obrazovka tady není dostupná.');}}
 function openNotebook(n){applyEdTheme();edEnter();
@@ -2195,7 +2293,7 @@ function openNotebook(n){applyEdTheme();edEnter();
   requestAnimationFrame(()=>{resize();if(n._lastY!=null){oy=n._lastY;clampView();render();}});
   n._lastSnap=Date.now();setTimeout(()=>verOnOpen(n).catch(()=>{}),1500);
 }
-function closeNotebook(){closePageGrid();if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui','dark-ui');if(ZB.on)toggleZoom(false);closeCalc();try{if(wake){wake.release();wake=null;}}catch(e){}commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+function closeNotebook(){closePageGrid();if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui','dark-ui');if(ZB.on)toggleZoom(false);closeCalc();releaseWake();commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
 
 /* =========================================================
    Lupa psaní (zoom box) – píšete velkým písmem dole, na stránku se zapíše zmenšeně
@@ -3706,9 +3804,15 @@ addEventListener('resize',()=>{if(XL.doc)xlRender();});
 
 /* ---------- nastavení, nápověda, menu ---------- */
 async function openSettings(){
-  await modal('Nastavení',b=>{
+  await modal('Nastavení',b0=>{
+    b0.classList.add('settings');let b=b0;const grp=(t,ic_)=>{b=el('section',{class:'sgroup'},`<h3>${ic(ic_)}${t}</h3>`);b0.append(b);};
+    grp('Vzhled','sun');
     const ft=el('div',{class:'field'},'<span>Vzhled aplikace</span>');chips(ft,[['light','Světlý'],['dark','Tmavý'],['system','Podle systému']],S.theme,v=>{S.theme=v;saveS();applyTheme();if(nb){applyEdTheme();updateToolbar();render();}});b.append(ft);
     const fe=el('div',{class:'field'},'<span>Okolí stránek v sešitě</span>');chips(fe,[['app','Jako aplikace'],['dark','Tmavé'],['light','Světlé']],S.edTheme||'app',v=>setEdTheme(v));b.append(fe);
+    grp('Baterie','battery');
+    const fb=el('div',{class:'field'},'<span>Úsporný režim</span>');chips(fb,[['auto','Automaticky pod 20 %'],['on','Zapnuto'],['off','Vypnuto']],S.eco||'auto',v=>{S.eco=v;saveS();applyEco();});b.append(fb);
+    b.append(el('p',{class:'shint'},'Úsporný režim kreslí plátno v nižším rozlišení, vypne animace a nechá obrazovku normálně zhasnout. Jinak se obrazovka drží rozsvícená jen během psaní (2,5 min od posledního dotyku).'));
+    grp('Pero a gesta','pen');
     const f1=el('label',{class:'field'},`<span>Kolečko nástrojů – doba podržení: <b id="holdV">${S.holdMs} ms</b></span>`);const r=el('input',{type:'range',id:'holdMs',min:'250',max:'1000',step:'50',value:String(S.holdMs)});r.oninput=()=>{S.holdMs=+r.value;$('#holdV').textContent=r.value+' ms';saveS();};f1.append(r);b.append(f1);
     const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
     const f2=el('label',{class:'field'},'<span>Když po nakreslení tahu pero podržím</span>');const s2=el('select',{id:'afterHold'});[['shape','Převést na přesný tvar'],['menu','Otevřít kolečko'],['off','Nic nedělat']].forEach(([v,l])=>s2.append(new Option(l,v,false,v===S.afterHold)));s2.onchange=()=>{S.afterHold=s2.value;saveS();};f2.append(s2);b.append(f2);
@@ -3716,6 +3820,7 @@ async function openSettings(){
     const c4=el('label',{class:'check'});const cb4=el('input',{type:'checkbox',id:'calcFr'});cb4.checked=S.calcFrames;cb4.onchange=()=>{S.calcFrames=cb4.checked;saveS();};c4.append(cb4,document.createTextNode('Nabídnout výpočet, když příklad orámuji'));b.append(c4);
     const c2=el('label',{class:'check'});const cb2=el('input',{type:'checkbox',id:'twoTap'});cb2.checked=S.twoTapUndo;cb2.onchange=()=>{S.twoTapUndo=cb2.checked;saveS();};c2.append(cb2,document.createTextNode('Klepnutí dvěma prsty = Zpět, třemi = Znovu'));b.append(c2);
     const c5=el('label',{class:'check'});const cb5=el('input',{type:'checkbox'});cb5.checked=S.scribble!==false;cb5.onchange=()=>{S.scribble=cb5.checked;saveS();};c5.append(cb5,document.createTextNode('Čmáranice přes napsané ho smaže (bez přepínání na gumu)'));b.append(c5);
+    grp('Sešit','book');
     const f6=el('div',{class:'field'},'<span>Stránky v sešitě</span>');chips(f6,[['v','Svislé posouvání'],['h','Listování do stran']],S.layout==='h'?'h':'v',v=>{if(nb)setLayout(v);else{S.layout=v;saveS();}});b.append(f6);
   },[{label:'Hotovo',cls:'primary',value:true}]);
 }
@@ -4225,7 +4330,7 @@ function selImageMenu(anchor){
    Výkon: pozadí stránek (PDF, učebnice) – dekódování mimo hlavní vlákno,
    zmenšené úrovně podle potřebné velikosti a omezená paměť (LRU)
    ========================================================= */
-const BG={m:new Map(),bytes:0,MAX:((navigator.deviceMemory||4)>=6?220:140)*1e6,q:[],run:0,ok:typeof createImageBitmap==='function'};
+const BG={par:2,m:new Map(),bytes:0,MAX:((navigator.deviceMemory||4)>=6?220:140)*1e6,q:[],run:0,ok:typeof createImageBitmap==='function'};
 const BG_L=[320,640,1280,2048,Infinity];
 function bgEnt(src){let e=BG.m.get(src);if(!e){e={src,lv:new Map(),pend:new Set(),t:0,ar:1.414,nat:0,blob:null,cb:[]};BG.m.set(src,e);}e.t=performance.now();return e;}
 function bgWant(px,e){let L=Infinity;for(const l of BG_L)if(l>=px*0.92){L=l;break;}if(e.nat&&L>=e.nat)L=Infinity;return L;}
@@ -4242,7 +4347,7 @@ function bgQueue(e,L,prio){
   const job={e,L};prio?BG.q.unshift(job):BG.q.push(job);bgPump();
 }
 function bgPump(){
-  while(BG.run<2&&BG.q.length){const j=BG.q.shift();BG.run++;bgDecode(j.e,j.L).catch(()=>{}).finally(()=>{BG.run--;j.e.pend.delete(j.L);bgPump();});}
+  while(BG.run<BG.par&&BG.q.length){const j=BG.q.shift();BG.run++;bgDecode(j.e,j.L).catch(()=>{}).finally(()=>{BG.run--;j.e.pend.delete(j.L);bgPump();});}
 }
 async function bgDecode(e,L){
   if(e.lv.has(L))return;
@@ -4289,10 +4394,10 @@ let warmT=0;
 function warmNeighbors(){
   clearTimeout(warmT);warmT=setTimeout(()=>{
     if(!nb||fastMode)return;const i=curPageIndex();
-    for(const d of [1,-1,2,-2,3]){const p=nb.pages[i+d];if(p&&p.bg)getBg(p,p.w*z*dpr,0);}
+    for(const d of (ECO()?[1,-1]:[1,-1,2,-2,3])){const p=nb.pages[i+d];if(p&&p.bg)getBg(p,p.w*z*dpr,0);}
     /* těžké stránky (hodně tahů) předpřipravit jako bitmapu pro plynulý posun */
     const ric=window.requestIdleCallback||(f=>setTimeout(f,60));
-    ric(()=>{if(!nb||fastMode)return;for(const d of [0,1,-1]){const p=nb.pages[i+d];if(p&&heavyPage(p))pageBitmap(p);}});
+    ric(()=>{if(!nb||fastMode||ECO())return;for(const d of [0,1,-1]){const p=nb.pages[i+d];if(p&&heavyPage(p))pageBitmap(p);}});
   },120);
 }
 const heavyPage=p=>p.items.length>220;
@@ -4302,7 +4407,7 @@ let viewRAF=0;
 function animView(tz,tox,toy,D=280,done){
   cancelInertia();if(viewRAF)cancelAnimationFrame(viewRAF);
   const z0=z,x0=ox,y0=oy,t0=performance.now();setFast();
-  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;if(reduce)D=1;
+  const reduce=ECO()||matchMedia('(prefers-reduced-motion: reduce)').matches;if(reduce)D=1;
   const step=now=>{const k=Math.min(1,(now-t0)/D),e=k<1?1-Math.pow(1-k,3):1;
     /* zoom interpolovat logaritmicky – působí rovnoměrně */
     z=z0*Math.pow(tz/z0,e);ox=x0+(tox-x0)*e;oy=y0+(toy-y0)*e;clampView();render();
@@ -4333,6 +4438,16 @@ function lazyThumb(p,w,io){
   io.observe(c);return c;
 }
 
+
+/* =========================================================
+   Úsporný režim (baterie): nižší rozlišení plátna, bez animací,
+   méně předběžného načítání, obrazovka se nedrží rozsvícená.
+   'auto' = zapne se sám, když baterie klesne pod 20 % a nenabíjí se.
+   ========================================================= */
+let batLow=false;
+const ECO=()=>S.eco==='on'||(S.eco==='auto'&&batLow);
+function applyEco(){const on=ECO();document.documentElement.classList.toggle('eco',on);BG.par=on?1:2;if(on)releaseWake();else if(nb)requestWake();if(nb){W=0;resize();}}
+try{navigator.getBattery&&navigator.getBattery().then(b=>{const up=()=>{const low=!b.charging&&b.level<=0.2;if(low!==batLow){batLow=low;applyEco();if(low&&S.eco==='auto')toast('Baterie pod 20 % – zapnut úsporný režim');}};b.addEventListener('levelchange',up);b.addEventListener('chargingchange',up);up();}).catch(()=>{});}catch(e){}
 /* ---------- propojení UI ---------- */
 let pdfInto=false;
 [['bBack','back'],['bPages','grid'],['bUndo','undo'],['bRedo','redo'],['bImage','image'],['bRuler','ruler'],['bAddPg','plus'],['bFinger','hand'],['bMore','more'],['bMarks','star'],['bPagesClose','close'],['bSide','sidebar'],['bLibAdd','plus'],['bLibMore','more']].forEach(([id,i])=>{$('#'+id).innerHTML=ic(i);});
