@@ -1499,7 +1499,7 @@ function moveAct(e,sx,sy){
   if(!act.far&&Math.hypot(sx-act.sx0,sy-act.sy0)>8){act.far=true;clearTimeout(holdTimer);}
   const evs=(e.getCoalescedEvents&&e.getCoalescedEvents())||[];const list=evs.length?evs:[e];
   switch(act.type){
-    case 'radial':if(Math.hypot(sx-act.sx0,sy-act.sy0)>10)act.moved=true;radialHover(sx,sy);break;
+    case 'radial':if(Math.hypot(sx-act.sx0,sy-act.sy0)>10)act.moved=true;radialHover(sx,sy);snakeCheck();break;
     case 'draw':{
       if(act.shaped)break;
       const it=act.it;
@@ -1530,7 +1530,7 @@ function endAct(e){
   clearTimeout(holdTimer);clearTimeout(stillTimer);cancelAnimationFrame(holdRAF);
   const a=act; act=null; live.style.mixBlendMode=''; unfade();
   switch(a.type){
-    case 'radial':{const[sx,sy]=sp(e);if(a.moved){const h=radialHit(sx,sy);if(h&&h.item)radialApply(h);closeRadial();}else{radial.pinned=true;updateRadialHover();}break;}
+    case 'radial':{const[sx,sy]=sp(e);clearTimeout(snakeT);if(a.moved){const h=radialHit(sx,sy);if(h&&h.item&&!snakeDone(h))radialApply(h);closeRadial();}else{radial.pinned=true;updateRadialHover();}break;}
     case 'draw':commitDraw(a);break;
     case 'shape':commitShape(a);break;
     case 'erase':if(a.changed){pushUndo({k:'items',pid:a.page.id,items:a.before});changed();}render();if(T.eraser.back&&a.tool==='eraser'&&T.tool==='eraser'&&T.prevTool&&T.prevTool!=='eraser')setTool(T.prevTool);break;
@@ -1800,7 +1800,7 @@ function radBuild(withPaste){
   return {inner,outer};
 }
 const radRot=()=>(S.radRot||0)*Math.PI/180;
-function closeRadial(){radial.open=false;radial.hover=null;renderRadial();}
+function closeRadial(){clearTimeout(snakeT);radial.snake=null;radial.snakeKind=null;radial.open=false;radial.hover=null;renderRadial();}
 function sector(r0,r1,a0,a1){const p=(r,a)=>`${(r*Math.cos(a)).toFixed(2)} ${(r*Math.sin(a)).toFixed(2)}`;const lg=a1-a0>Math.PI?1:0;return `M${p(r1,a0)}A${r1} ${r1} 0 ${lg} 1 ${p(r1,a1)}L${p(r0,a1)}A${r0} ${r0} 0 ${lg} 0 ${p(r0,a0)}Z`;}
 function radialHit(x,y){
   const dx=x-radial.cx,dy=y-radial.cy,d=Math.hypot(dx,dy)/radK(),ang=Math.atan2(dy,dx);
@@ -1810,7 +1810,7 @@ function radialHit(x,y){
   if(d<=R3+40){const r=pick(radial.outer,'outer');return r.item.kind==='none'?null:r;}
   return null;
 }
-function radialHover(sx,sy){const h=radialHit(sx,sy);const k=h?(h.center?'c':h.ring+h.idx):'';const o=radial.hover;const ko=o?(o.center?'c':o.ring+o.idx):'';if(k!==ko){radial.hover=h;updateRadialHover();}}
+function radialHover(sx,sy){lastRadXY=[sx,sy];const h=radialHit(sx,sy);const k=h?(h.center?'c':h.ring+h.idx):'';const o=radial.hover;const ko=o?(o.center?'c':o.ring+o.idx):'';if(k!==ko){radial.hover=h;updateRadialHover();}}
 function radialTap(sx,sy){const h=radialHit(sx,sy);if(h&&h.item)radialApply(h);closeRadial();}
 function radialApply(h){
   const it=h.item;
@@ -1821,10 +1821,10 @@ function radialApply(h){
   else if(it.kind==='size')setSize(it.v);
   vibrate(6);
 }
-function renderRadial(){
+function renderRadial(still){
   // Kolečko se sestaví jen jednou při otevření; při pohybu pera se mění jen zvýraznění (žádné problikávání).
   if(!radial.open){radialSvg.innerHTML='';return;}
-  radialSvg.innerHTML=radialMarkup(radial.cx,radial.cy,radK());updateRadialHover();
+  radialSvg.innerHTML=radialMarkup(radial.cx,radial.cy,radK());if(still){const g=radialSvg.querySelector('.rg');if(g)g.style.animation='none';}updateRadialHover();
 }
 function radialMarkup(cx,cy,k){
   let s=`<g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)}) scale(${k})"><g class="rg"><circle r="${R3+6}" class="r-bg"/>`;
@@ -1841,6 +1841,25 @@ function radialMarkup(cx,cy,k){
   s+=`<g id="rLab" transform="translate(0 ${-(R3+24)})" visibility="hidden"><rect id="rLabR" y="-14" height="28" rx="14" class="r-lab"/><text id="rLabT" text-anchor="middle" y="4.5" class="r-labt"></text></g>`;
   s+='</g></g>';return s;
 }
+/* „Had“: táhnete perem přes kolečko a co na chvilku podržíte (~0,15 s), to se vybere –
+   třeba zvýrazňovač → žlutá → tenká jedním tahem. Rychlý přejezd nic nevybere. */
+let snakeT=0;
+const snakeKey=h=>h&&h.item?h.ring+':'+(h.item.kind==='tool'?h.item.id:h.item.kind==='color'?h.item.c:h.item.kind==='size'?'s'+h.item.i:h.item.kind):'';
+const snakeDone=h=>!!(radial.snake&&radial.snake.has(snakeKey(h)));
+function snakeCheck(){
+  clearTimeout(snakeT);const h=radial.hover;
+  if(!radial.open||S.radSnake===false||!h||!h.item||!['tool','color','size'].includes(h.item.kind)||snakeDone(h))return;
+  const key=snakeKey(h);
+  snakeT=setTimeout(()=>{if(!radial.open||snakeKey(radial.hover)!==key)return;
+    radialApply(h);if(!radial.snake)radial.snake=new Set();
+    /* jedna volba na druh: nový nástroj/barva/tloušťka nahradí předchozí v tomto tahu */
+    for(const k of [...radial.snake])if(k.split(':')[0]===h.ring&&radial.snakeKind&&radial.snakeKind[k]===h.item.kind)radial.snake.delete(k);
+    radial.snake.add(key);(radial.snakeKind||(radial.snakeKind={}))[key]=h.item.kind;
+    if(h.item.kind==='tool'){Object.assign(radial,radBuild(true));}
+    renderRadial(true);radial.hover=radialHit(lastRadXY[0],lastRadXY[1]);updateRadialHover();vibrate(8);
+  },S.radSnakeMs||160);
+}
+let lastRadXY=[0,0];
 function updateRadialHover(){
   if(!radial.open)return;
   const hv=radial.hover,key=hv&&!hv.center?hv.ring+'-'+hv.idx:'';
@@ -3996,6 +4015,8 @@ function radSettings(b){
   const fr=el('div',{class:'field'},'<span>Kde kolečko začíná (pozice č. 1)</span>');chips(fr,[[0,'Nahoře'],[90,'Vpravo'],[180,'Dole'],[270,'Vlevo']],S.radRot||0,v=>{S.radRot=v;saveS();draw();});b.append(fr);
   slider(b,'Počet barev ve vnějším kruhu',0,8,1,S.radColors??8,v=>v?String(v):'žádné',v=>{S.radColors=v;saveS();draw();});
   toggle(b,'Ukazovat tloušťky ve vnějším kruhu',S.radSizes!==false,v=>{S.radSizes=v;saveS();draw();});
+  toggle(b,'„Had“ – výběr více věcí jedním tahem (na položce se krátce zastavte)',S.radSnake!==false,v=>{S.radSnake=v;saveS();});
+  slider(b,'Jak dlouho se zastavit u položky',80,400,20,S.radSnakeMs||160,v=>v+' ms',v=>{S.radSnakeMs=v;saveS();});
   draw();
 }
 async function openSettings(){
