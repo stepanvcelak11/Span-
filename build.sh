@@ -13,4 +13,7 @@ mkdir -p docs
   cat src/app.html
   printf '\n</body>\n</html>\n'
 } > docs/index.html
-echo "docs/index.html sestaveno"
+# verze offline mezipaměti = otisk aplikace → po aktualizaci se tablet sám přenačte
+V=$(md5sum docs/index.html | cut -c1-10)
+sed -i "s/^const VER = '.*';/const VER = '$V';/" docs/sw.js
+echo "docs/index.html sestaveno (offline verze $V)"

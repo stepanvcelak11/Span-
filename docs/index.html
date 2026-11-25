@@ -704,9 +704,9 @@ const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slic
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PW=1000, PH=1414, GAP=36;
-const JSPDF='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-const PDFJS_W='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const JSPDF='lib/jspdf.umd.min.js';
+const PDFJS='lib/pdf.min.js';
+const PDFJS_W='lib/pdf.worker.min.js';
 
 /* ---------- ikony ---------- */
 const IC={
@@ -2000,7 +2000,11 @@ async function insertImage(file){
   }catch(e){toast('Obrázek se nepodařilo načíst.');}
 }
 const scripts={};
-function loadScript(u){return scripts[u]||(scripts[u]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>{delete scripts[u];rej(new Error('load'));};document.head.append(s);}));}
+/* knihovny jsou přibalené k aplikaci (složka lib/) → fungují bez internetu; záložně z CDN */
+const LIB_CDN={'lib/jspdf.umd.min.js':'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js','lib/pdf.min.js':'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','lib/pdf.worker.min.js':'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js','lib/hyperformula.full.min.js':'https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/hyperformula.full.min.js','lib/hf-csCZ.js':'https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/languages/csCZ.js','lib/xlsx.full.min.js':'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js','lib/chart.umd.js':'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js'};
+const libUsed={};
+function loadScript1(u){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>{s.remove();rej(new Error('load'));};document.head.append(s);});}
+function loadScript(u){return scripts[u]||(scripts[u]=loadScript1(u).then(()=>{libUsed[u]=u;}).catch(()=>LIB_CDN[u]?loadScript1(LIB_CDN[u]).then(()=>{libUsed[u]=LIB_CDN[u];}):Promise.reject(new Error('load'))).catch(e=>{delete scripts[u];throw e;}));}
 async function saveFile(name,blob){
   let dl=null; try{if(window.claude&&window.claude.use)dl=await window.claude.use('downloads');}catch(e){}
   if(dl){try{await dl.save({filename:name,data:blob});toast('Soubor uložen');}catch(e){if(e&&e.code!=='declined')toast('Soubor se nepodařilo uložit ('+(e.code||'chyba')+').');}return;}
@@ -2032,7 +2036,7 @@ async function importPDF(file,into){
   try{
     toast('Načítám PDF…',true);
     await loadScript(PDFJS_W); await loadScript(PDFJS);
-    const lib=window.pdfjsLib; lib.GlobalWorkerOptions.workerSrc=PDFJS_W;
+    const lib=window.pdfjsLib; lib.GlobalWorkerOptions.workerSrc=libUsed[PDFJS_W]||PDFJS_W;
     const pdf=await lib.getDocument({data:await file.arrayBuffer()}).promise; const pages=[];
     for(let i=1;i<=pdf.numPages;i++){
       toast(`Načítám stránku ${i} / ${pdf.numPages}`,true);
@@ -2815,10 +2819,10 @@ function checkFrame(page,frame){
 /* =========================================================
    Tabulky (Excel) – výpočty HyperFormula (české funkce), soubory .xlsx přes SheetJS
    ========================================================= */
-const HF_URL='https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/hyperformula.full.min.js';
-const HF_CS='https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/languages/csCZ.js';
-const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-const CHART_URL='https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js';
+const HF_URL='lib/hyperformula.full.min.js';
+const HF_CS='lib/hf-csCZ.js';
+const XLSX_URL='lib/xlsx.full.min.js';
+const CHART_URL='lib/chart.umd.js';
 const XL_CFG={licenseKey:'gpl-v3',language:'csCZ',functionArgSeparator:';',decimalSeparator:',',thousandSeparator:' ',arrayColumnSeparator:';',arrayRowSeparator:'|',dateFormats:['DD.MM.YYYY','DD.MM.YY','D.M.YYYY'],currencySymbol:['Kč'],undoLimit:300};
 const XL={doc:null,hf:null,sheet:0,sel:{r:0,c:0,r2:0,c2:0},edit:null,undo:[],redo:[],clip:null,RH:32,HW:48,CH:30,xs:[],extend:false};
 let hfReady=null;
@@ -4460,6 +4464,30 @@ let batLow=false;
 const ECO=()=>S.eco==='on'||(S.eco==='auto'&&batLow);
 function applyEco(){const on=ECO();document.documentElement.classList.toggle('eco',on);BG.par=on?1:2;if(on)releaseWake();else if(nb)requestWake();if(nb){W=0;resize();}}
 try{navigator.getBattery&&navigator.getBattery().then(b=>{const up=()=>{const low=!b.charging&&b.level<=0.2;if(low!==batLow){batLow=low;applyEco();if(low&&S.eco==='auto')toast('Baterie pod 20 % – zapnut úsporný režim');}};b.addEventListener('levelchange',up);b.addEventListener('chargingchange',up);up();}).catch(()=>{});}catch(e){}
+
+/* =========================================================
+   Offline: service worker uloží aplikaci i všechny knihovny (PDF, Excel, grafy, písma),
+   po prvním otevření s internetem pak vše funguje bez připojení.
+   ========================================================= */
+function offlineCapable(){return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!/claude/.test(location.hostname);}
+function offlineSetup(){
+  if(offlineCapable()){
+    navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='offline-ready'){if(!store.get('offlineOk',false)){store.set('offlineOk',true);toast('Aplikace je připravená i bez internetu ✓');}}});
+    navigator.serviceWorker.register('sw.js').then(r=>{r.update&&r.update().catch(()=>{});}).catch(()=>{});
+    try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+  }
+  const net=()=>{document.documentElement.classList.toggle('offline',!navigator.onLine);};
+  addEventListener('online',()=>{net();toast('Připojeno k internetu');});
+  addEventListener('offline',()=>{net();toast(offlineCapable()?'Jste offline – sešity, PDF i tabulky fungují dál':'Jste offline – aplikace běží, dokud tuto stránku nezavřete');});
+  net();
+}
+function offlineInfo(){
+  const ok=offlineCapable(),ready=ok&&navigator.serviceWorker.controller;
+  modal('Offline režim',b=>{b.innerHTML=ok?(ready?'<p>✓ Aplikace je uložená v tabletu a funguje i bez internetu – psaní, sešity, import PDF, tabulky (Excel), grafy, rozpoznávání písma i export do PDF.</p><p>Bez internetu nefunguje jen volitelné upřesnění rukopisu přes Claude.</p>':'<p>Aplikace se právě ukládá pro offline použití. Nechte ji chvíli otevřenou s internetem.</p>')
+    :'<p>Tato stránka běží uvnitř claude.ai, a ta bez internetu nejde otevřít.</p><p>Pro práci bez internetu otevřete Span z jeho vlastní adresy (GitHub Pages) a v Chromu zvolte <b>⋮ → Přidat na plochu / Instalovat aplikaci</b>. Pak se spouští z ikony na ploše i bez připojení.</p><p>Vaše sešity jsou uložené v prohlížeči podle adresy – sešity z claude.ai do nainstalované aplikace přenesete přes Zálohu (podržte sešit → Záloha) a Import.</p>';
+    if(ok)navigator.serviceWorker.ready.then(r=>r.active&&r.active.postMessage('precache')).catch(()=>{});
+  },[{label:'Hotovo',cls:'primary',value:true}]);
+}
 /* ---------- propojení UI ---------- */
 let pdfInto=false;
 [['bBack','back'],['bPages','grid'],['bUndo','undo'],['bRedo','redo'],['bImage','image'],['bRuler','ruler'],['bAddPg','plus'],['bFinger','hand'],['bMore','more'],['bMarks','star'],['bPagesClose','close'],['bSide','sidebar'],['bLibAdd','plus'],['bLibMore','more']].forEach(([id,i])=>{$('#'+id).innerHTML=ic(i);});
@@ -4480,7 +4508,7 @@ $('#bMore').onclick=e=>moreMenu(e.currentTarget);
 $('#bBack').onclick=closeNotebook;
 $('#bSide').onclick=()=>{LV.side=!LV.side;saveLV();renderLib();};
 $('#bLibAdd').onclick=e=>menuPop(e.currentTarget,[['quick','Rychlá poznámka',quickNote],['book','Nový sešit',newNotebook],['table','Nová tabulka (Excel)',()=>newSheetDoc()],['folderPlus','Nová složka',()=>editFolder()],['tag','Nová kategorie',()=>editCategory()],'-',['down','Importovat PDF, Excel nebo zálohu',importAny]]);
-$('#bLibMore').onclick=e=>menuPop(e.currentTarget,[['down','Zálohovat celou knihovnu',exportAll],['up','Obnovit ze zálohy',()=>$('#fBak').click()],'-',['gear','Nastavení',openSettings],['help','Nápověda',openHelp]]);
+$('#bLibMore').onclick=e=>menuPop(e.currentTarget,[['down','Zálohovat celou knihovnu',exportAll],['up','Obnovit ze zálohy',()=>$('#fBak').click()],'-',['check','Offline režim',offlineInfo],['gear','Nastavení',openSettings],['help','Nápověda',openHelp]]);
 $('#fImg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)insertImage(f);};
 $('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   if(/\.json$/i.test(f.name)||f.type==='application/json')importBackup(f);
@@ -4562,7 +4590,7 @@ async function init(){
   const old=Date.now()-30*864e5;for(const n of notebooks.filter(n=>n.trashed&&n.trashed<old)){await DB.del(n.id);}notebooks=notebooks.filter(n=>!(n.trashed&&n.trashed<old));
   renderLib();setTimeout(()=>bgCleanup().catch(()=>{}),6000);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{tlCache=new WeakMap();if(nb)render();});
-  try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!(window.claude&&window.claude.use)&&!/claude/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}
+  offlineSetup();
 }
 init();
 </script>
