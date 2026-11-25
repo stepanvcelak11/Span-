@@ -582,6 +582,8 @@ html:has(body.dark-ui){background:#0E0E10}
 .rad-row .ib{flex:none}
 .rad-row .ib{width:36px;height:36px}
 .rad-add .chip svg{width:16px;height:16px}
+body.no-tools .fbar.fc{display:none}
+body.no-pal #vpal{display:none!important}
 .eco *,.eco *::before,.eco *::after{animation:none!important;transition:none!important}
 .eco .stage canvas{will-change:auto}
 /* plátno: vlastní vrstva pro GPU, ať se nepřekresluje se zbytkem stránky */
@@ -2440,7 +2442,7 @@ let wakePokeT=0;
 document.addEventListener('pointerdown',()=>{if(!nb&&!XL.doc)return;const t=performance.now();if(t-wakePokeT<4000)return;wakePokeT=t;requestWake();},{passive:true,capture:true});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nb)requestWake();});
 function toggleFullscreen(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>toast('Celá obrazovka tady není dostupná.'));else if(!r)toast('Celá obrazovka tady není dostupná.');}}catch(e){toast('Celá obrazovka tady není dostupná.');}}
-function openNotebook(n){applyEdTheme();edEnter();
+function openNotebook(n){applyEdTheme();applyBars();edEnter();
   requestWake();pcache.clear();commitText();nb=n;nb.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});
   H_.undo=[];H_.redo=[];sel=null;act=null;W=0;ruler.on=false;
   layoutPages();$('#lib').hidden=true;$('#editor').hidden=false;
@@ -4031,6 +4033,9 @@ function radSettings(b){
   slider(b,'Jak dlouho se zastavit u položky',80,400,20,S.radSnakeMs||160,v=>v+' ms',v=>{S.radSnakeMs=v;saveS();});
   draw();
 }
+/* skrytí okrajových lišt – vše jde ovládat kolečkem */
+function applyBars(){document.body.classList.toggle('no-tools',!!S.hideTools);document.body.classList.toggle('no-pal',!!S.hidePal);}
+function setBars(tools,pal){S.hideTools=tools;S.hidePal=pal;if((tools||pal)&&!S.radial){S.radial=true;toast('Kolečko nástrojů zapnuto – nástroje teď vybíráte podržením pera');}saveS();applyBars();}
 async function openSettings(){
   await modal('Nastavení',b0=>{
     b0.classList.add('settings');let b=b0;const grp=(t,ic_)=>{b=el('section',{class:'sgroup'},`<h3>${ic(ic_)}${t}</h3>`);b0.append(b);};
@@ -4044,9 +4049,11 @@ async function openSettings(){
     const f1=el('label',{class:'field'},`<span>Otevře se po podržení: <b id="holdV">${S.holdMs} ms</b></span>`);const r=el('input',{type:'range',id:'holdMs',min:'150',max:'1000',step:'25',value:String(S.holdMs)});r.oninput=()=>{S.holdMs=+r.value;$('#holdV').textContent=r.value+' ms';saveS();};f1.append(r);b.append(f1);
     slider(b,'Velikost kolečka',60,140,5,Math.round(radK()*100),v=>v+' %',v=>{S.radScale=v/100;saveS();});
     radSettings(b);
+    toggle(b,'Skrýt horní lištu nástrojů (pero, guma, laso…)',!!S.hideTools,v=>setBars(v,!!S.hidePal));
+    toggle(b,'Skrýt boční paletu barev a tlouštěk',!!S.hidePal,v=>setBars(!!S.hideTools,v));
     b.append(el('p',{class:'shint'},'Barvy v kolečku jsou vaše oblíbené z levé palety – podržením barvy v paletě ji změníte.'));
     grp('Pero a gesta','hand');
-    const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
+    const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();if(!cb.checked&&(S.hideTools||S.hidePal)){S.hideTools=S.hidePal=false;saveS();applyBars();toast('Bez kolečka jsou lišty nástrojů a barev zase vidět');}};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
     const f2=el('label',{class:'field'},'<span>Když po nakreslení tahu pero podržím</span>');const s2=el('select',{id:'afterHold'});[['shape','Převést na přesný tvar'],['menu','Otevřít kolečko'],['off','Nic nedělat']].forEach(([v,l])=>s2.append(new Option(l,v,false,v===S.afterHold)));s2.onchange=()=>{S.afterHold=s2.value;saveS();};f2.append(s2);b.append(f2);
     const f3=el('div',{class:'field'},'<span>Psaní rukou (prstem)</span>');chips(f3,[['off','Jen perem'],['on','Perem i prstem'],['auto','Automaticky']],S.finger,v=>{S.finger=v;saveS();if(nb)updateToolbar();});b.append(f3);
     b.append(el('p',{class:'shint'},'<b>Jen perem:</b> prst a ruka stránku jen posouvají a přibližují, nikdy nepíšou. <b>Automaticky:</b> prstem se píše, dokud tablet nepozná pero. Rychlé přepnutí je i tlačítkem s rukou v horní liště sešitu.'));
@@ -4224,7 +4231,7 @@ function closeTop(){const o=document.querySelectorAll('.modal-ov');const t=o[o.l
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);{const d=edDark();it(d?'sun':'moon',d?'Světlé okolí stránek':'Tmavé okolí stránek',()=>setEdTheme(d?'light':'dark'));}it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());it('fit','Celá obrazovka',toggleFullscreen);{const d=edDark();it(d?'sun':'moon',d?'Světlé okolí stránek':'Tmavé okolí stránek',()=>setEdTheme(d?'light':'dark'));if(S.hideTools)it('gear','Možnosti nástroje ('+(TOOL_N[T.tool]||T.tool)+')',()=>setTimeout(()=>openToolOptions(T.tool,$('#bMore')),0));{const hid=S.hideTools&&S.hidePal;it('pen',hid?'Zobrazit lišty nástrojů a barev':'Skrýt lišty (ovládat jen kolečkem)',()=>setBars(!hid,!hid));}}it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
