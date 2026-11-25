@@ -569,6 +569,19 @@ body.dark-ui .fbar,body.dark-ui .vpal{box-shadow:0 0 0 .5px rgba(255,255,255,.06
 .lib-main{padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
 #sheet{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
 html:has(body.dark-ui){background:#0E0E10}
+.rad-cfg{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.rad-pv{width:220px;height:220px;flex:none;margin:0 auto;overflow:visible}
+.rad-pv .rg{animation:none}
+.rad-n{font:700 13px var(--f-body);fill:var(--accent);text-anchor:middle}
+.rad-side{flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px}
+.rad-list{display:flex;flex-direction:column;gap:2px}
+.rad-row{display:flex;align-items:center;gap:8px;padding:2px 4px 2px 8px;border-radius:12px;background:var(--surface)}
+.rad-row b{width:18px;color:var(--accent);font-variant-numeric:tabular-nums}
+.rad-row svg.i{width:18px;height:18px}
+.rad-row span{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rad-row .ib{flex:none}
+.rad-row .ib{width:36px;height:36px}
+.rad-add .chip svg{width:16px;height:16px}
 .eco *,.eco *::before,.eco *::after{animation:none!important;transition:none!important}
 .eco .stage canvas{will-change:auto}
 /* plátno: vlastní vrstva pro GPU, ať se nepřekresluje se zbytkem stránky */
@@ -1788,19 +1801,23 @@ function openRadial(x,y){
   const k=radK(),m=(R3+10)*k;
   radial.cx=W<2*m?W/2:clamp(x,m,W-m); radial.cy=H<2*m+40?H/2:clamp(y,m+34*k,H-m);
   radial.ox=x;radial.oy=y;radial.open=true;radial.pinned=false;radial.hover=null;
-  const inner=radItems().map(id=>id==='undo'?{kind:'undo',label:'Zpět',icon:'undo'}:id==='redo'?{kind:'redo',label:'Znovu',icon:'redo'}:{kind:'tool',id,label:TOOL_N[id],icon:IC[id]?id:'pen'});
-  if(clip&&clip.length)inner.push({kind:'paste',label:'Vložit',icon:'paste'});
-  radial.inner=inner;
-  radial.outer=favList().slice(0,S.radColors??8).map(c=>({kind:'color',c,label:'Barva'})).concat(S.radSizes===false?[]:SIZES[sizeTool()].map((v,i)=>({kind:'size',v,i,label:'Tloušťka '+(i+1)})));
-  if(!radial.outer.length)radial.outer=[{kind:'none',label:''}];
+  Object.assign(radial,radBuild(true));
   renderRadial();
 }
+function radBuild(withPaste){
+  const inner=radItems().map(id=>id==='undo'?{kind:'undo',label:'Zpět',icon:'undo'}:id==='redo'?{kind:'redo',label:'Znovu',icon:'redo'}:{kind:'tool',id,label:TOOL_N[id],icon:IC[id]?id:'pen'});
+  if(withPaste&&clip&&clip.length)inner.push({kind:'paste',label:'Vložit',icon:'paste'});
+  const cols=favList().slice(0,S.radColors??8).map(c=>({kind:'color',c,label:'Barva'})),szs=S.radSizes===false?[]:SIZES[sizeTool()].map((v,i)=>({kind:'size',v,i,label:'Tloušťka '+(i+1)}));
+  let outer=S.radOuter==='sizes'?szs.concat(cols):cols.concat(szs);if(!outer.length)outer=[{kind:'none',label:''}];
+  return {inner,outer};
+}
+const radRot=()=>(S.radRot||0)*Math.PI/180;
 function closeRadial(){radial.open=false;radial.hover=null;renderRadial();}
 function sector(r0,r1,a0,a1){const p=(r,a)=>`${(r*Math.cos(a)).toFixed(2)} ${(r*Math.sin(a)).toFixed(2)}`;const lg=a1-a0>Math.PI?1:0;return `M${p(r1,a0)}A${r1} ${r1} 0 ${lg} 1 ${p(r1,a1)}L${p(r0,a1)}A${r0} ${r0} 0 ${lg} 0 ${p(r0,a0)}Z`;}
 function radialHit(x,y){
   const dx=x-radial.cx,dy=y-radial.cy,d=Math.hypot(dx,dy)/radK(),ang=Math.atan2(dy,dx);
   if(d<RC)return {center:true};
-  const pick=(arr,ring)=>{const n=arr.length,st=2*Math.PI/n,a0=-Math.PI/2-st/2;let t=Math.floor((ang-a0)/st);t=((t%n)+n)%n;return {ring,idx:t,item:arr[t]};};
+  const pick=(arr,ring)=>{const n=arr.length,st=2*Math.PI/n,a0=-Math.PI/2-st/2+radRot();let t=Math.floor((ang-a0)/st);t=((t%n)+n)%n;return {ring,idx:t,item:arr[t]};};
   if(d<=R1+3)return pick(radial.inner,'inner');
   if(d<=R3+40){const r=pick(radial.outer,'outer');return r.item.kind==='none'?null:r;}
   return null;
@@ -1819,19 +1836,22 @@ function radialApply(h){
 function renderRadial(){
   // Kolečko se sestaví jen jednou při otevření; při pohybu pera se mění jen zvýraznění (žádné problikávání).
   if(!radial.open){radialSvg.innerHTML='';return;}
-  let s=`<g transform="translate(${radial.cx.toFixed(1)} ${radial.cy.toFixed(1)}) scale(${radK()})"><g class="rg"><circle r="${R3+6}" class="r-bg"/>`;
-  const inn=radial.inner,ni=inn.length,di=2*Math.PI/ni,ai=-Math.PI/2-di/2;
+  radialSvg.innerHTML=radialMarkup(radial.cx,radial.cy,radK());updateRadialHover();
+}
+function radialMarkup(cx,cy,k){
+  let s=`<g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)}) scale(${k})"><g class="rg"><circle r="${R3+6}" class="r-bg"/>`;
+  const inn=radial.inner,ni=inn.length,di=2*Math.PI/ni,ai=-Math.PI/2-di/2+radRot();
   inn.forEach((it,i)=>{const a=ai+i*di,b=a+di,on=it.kind==='tool'&&it.id===T.tool;
     s+=`<path d="${sector(R0,R1,a+0.014,b-0.014)}" class="r-sec${on?' on':''}" data-k="inner-${i}"/>`;
     const m=(a+b)/2,rr=(R0+R1)/2;s+=`<svg x="${(Math.cos(m)*rr-12).toFixed(1)}" y="${(Math.sin(m)*rr-12).toFixed(1)}" width="24" height="24" viewBox="0 0 24 24" class="r-ic${on?' on':''}" data-k="inner-${i}">${IC[it.icon]}</svg>`;});
-  const out=radial.outer,no=out.length,d=2*Math.PI/no,ao=-Math.PI/2-d/2;
+  const out=radial.outer,no=out.length,d=2*Math.PI/no,ao=-Math.PI/2-d/2+radRot();
   out.forEach((it,i)=>{const a=ao+i*d,b=a+d,d0=sector(R2,R3,a+0.02,b-0.02),d1=sector(R2,R3+10,a+0.02,b-0.02);
     if(it.kind==='none'){}
     else if(it.kind==='color'){const on=it.c.toLowerCase()===curColor().toLowerCase();s+=`<path d="${d0}" data-d0="${d0}" data-d1="${d1}" fill="${it.c}" class="r-col${on?' on':''}" data-k="outer-${i}"/>`;}
     else{const on=Math.abs(it.v-curSize())<0.01;s+=`<path d="${d0}" data-d0="${d0}" data-d1="${d1}" class="r-sec${on?' on':''}" data-k="outer-${i}"/>`;const m=(a+b)/2,rr=(R2+R3)/2;s+=`<circle cx="${(Math.cos(m)*rr).toFixed(1)}" cy="${(Math.sin(m)*rr).toFixed(1)}" r="${2+it.i*2.3}" class="r-dot" data-k="outer-${i}"/>`;}});
   s+=`<circle r="${RC}" class="r-center" id="rCenter"/><circle r="9" fill="${curColor()}" stroke="var(--line)"/>`;
   s+=`<g id="rLab" transform="translate(0 ${-(R3+24)})" visibility="hidden"><rect id="rLabR" y="-14" height="28" rx="14" class="r-lab"/><text id="rLabT" text-anchor="middle" y="4.5" class="r-labt"></text></g>`;
-  s+='</g></g>'; radialSvg.innerHTML=s; updateRadialHover();
+  s+='</g></g>';return s;
 }
 function updateRadialHover(){
   if(!radial.open)return;
@@ -3961,6 +3981,35 @@ document.addEventListener('paste',e=>{if($('#sheet').hidden||!XL.doc||e.target.c
 addEventListener('resize',()=>{if(XL.doc)xlRender();});
 
 /* ---------- nastavení, nápověda, menu ---------- */
+/* nastavení rozložení kolečka: náhled + pořadí (1 = nahoře, dál po směru hodin) */
+function radSettings(b){
+  const wrap=el('div',{class:'rad-cfg'});b.append(wrap);
+  const pv=document.createElementNS('http://www.w3.org/2000/svg','svg');pv.setAttribute('viewBox','-170 -170 340 340');pv.setAttribute('class','rad-pv');
+  const side=el('div',{class:'rad-side'});wrap.append(pv,side);
+  const draw=()=>{const sv={inner:radial.inner,outer:radial.outer};Object.assign(radial,radBuild(false));pv.innerHTML=radialMarkup(0,0,1);
+    /* čísla pozic do náhledu */
+    const n=radial.inner.length,di=2*Math.PI/n;let t='';radial.inner.forEach((it,i)=>{const m=-Math.PI/2+i*di+radRot(),r=R1-11;t+=`<text x="${(Math.cos(m)*r).toFixed(1)}" y="${(Math.sin(m)*r+4).toFixed(1)}" class="rad-n">${i+1}</text>`;});
+    pv.querySelector('.rg').insertAdjacentHTML('beforeend',t);Object.assign(radial,sv);list();};
+  const save=L=>{S.radItems=L;saveS();draw();};
+  const list=()=>{side.innerHTML='';const L=radItems().slice();
+    side.append(el('div',{class:'field'},'<span>Pořadí ve vnitřním kruhu</span>'));
+    const ol=el('div',{class:'rad-list'});
+    L.forEach((id,i)=>{const nm=(RAD_ALL.find(x=>x[0]===id)||[id,id])[1],row=el('div',{class:'rad-row'},`<b>${i+1}</b>${ic(IC[id]?id:'pen')}<span>${esc(nm)}</span>`);
+      const up=el('button',{class:'ib',title:'Dřív (proti směru hodin)','aria-label':'Posunout dřív'},ic('up')),dn=el('button',{class:'ib',title:'Později (po směru hodin)','aria-label':'Posunout později'},ic('dn')),rm=el('button',{class:'ib',title:'Odebrat z kolečka','aria-label':'Odebrat'},ic('close'));
+      up.disabled=i===0;dn.disabled=i===L.length-1;
+      up.onclick=()=>{[L[i-1],L[i]]=[L[i],L[i-1]];save(L);};dn.onclick=()=>{[L[i+1],L[i]]=[L[i],L[i+1]];save(L);};
+      rm.onclick=()=>{if(L.length<=2){toast('V kolečku musí zůstat aspoň 2 položky');return;}L.splice(i,1);save(L);};
+      row.append(up,dn,rm);ol.append(row);});
+    side.append(ol);
+    const miss=RAD_ALL.filter(x=>!L.includes(x[0]));
+    if(miss.length){const ad=el('div',{class:'row rad-add'});miss.forEach(([id,l])=>{const c=el('button',{class:'chip'},ic('plus')+esc(l));c.onclick=()=>{L.push(id);save(L);};ad.append(c);});side.append(el('div',{class:'field'},'<span>Přidat do kolečka</span>'),ad);}
+  };
+  const fo=el('div',{class:'field'},'<span>Vnější kruh – co je první (nahoře)</span>');chips(fo,[['colors','Barvy'],['sizes','Tloušťky']],S.radOuter==='sizes'?'sizes':'colors',v=>{S.radOuter=v;saveS();draw();});b.append(fo);
+  const fr=el('div',{class:'field'},'<span>Kde kolečko začíná (pozice č. 1)</span>');chips(fr,[[0,'Nahoře'],[90,'Vpravo'],[180,'Dole'],[270,'Vlevo']],S.radRot||0,v=>{S.radRot=v;saveS();draw();});b.append(fr);
+  slider(b,'Počet barev ve vnějším kruhu',0,8,1,S.radColors??8,v=>v?String(v):'žádné',v=>{S.radColors=v;saveS();draw();});
+  toggle(b,'Ukazovat tloušťky ve vnějším kruhu',S.radSizes!==false,v=>{S.radSizes=v;saveS();draw();});
+  draw();
+}
 async function openSettings(){
   await modal('Nastavení',b0=>{
     b0.classList.add('settings');let b=b0;const grp=(t,ic_)=>{b=el('section',{class:'sgroup'},`<h3>${ic(ic_)}${t}</h3>`);b0.append(b);};
@@ -3973,11 +4022,7 @@ async function openSettings(){
     grp('Kolečko nástrojů','pen');
     const f1=el('label',{class:'field'},`<span>Otevře se po podržení: <b id="holdV">${S.holdMs} ms</b></span>`);const r=el('input',{type:'range',id:'holdMs',min:'150',max:'1000',step:'25',value:String(S.holdMs)});r.oninput=()=>{S.holdMs=+r.value;$('#holdV').textContent=r.value+' ms';saveS();};f1.append(r);b.append(f1);
     slider(b,'Velikost kolečka',60,140,5,Math.round(radK()*100),v=>v+' %',v=>{S.radScale=v/100;saveS();});
-    const frt=el('div',{class:'field'},'<span>Nástroje v kolečku (klepnutím zapnete / vypnete)</span>');const tr=el('div',{class:'row'});
-    RAD_ALL.forEach(([id,l])=>{const bt=el('button',{class:'chip','aria-pressed':String(radItems().includes(id))},ic(IC[id]?id:'pen')+esc(l));bt.onclick=()=>{let L=radItems().slice();if(L.includes(id)){if(L.length<=2){toast('V kolečku musí zůstat aspoň 2 položky');return;}L=L.filter(x=>x!==id);}else L=RAD_ALL.map(a=>a[0]).filter(x=>L.includes(x)||x===id);S.radItems=L;saveS();bt.setAttribute('aria-pressed',String(L.includes(id)));};tr.append(bt);});
-    frt.append(tr);b.append(frt);
-    slider(b,'Počet barev ve vnějším kruhu',0,8,1,S.radColors??8,v=>v?String(v):'žádné',v=>{S.radColors=v;saveS();});
-    toggle(b,'Ukazovat tloušťky ve vnějším kruhu',S.radSizes!==false,v=>{S.radSizes=v;saveS();});
+    radSettings(b);
     b.append(el('p',{class:'shint'},'Barvy v kolečku jsou vaše oblíbené z levé palety – podržením barvy v paletě ji změníte.'));
     grp('Pero a gesta','hand');
     const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
