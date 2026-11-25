@@ -36,6 +36,7 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - Nový vzhled: jemnější plochy, jednotné zaoblení, kompaktní rychlé akce, nastavení ve skupinách.
 - **Offline:** knihovny (PDF, Excel, grafy, export) jsou přibalené ve složce `docs/lib`, service worker po prvním otevření uloží aplikaci, knihovny i písma – nainstalovaná aplikace (Přidat na plochu) funguje celá bez internetu. Knihovna → ⋯ → Offline režim ukáže stav.
 - **Jen perem:** Nastavení → Pero a gesta → Psaní rukou: Jen perem / Perem i prstem / Automaticky (+ přepínač s rukou v liště); odmítnutí dlaně – velký dotyk a dotyk při psaní nebo držení pera nad displejem se ignoruje.
+- Přehled stránek: nativní plynulé posouvání, malé náhledy stránek učebnic ukládané zvlášť; guma překresluje jen okolí; ukládání až v klidu po psaní; sešit se otevře tam, kde jste skončili; ukázky čar u pera a zvýrazňovače; klávesnice v kalkulačce; vlastní kolečko (nástroje, barvy, tloušťky, velikost, rychlost); laso se po přesunu vrátí k předchozímu nástroji; snadné přidání sešitů do složky/kategorie; aplikace až k horní liště systému.
 - Funguje offline, data v IndexedDB na zařízení.
 
 ## Struktura
