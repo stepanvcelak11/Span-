@@ -572,6 +572,9 @@ html:has(body.dark-ui){background:#0E0E10}
 .rad-add .chip svg{width:16px;height:16px}
 body.no-tools .fbar.fc{display:none}
 body.no-pal #vpal{display:none!important}
+.upd-bar{position:fixed;z-index:85;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:8px 8px 8px 18px;border-radius:16px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);font-weight:600;animation:toastIn .26s var(--ease-out)}
+.upd-bar .btn{height:38px}
+.app-ver{text-align:center;margin:4px 0 0}
 .eco *,.eco *::before,.eco *::after{animation:none!important;transition:none!important}
 .eco .stage canvas{will-change:auto}
 /* plátno: vlastní vrstva pro GPU, ať se nepřekresluje se zbytkem stránky */
@@ -4050,6 +4053,7 @@ async function openSettings(){
     const c4=el('label',{class:'check'});const cb4=el('input',{type:'checkbox',id:'calcFr'});cb4.checked=S.calcFrames;cb4.onchange=()=>{S.calcFrames=cb4.checked;saveS();};c4.append(cb4,document.createTextNode('Nabídnout výpočet, když příklad orámuji'));b.append(c4);
     const c2=el('label',{class:'check'});const cb2=el('input',{type:'checkbox',id:'twoTap'});cb2.checked=S.twoTapUndo;cb2.onchange=()=>{S.twoTapUndo=cb2.checked;saveS();};c2.append(cb2,document.createTextNode('Klepnutí dvěma prsty = Zpět, třemi = Znovu'));b.append(c2);
     const c5=el('label',{class:'check'});const cb5=el('input',{type:'checkbox'});cb5.checked=S.scribble!==false;cb5.onchange=()=>{S.scribble=cb5.checked;saveS();};c5.append(cb5,document.createTextNode('Čmáranice přes napsané ho smaže (bez přepínání na gumu)'));b.append(c5);
+    b0.append(el('p',{class:'shint app-ver'},'Verze aplikace: '+(APP_BUILD.startsWith('__')?'vývojová':APP_BUILD)));
     grp('Sešit','book');
     const f6=el('div',{class:'field'},'<span>Stránky v sešitě</span>');chips(f6,[['v','Svislé posouvání'],['h','Listování do stran']],S.layout==='h'?'h':'v',v=>{if(nb)setLayout(v);else{S.layout=v;saveS();}});b.append(f6);
   },[{label:'Hotovo',cls:'primary',value:true}]);
@@ -4695,10 +4699,20 @@ try{navigator.getBattery&&navigator.getBattery().then(b=>{const up=()=>{const lo
    po prvním otevření s internetem pak vše funguje bez připojení.
    ========================================================= */
 function offlineCapable(){return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!/claude/.test(location.hostname);}
+const APP_BUILD='__BUILD__';
+function updateBar(){if($('#updBar'))return;const b=el('div',{class:'upd-bar',id:'updBar',role:'status'},'<span>Je připravená nová verze Spanu</span>');
+  const go=el('button',{class:'btn primary'},'Obnovit');go.onclick=async()=>{try{commitText();savePos();await flushSaveNow();}catch(e){}location.reload();};
+  const no=el('button',{class:'ib','aria-label':'Později'},ic('close'));no.onclick=()=>b.remove();b.append(go,no);document.body.append(b);}
+async function flushSaveNow(){clearTimeout(saveTimer);if(nb)await DB.put(nb);}
 function offlineSetup(){
   if(offlineCapable()){
     navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='offline-ready'){if(!store.get('offlineOk',false)){store.set('offlineOk',true);toast('Aplikace je připravená i bez internetu ✓');}}});
-    navigator.serviceWorker.register('sw.js').then(r=>{r.update&&r.update().catch(()=>{});}).catch(()=>{});
+    const hadCtl=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').then(r=>{r.update&&r.update().catch(()=>{});
+      /* při návratu do aplikace zkontrolovat, jestli není nová verze */
+      document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')r.update&&r.update().catch(()=>{});});}).catch(()=>{});
+    /* nová verze se stáhla na pozadí → nabídnout obnovení (nic se samo nepřenačte uprostřed psaní) */
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl)updateBar();});
     try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
   }
   const net=()=>{document.documentElement.classList.toggle('offline',!navigator.onLine);};

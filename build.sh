@@ -13,6 +13,9 @@ mkdir -p docs
   cat src/app.html
   printf '\n</body>\n</html>\n'
 } > docs/index.html
+# čitelná verze (datum sestavení) do aplikace
+B=$(TZ=Europe/Prague date '+%-d. %-m. %Y %H:%M')
+sed -i "s/const APP_BUILD='__BUILD__'/const APP_BUILD='$B'/" docs/index.html
 # verze offline mezipaměti = otisk aplikace → po aktualizaci se tablet sám přenačte
 V=$(md5sum docs/index.html | cut -c1-10)
 sed -i "s/^const VER = '.*';/const VER = '$V';/" docs/sw.js
