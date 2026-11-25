@@ -4,7 +4,7 @@
   "description": "Ručně psané poznámky pro tablet s perem",
   "start_url": "./",
   "scope": "./",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "any",
   "background_color": "#0B0B0D",
   "theme_color": "#0B0B0D",
