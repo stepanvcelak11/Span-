@@ -2432,6 +2432,13 @@ function releaseWake(){clearTimeout(wakeT);try{if(wake){wake.release();wake=null
 let wakePokeT=0;
 document.addEventListener('pointerdown',()=>{if(!nb&&!XL.doc)return;const t=performance.now();if(t-wakePokeT<4000)return;wakePokeT=t;requestWake();},{passive:true,capture:true});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nb)requestWake();});
+/* Nainstalovaná aplikace: Android si i v režimu „fullscreen“ nechává nahoře pruh. Skutečná celá obrazovka
+   (Fullscreen API) ho zakryje – zapne se při prvním dotyku (prohlížeč to dovolí jen po akci uživatele). */
+const installed=()=>['fullscreen','standalone','minimal-ui'].some(m=>matchMedia('(display-mode: '+m+')').matches);
+function fsWanted(){return S.autoFs!==false&&installed()&&!document.fullscreenElement&&!!document.documentElement.requestFullscreen&&window===window.top;}
+let fsFail=0;
+document.addEventListener('pointerup',()=>{if(!fsWanted()||fsFail>2)return;try{document.documentElement.requestFullscreen({navigationUI:'hide'}).then(()=>{fsFail=0;}).catch(()=>{fsFail++;});}catch(e){fsFail++;}},{capture:true,passive:true});
+document.addEventListener('fullscreenchange',()=>{setTimeout(()=>{if(nb){W=0;resize();}},120);});
 function toggleFullscreen(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>toast('Celá obrazovka tady není dostupná.'));else if(!r)toast('Celá obrazovka tady není dostupná.');}}catch(e){toast('Celá obrazovka tady není dostupná.');}}
 function openNotebook(n){applyEdTheme();applyBars();edEnter();
   requestWake();pcache.clear();commitText();nb=n;nb.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});
@@ -4033,6 +4040,7 @@ async function openSettings(){
     grp('Vzhled','sun');
     const ft=el('div',{class:'field'},'<span>Vzhled aplikace</span>');chips(ft,[['light','Světlý'],['dark','Tmavý'],['system','Podle systému']],S.theme,v=>{S.theme=v;saveS();applyTheme();if(nb){applyEdTheme();updateToolbar();render();}});b.append(ft);
     const fe=el('div',{class:'field'},'<span>Okolí stránek v sešitě</span>');chips(fe,[['app','Jako aplikace'],['dark','Tmavé'],['light','Světlé']],S.edTheme||'app',v=>setEdTheme(v));b.append(fe);
+    toggle(b,'Přes celou obrazovku – skrýt horní pruh systému (v nainstalované aplikaci, zapne se po prvním dotyku)',S.autoFs!==false,v=>{S.autoFs=v;saveS();if(!v&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});});
     grp('Baterie','battery');
     const fb=el('div',{class:'field'},'<span>Úsporný režim</span>');chips(fb,[['auto','Automaticky pod 20 %'],['on','Zapnuto'],['off','Vypnuto']],S.eco||'auto',v=>{S.eco=v;saveS();applyEco();});b.append(fb);
     b.append(el('p',{class:'shint'},'Úsporný režim kreslí plátno v nižším rozlišení, vypne animace a nechá obrazovku normálně zhasnout. Jinak se obrazovka drží rozsvícená jen během psaní (2,5 min od posledního dotyku).'));
