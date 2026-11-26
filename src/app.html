@@ -1481,7 +1481,7 @@ function beginAct(e,sx,sy){
   clearTimeout(fadeT);fadeT=setTimeout(()=>{if(act&&['draw','shape','erase','lasso'].includes(act.type))$('#editor').classList.add('drawing');},220);
 }
 let fadeT=0;
-function unfade(){clearTimeout(fadeT);$('#editor').classList.remove('drawing');}
+function unfade(now){clearTimeout(fadeT);if(now||!$('#editor').classList.contains('drawing')){$('#editor').classList.remove('drawing');return;}fadeT=setTimeout(()=>$('#editor').classList.remove('drawing'),900);}
 function armHold(){
   clearTimeout(holdTimer); if(!S.radial)return;
   holdTimer=setTimeout(onHold,S.holdMs);
@@ -1529,7 +1529,7 @@ function moveAct(e,sx,sy){
       if(act.straight){const[x,y]=toLocal(sx,sy,act.page);it.p=[it.p[0],[x,y,0.5]];pathCache.delete(it);}
       else if(act.snap!=null){for(const ev of list){const[px,py]=sp(ev);const q=snapPt(act,px,py);addPoint(act,q[0],q[1],0.5);}act.pred=null;}
       else{for(const ev of list){const[px,py]=sp(ev);addPoint(act,px,py,pressureOf(ev));}
-        const pr=e.getPredictedEvents?e.getPredictedEvents():[];act.pred=pr.slice(0,3).map(ev=>{const[px,py]=sp(ev);const q=toLocal(px,py,act.page);return [q[0],q[1],it.p[it.p.length-1][2]];});}
+        const pr=e.getPredictedEvents&&(act.it.k==='hl'?1:(T.pen.smooth??1))===0?e.getPredictedEvents():[];act.pred=pr.slice(0,1).map(ev=>{const[px,py]=sp(ev);const q=toLocal(px,py,act.page);return [q[0],q[1],it.p[it.p.length-1][2]];});}
       if(Math.hypot(sx-act.stillAt[0],sy-act.stillAt[1])>4){act.stillAt=[sx,sy];if(act.far)armStill();}
       ovSched();break;}
     case 'shape':{const[x,y]=toLocal(sx,sy,act.page);act.b=[x,y];if(act.kind==='auto'){for(const ev of list){const[px,py]=sp(ev);const q=toLocal(px,py,act.page);const l=act.raw[act.raw.length-1];if(dist(q,l)*z>1)act.raw.push([q[0],q[1],0.5]);}}ovSched();break;}
@@ -1545,9 +1545,21 @@ function moveAct(e,sx,sy){
 function snapPt(a,sx,sy){const[lx]=rulerLocal(sx,sy);const off=a.snap+(a.snap<0?-1:1)*(a.it.w*z/2);return rulerToScreen(lx,off);}
 function addPoint(a,px,py,pr){
   let[x,y]=toLocal(px,py,a.page);const p=a.it.p,l=p[p.length-1];
-  if(a.snap==null&&a.type==='draw'){a.raw=[x,y];const k=[1,0.6,0.4,0.25][a.it.k==='hl'?1:(T.pen.smooth??1)];x=l[0]+(x-l[0])*k;y=l[1]+(y-l[1])*k;}
+  if(a.snap==null&&a.type==='draw'){
+    /* vyhlazování už během psaní – po zvednutí pera se čára nemění (dřív „problikla“) */
+    if(!a.R){a.R=[p[0].slice()];a.S1=[a.R[0]];}
+    a.raw=[x,y];const R=a.R,r=R[R.length-1],k=[1,0.6,0.4,0.25][a.it.k==='hl'?1:(T.pen.smooth??1)];x=r[0]+(x-r[0])*k;y=r[1]+(y-r[1])*k;
+    const d=Math.hypot(x-r[0],y-r[1]);if(d<1.1&&d*z<1.5)return;
+    R.push([x,y,r[2]*0.55+pr*0.45]);smoothTail(a);pathCache.delete(a.it);return;
+  }
   if(Math.hypot(x-l[0],y-l[1])*z<1.2&&Math.hypot(x-l[0],y-l[1])<1)return;
   p.push([x,y,l[2]*0.55+pr*0.45]); pathCache.delete(a.it);
+}
+function smoothTail(a){
+  const R=a.R,S1=a.S1,P=a.it.p,n=R.length;
+  const f=(A,i)=>i<=0||i>=A.length-1?A[i]:[(A[i-1][0]+2*A[i][0]+A[i+1][0])/4,(A[i-1][1]+2*A[i][1]+A[i+1][1])/4,A[i][2]];
+  for(let i=Math.max(0,n-2);i<n;i++)S1[i]=f(R,i);
+  for(let i=Math.max(0,n-3);i<n;i++)P[i]=f(S1,i);
 }
 function endAct(e){
   clearTimeout(holdTimer);clearTimeout(stillTimer);cancelAnimationFrame(holdRAF);
@@ -1596,8 +1608,11 @@ function scribbleErase(page,it){
   const ids=new Set(hits.map(o=>o.id));snapItems(page);page.items=page.items.filter(o=>!ids.has(o.id));changed();render();toast('Smazáno čmáranicí ('+hits.length+') – Zpět vrátí');vibrate&&vibrate(15);return true;
 }
 function commitDraw(a){
-  let it=a.it; if(a.raw&&!a.shaped&&!a.straight){const l=it.p[it.p.length-1];it.p.push([a.raw[0],a.raw[1],l[2]]);}
-  if(!a.shaped&&!a.straight)it.p=processPts(it.p);
+  let it=a.it;
+  if(a.R&&!a.shaped&&!a.straight){const r=a.R[a.R.length-1];if(a.raw&&Math.hypot(a.raw[0]-r[0],a.raw[1]-r[1])>0.6){a.R.push([a.raw[0],a.raw[1],r[2]]);smoothTail(a);}
+    it.p=densify(it.p,2.5).map(q=>[Math.round(q[0]*100)/100,Math.round(q[1]*100)/100,Math.round(q[2]*1000)/1000]);}
+  else{if(a.raw&&!a.shaped&&!a.straight){const l=it.p[it.p.length-1];it.p.push([a.raw[0],a.raw[1],l[2]]);}
+  if(!a.shaped&&!a.straight)it.p=processPts(it.p);}
   it=finalize(Object.assign({},it)); delete it.ps_;
   if(performance.now()-a.t0<450&&Math.max(it.bb[2]-it.bb[0],it.bb[3]-it.bb[1])*z<9&&tapAt(a.sx0,a.sy0))return;
   if(it.k!=='hl'&&S.scribble!==false&&scribbleErase(a.page,it))return;
