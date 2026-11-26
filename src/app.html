@@ -1547,9 +1547,9 @@ function addPoint(a,px,py,pr){
   let[x,y]=toLocal(px,py,a.page);const p=a.it.p,l=p[p.length-1];
   if(a.snap==null&&a.type==='draw'){
     /* vyhlazování už během psaní – po zvednutí pera se čára nemění (dřív „problikla“) */
-    if(!a.R){a.R=[p[0].slice()];a.S1=[a.R[0]];}
-    a.raw=[x,y];const R=a.R,r=R[R.length-1],k=[1,0.6,0.4,0.25][a.it.k==='hl'?1:(T.pen.smooth??1)];x=r[0]+(x-r[0])*k;y=r[1]+(y-r[1])*k;
-    const d=Math.hypot(x-r[0],y-r[1]);if(d<1.1&&d*z<1.5)return;
+    if(!a.R){a.R=[p[0].slice()];a.S1=[a.R[0]];a.sl=a.it.k==='hl'?1:(T.pen.smooth??1);}
+    a.raw=[x,y];const R=a.R,r=R[R.length-1],k=[1,0.9,0.65,0.45][a.sl];x=r[0]+(x-r[0])*k;y=r[1]+(y-r[1])*k;
+    const d=Math.hypot(x-r[0],y-r[1]);if(d<0.6&&d*z<1.2)return;
     R.push([x,y,r[2]*0.55+pr*0.45]);smoothTail(a);pathCache.delete(a.it);return;
   }
   if(Math.hypot(x-l[0],y-l[1])*z<1.2&&Math.hypot(x-l[0],y-l[1])<1)return;
@@ -1558,7 +1558,10 @@ function addPoint(a,px,py,pr){
 function smoothTail(a){
   const R=a.R,S1=a.S1,P=a.it.p,n=R.length;
   const f=(A,i)=>i<=0||i>=A.length-1?A[i]:[(A[i-1][0]+2*A[i][0]+A[i+1][0])/4,(A[i-1][1]+2*A[i][1]+A[i+1][1])/4,A[i][2]];
+  /* vypnuto: beze změny; slabé: jedno lehké vyhlazení (zachová obloučky psacího písma); střední/silné: dvě */
+  if(!a.sl){P[n-1]=R[n-1];return;}
   for(let i=Math.max(0,n-2);i<n;i++)S1[i]=f(R,i);
+  if(a.sl===1){for(let i=Math.max(0,n-2);i<n;i++)P[i]=S1[i];return;}
   for(let i=Math.max(0,n-3);i<n;i++)P[i]=f(S1,i);
 }
 function endAct(e){
