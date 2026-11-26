@@ -1,5 +1,5 @@
 // Span – offline režim: po prvním otevření s internetem funguje aplikace celá i bez připojení
-const VER = 'a6efe73731';
+const VER = 'd392da2eed';
 const CACHE = 'span-' + VER, LIBS = 'span-libs-2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 // knihovny pro PDF, tabulky (Excel), grafy jsou přibalené ve složce lib/ – uloží se hned při instalaci
