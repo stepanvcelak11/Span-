@@ -4740,7 +4740,7 @@ try{navigator.getBattery&&navigator.getBattery().then(b=>{const up=()=>{const lo
    po prvním otevření s internetem pak vše funguje bez připojení.
    ========================================================= */
 function offlineCapable(){return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!/claude/.test(location.hostname);}
-const APP_BUILD='26. 11. 2026 11:38';
+const APP_BUILD='26. 11. 2026 11:55';
 function updateBar(){if($('#updBar'))return;const b=el('div',{class:'upd-bar',id:'updBar',role:'status'},'<span>Je připravená nová verze Spanu</span>');
   const go=el('button',{class:'btn primary'},'Obnovit');go.onclick=async()=>{try{commitText();savePos();await flushSaveNow();}catch(e){}location.reload();};
   const no=el('button',{class:'ib','aria-label':'Později'},ic('close'));no.onclick=()=>b.remove();b.append(go,no);document.body.append(b);}
@@ -4766,6 +4766,12 @@ function offlineInfo(){
   modal('Offline režim',b=>{b.innerHTML=ok?(ready?'<p>✓ Aplikace je uložená v tabletu a funguje i bez internetu – psaní, sešity, import PDF, tabulky (Excel), grafy, rozpoznávání písma i export do PDF.</p><p>Bez internetu nefunguje jen volitelné upřesnění rukopisu přes Claude.</p>':'<p>Aplikace se právě ukládá pro offline použití. Nechte ji chvíli otevřenou s internetem.</p>')
     :'<p>Tato stránka běží uvnitř claude.ai, a ta bez internetu nejde otevřít.</p><p>Pro práci bez internetu otevřete Span z jeho vlastní adresy (GitHub Pages) a v Chromu zvolte <b>⋮ → Přidat na plochu / Instalovat aplikaci</b>. Pak se spouští z ikony na ploše i bez připojení.</p><p>Vaše sešity jsou uložené v prohlížeči podle adresy – sešity z claude.ai do nainstalované aplikace přenesete přes Zálohu (podržte sešit → Záloha) a Import.</p>';
     if(ok)navigator.serviceWorker.ready.then(r=>r.active&&r.active.postMessage('precache')).catch(()=>{});
+    if(ok){const dg=el('p',{class:'shint'},'Kontroluji uložené soubory…');b.append(dg);(async()=>{try{
+      const reg=await navigator.serviceWorker.getRegistration();const ks=await caches.keys();let core=0,libs=0,idx=false;
+      for(const k of ks){const c=await caches.open(k),rs=await c.keys();if(k.startsWith('span-libs'))libs=rs.filter(r=>/\/lib\//.test(r.url)).length;else if(k.startsWith('span-')){core=rs.length;idx=rs.some(r=>/\/(index\.html)?$/.test(new URL(r.url).pathname));}}
+      const per=navigator.storage&&navigator.storage.persisted?await navigator.storage.persisted():null;
+      dg.innerHTML=`Stav: ${reg&&reg.active?'✓ offline služba běží':'✗ offline služba neběží'}${navigator.serviceWorker.controller?'':' (tato stránka ji zatím nepoužívá – zavřete a znovu otevřete aplikaci)'} · aplikace ${idx?'✓ uložená':'✗ neuložená'} (${core} souborů) · knihovny ${libs}/7${per===false?' · úložiště není trvalé':''}`;
+    }catch(e){dg.textContent='Kontrola selhala: '+e.message;}})();}
   },[{label:'Hotovo',cls:'primary',value:true}]);
 }
 /* ---------- propojení UI ---------- */

@@ -1,5 +1,5 @@
 // Span – offline režim: po prvním otevření s internetem funguje aplikace celá i bez připojení
-const VER = '8d226faecd';
+const VER = 'a6efe73731';
 const CACHE = 'span-' + VER, LIBS = 'span-libs-2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 // knihovny pro PDF, tabulky (Excel), grafy jsou přibalené ve složce lib/ – uloží se hned při instalaci
@@ -11,11 +11,12 @@ async function put(cache, url) {
   try { const r = await fetch(url, { mode: 'cors', credentials: 'omit' }); if (r.ok) { await cache.put(url, r.clone()); return r; } } catch (e) {}
   return null;
 }
-async function precacheLibs() {
+async function precacheLibs(fonts = true) {
   const c = await caches.open(LIBS);
   await Promise.all(LIB_URLS.map(async u => { if (!(await c.match(u))) await put(c, u); }));
-  // písma: z CSS vytáhnout adresy souborů a uložit i ty (jen ty české/latinské)
-  const css = await put(c, FONTS_CSS);
+  if (!fonts) return;
+  // písma: z CSS vytáhnout adresy souborů a uložit i ty
+  const css = (await c.match(FONTS_CSS)) || (await put(c, FONTS_CSS));
   if (css) {
     const txt = await css.text();
     const urls = [...new Set([...txt.matchAll(/url\((https:[^)]+)\)/g)].map(m => m[1]))];
@@ -24,9 +25,11 @@ async function precacheLibs() {
 }
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
+    // jádro aplikace se musí uložit celé – jinak instalace selže a zůstane funkční předchozí verze
     const c = await caches.open(CACHE);
-    await Promise.all(CORE.map(u => c.add(new Request(u, { cache: 'reload' })).catch(() => {})));
-    await precacheLibs().catch(() => {});
+    await c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })));
+    // knihovny (bez písem) ještě před aktivací, písma až potom na pozadí
+    await precacheLibs(false).catch(() => {});
     self.skipWaiting();
   })());
 });
@@ -35,6 +38,7 @@ self.addEventListener('activate', e => {
     const ks = await caches.keys();
     await Promise.all(ks.filter(k => k !== CACHE && k !== LIBS).map(k => caches.delete(k)));
     await self.clients.claim();
+    precacheLibs(true).catch(() => {});
     (await self.clients.matchAll()).forEach(cl => cl.postMessage({ type: 'offline-ready' }));
   })());
 });
