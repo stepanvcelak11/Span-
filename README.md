@@ -39,7 +39,7 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 - Přehled stránek: nativní plynulé posouvání, malé náhledy stránek učebnic ukládané zvlášť; guma překresluje jen okolí; ukládání až v klidu po psaní; sešit se otevře tam, kde jste skončili; ukázky čar u pera a zvýrazňovače; klávesnice v kalkulačce; vlastní kolečko (nástroje, barvy, tloušťky, velikost, rychlost); laso se po přesunu vrátí k předchozímu nástroji; snadné přidání sešitů do složky/kategorie; aplikace až k horní liště systému.
 - Stránky na šířku (i jednotlivé stránky, ⋯ → Otočit stránku), tlačítko „Přidat stránku / Na šířku“ pod poslední stránkou, hladší písmo (psaní se už nepřevádí na čáry).
 - Čistá obrazovka (dvojklep prstem / F): žádné lišty, jen přesunutelné plovoucí tlačítko s panelem ovládání (nástroje, barvy, tloušťky, stránky, knihovna, nastavení); akce v kolečku (Ovládání, Nová stránka, Přehled stránek, Knihovna, Pravítko…); nastavitelné boční tlačítko pera, zadní konec pera a dvojklep.
-- Písmeno + podržení pera = dočasný nástroj (G guma, F fix, L laso, P pero, Z zvýrazňovač, T text), po použití se vrátí předchozí; učení vlastního písma, přiřazení a přísnost v Nastavení.
+- Písmeno + podržení pera = dočasný nástroj (G guma, F fix nebo zkratka Γ, L laso, P pero, Z zvýrazňovač, T text nebo zkratka ┐), po použití se vrátí předchozí; učení vlastního písma, přiřazení a přísnost v Nastavení.
 - Funguje offline, data v IndexedDB na zařízení.
 
 ## Struktura
