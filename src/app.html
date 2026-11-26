@@ -1686,21 +1686,20 @@ function letterCommand(fromTap){
     const r0=rec[0];if(!r0||now-r0.t>2500)return false;const g=r0.it.bb,[lx,ly]=toLocal(a.sx0,a.sy0,page),m=Math.max(g[2]-g[0],g[3]-g[1])*0.35;
     if(lx<g[0]-m||lx>g[2]+m||ly<g[1]-m||ly>g[3]+m)return false;
     cur=r0.it.p.map(q=>[q[0],q[1]]);selfId=r0.it.id;tries=[[]];if(rec[1])tries.push([rec[1]]);if(rec[2])tries.push([rec[1],rec[2]]);rec.shift();}
-  const map=lcMap();let hit=null,near=null,why=null;
+  const map=lcMap();let hit=null,near=null;
   for(const extra of tries){
     const strokes=[cur].concat(extra.map(r=>r.it.p.map(q=>[q[0],q[1]])));
     const b=bbOf_([].concat(...strokes)),h=b[3]-b[1],w=b[2]-b[0],sz=Math.max(w,h);
     if(sz*z<14||sz*z>520||h<w*0.25)continue;                       // písmeno: rozumná velikost, spíš vyšší než široké
     if(extra.length){const cb=bbOf_(cur);if(extra.some(r=>{const g=r.it.bb;return g[0]>cb[2]+sz*0.5||g[2]<cb[0]-sz*0.5||g[1]>cb[3]+sz*0.5||g[3]<cb[1]-sz*0.5;}))continue;}
-    /* samostatné písmeno – těsně vedle nesmí být právě psané slovo (starší poznámky na stránce nevadí) */
-    const ex=new Set(extra.map(r=>r.it.id)),m=sz*0.4;if(selfId)ex.add(selfId);
+    /* písmeno může být kdekoli, i přes jiné písmo – pojistkou je podržení pera na místě */
     const r=lcMatch(strokes);
-    if(recentStrokes.some(o=>now-o.t<2500&&o.page===page&&!ex.has(o.it.id)&&page.items.includes(o.it)&&o.it.k!=='hl'&&(()=>{const g=o.it.bb;return g[0]<b[2]+m&&g[2]>b[0]-m&&g[1]<b[3]+m*0.3&&g[3]>b[1]-m*0.3;})())){if(!why&&extra.length===0&&r.k&&r.k[0]!=='_')why='word:'+r.k;continue;}
-    if(r.k&&r.k[0]!=='_'&&r.d<(S.lcStrict2??0.3)*(r.u?1.2:1)&&map[r.k]&&map[r.k]!=='none'){hit={k:r.k,act:map[r.k],extra,d:r.d};break;}
+    /* víc tahů (F, T, P) i jeden tah zkusit a vzít nejlepší shodu; složené písmeno má mírnou přednost */
+    const sc=r.d/((S.lcStrict2??0.3)*(r.u?1.2:1))*(extra.length?0.9:1);
+    if(r.k&&r.k[0]!=='_'&&sc<(extra.length?0.9:1)&&map[r.k]&&map[r.k]!=='none'&&(!hit||sc<hit.sc))hit={k:r.k,act:map[r.k],extra,d:r.d,sc};
     if(!near&&r.k&&r.k[0]!=='_'&&r.d<(S.lcStrict2??0.3)*2.2&&extra.length===0)near=r.k+' ('+Math.round(100*Math.max(0,1-r.d/((S.lcStrict2??0.3)*2.2)))+' %)';
   }
-  if(!hit){if(S.lcHint!==false){if(near)toast('Písmeno nepoznáno – nejblíž „'+near+'“. Naučte ho: Nastavení → Ovládání perem → Naučit moje písmena',0);
-      else if(why)toast('Písmeno „'+why.slice(5)+'“ je moc blízko právě psanému textu – napište ho kousek stranou');}
+  if(!hit){if(S.lcHint!==false){if(near)toast('Písmeno nepoznáno – nejblíž „'+near+'“. Naučte ho: Nastavení → Ovládání perem → Naučit moje písmena',0);}
     return false;}
   /* písmeno smazat a nástroj přepnout */
   clearTimeout(holdTimer);act=null;live.style.mixBlendMode='';unfade(true);
