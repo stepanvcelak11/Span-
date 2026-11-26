@@ -616,6 +616,8 @@ body.zen .zenbtn.on{display:flex}
 .zpanel .zsz button{width:40px;height:34px;border-radius:10px;border:0;background:var(--bar-2,rgba(127,127,127,.12));display:flex;align-items:center;justify-content:center}
 .zpanel .zsz button[aria-pressed="true"]{background:var(--accent-2)}
 .zpanel .zsz i{display:block;border-radius:50%;background:currentColor}
+.lcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.lcrow{display:flex;align-items:center;gap:8px}.lcrow b{width:18px;font-size:16px}.lcrow select{flex:1}
 .upd-bar{position:fixed;z-index:85;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:8px 8px 8px 18px;border-radius:16px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);font-weight:600;animation:toastIn .26s var(--ease-out)}
 .upd-bar .btn{height:38px}
 .app-ver{text-align:center;margin:4px 0 0}
@@ -1542,11 +1544,12 @@ function onHold(){
 }
 function armStill(){
   clearTimeout(stillTimer);
-  if(S.afterHold==='off'||!act||act.type!=='draw'||act.shaped||act.snap!=null)return;
-  stillTimer=setTimeout(onStill,Math.max(S.holdMs,700));
+  if((S.afterHold==='off'&&S.letterCmd===false)||!act||act.type!=='draw'||act.shaped||act.snap!=null)return;
+  stillTimer=setTimeout(onStill,Math.max(S.holdMs,S.letterCmd===false?700:600));
 }
 function onStill(){
   if(!act||act.type!=='draw'||!act.far||act.shaped)return;
+  if(S.letterCmd!==false&&letterCommand())return;
   if(S.afterHold==='shape'){
     if(act.it.p.length<5)return;
     /* psaní (malá písmena, krátká zastavení pera) se nepřevádí na tvary */
@@ -1652,6 +1655,65 @@ function scribbleErase(page,it){
   if(!hits.length)return false;
   const ids=new Set(hits.map(o=>o.id));snapItems(page);page.items=page.items.filter(o=>!ids.has(o.id));changed();render();toast('Smazáno čmáranicí ('+hits.length+') – Zpět vrátí');vibrate&&vibrate(15);return true;
 }
+/* ---------- písmeno + podržení pera = rychlá volba nástroje (G guma, F fix, L laso…) ---------- */
+const recentStrokes=[];
+const LC_ACTS={eraser:'Guma',pen:'Pero',fix:'Fix',hl:'Zvýrazňovač',lasso:'Laso',text:'Text',shape:'Tvary',tape:'Páska',laser:'Laser',ruler:'Pravítko',ctl:'Panel ovládání',zen:'Čistá obrazovka',none:'—'};
+const LC_DEF={G:'eraser',F:'fix',L:'lasso',P:'pen',Z:'hl',T:'text'};
+const lcMap=()=>Object.assign({},LC_DEF,S.letterMap||{});
+let LC_T=null;
+function lcTemplates(){
+  if(LC_T)return LC_T;
+  const arc=(cx,cy,rx,ry,a0,a1,n=24)=>{const o=[];for(let i=0;i<=n;i++){const a=(a0+(a1-a0)*i/n)*Math.PI/180;o.push([cx+Math.cos(a)*rx,cy+Math.sin(a)*ry]);}return o;};
+  const seg=(...p)=>{const o=[];for(let i=1;i<p.length;i++){const a=p[i-1],b=p[i];for(let k=0;k<8;k++){const t=k/8;o.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}}o.push(p[p.length-1]);return o;};
+  const g1=arc(40,50,38,48,-40,-340),ge=g1[g1.length-1];
+  const D={
+    G:[[g1.concat(seg(ge,[44,ge[1]]))],[g1.concat(seg(ge,[78,50],[46,50]))],[arc(40,50,38,48,-40,-350),seg([80,52],[46,52])],[arc(40,50,38,48,-40,-340).concat(seg(ge,[50,ge[1]+2],[78,60],[78,96]))]],
+    F:[[seg([0,100],[0,0]),seg([0,0],[60,0]),seg([0,48],[45,48])],[seg([60,0],[0,0],[0,100]),seg([0,48],[45,48])],[seg([0,0],[0,100]),seg([0,0],[60,0],),seg([0,50],[40,50])]],
+    L:[[seg([0,0],[0,100],[60,100])],[seg([0,0],[2,100],[55,96])]],
+    P:[[seg([0,100],[0,0]).concat(arc(0,25,45,25,-90,90,16))],[seg([0,0],[0,100]),seg([0,0],[25,0]).concat(arc(25,25,25,25,-90,90,14)).concat(seg([25,50],[0,50]))]],
+    Z:[[seg([0,0],[60,0],[0,100],[60,100])],[seg([5,5],[60,0],[0,98],[62,100])]],
+    T:[[seg([0,0],[70,0]),seg([35,0],[35,100])],[seg([35,0],[35,100]),seg([0,0],[70,0])]],
+    /* návnady – podobné tvary, které nic nespouští */
+    _C:[[arc(40,50,38,48,-40,-320)]],_O:[[arc(40,50,38,48,-90,270)]],_I:[[seg([0,0],[0,100])]],_V:[[seg([0,0],[30,100],[60,0])]],_U:[[seg([0,0],[0,70]).concat(arc(30,70,30,30,180,0,12)).concat(seg([60,70],[60,0]))]],
+    _S:[[arc(30,25,28,24,-20,-270).concat(arc(30,75,28,25,-90,160))]],_N:[[seg([0,100],[0,0],[60,100],[60,0])]],_E:[[seg([60,0],[0,0],[0,100],[60,100]),seg([0,50],[45,50])]],_H:[[seg([0,0],[0,100]),seg([60,0],[60,100]),seg([0,50],[60,50])]],
+    _J:[[seg([50,0],[50,75]).concat(arc(25,75,25,25,0,180,12))]],_7:[[seg([0,0],[60,0],[15,100])]],_2:[[arc(30,28,28,26,-160,20,14).concat(seg([55,40],[0,100],[60,100]))]],_1:[[seg([10,20],[35,0],[35,100])]],
+    _A:[[seg([0,100],[30,0],[60,100]),seg([12,60],[48,60])]],_X:[[seg([0,0],[60,100]),seg([60,0],[0,100])]],_plus:[[seg([30,0],[30,100]),seg([0,50],[60,50])]],_K:[[seg([0,0],[0,100]),seg([55,0],[0,55],[55,100])]],_R:[[seg([0,100],[0,0]).concat(arc(0,25,45,25,-90,90,16)).concat(seg([0,50],[50,100]))]],
+    _B:[[seg([0,100],[0,0]).concat(arc(0,25,40,25,-90,90,14)).concat(arc(0,75,48,25,-90,90,14))]],_D:[[seg([0,100],[0,0]).concat(arc(0,50,55,50,-90,90,20))]],_Y:[[seg([0,0],[30,50],[60,0]),seg([30,50],[30,100])]],_line:[[seg([0,50],[100,50])]],_e:[[seg([5,55],[60,55]).concat(arc(32,55,30,40,0,-300,20))]]
+  };
+  LC_T=[];for(const k in D)for(const v of D[k])LC_T.push({k,c:pcloud(v)});return LC_T;
+}
+function lcMatch(strokes){let best=null,bd=Infinity;const c=pcloud(strokes);for(const t of lcTemplates()){const d=pMatch(c,t.c);if(d<bd){bd=d;best=t.k;}}return {k:best,d:bd};}
+function letterCommand(){
+  const a=act,page=a.page,now=performance.now(),cur=a.it.p.map(q=>[q[0],q[1]]);
+  if(cur.length<6)return false;
+  const bbOf_=pts=>{let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of pts){x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}return [x0,y0,x1,y1];};
+  const rec=recentStrokes.filter(r=>r.page===page&&now-r.t<3000&&page.items.includes(r.it)).reverse();
+  const tries=[[]];if(rec[0])tries.push([rec[0]]);if(rec[1])tries.push([rec[0],rec[1]]);
+  const map=lcMap();let hit=null;
+  for(const extra of tries){
+    const strokes=[cur].concat(extra.map(r=>r.it.p.map(q=>[q[0],q[1]])));
+    const b=bbOf_([].concat(...strokes)),h=b[3]-b[1],w=b[2]-b[0],sz=Math.max(w,h);
+    if(h*z<22||sz*z>320||h<w*0.6)continue;                       // písmeno: rozumná velikost, spíš vyšší než široké
+    if(extra.length){const cb=bbOf_(cur);if(extra.some(r=>{const g=r.it.bb;return g[0]>cb[2]+sz*0.5||g[2]<cb[0]-sz*0.5||g[1]>cb[3]+sz*0.5||g[3]<cb[1]-sz*0.5;}))continue;}
+    /* samostatné písmeno – vedle nesmí být jiné písmo (jinak jde o psaní slova) */
+    const ex=new Set(extra.map(r=>r.it.id)),m=sz*0.55;
+    if(page.items.some(o=>!ex.has(o.id)&&o.t==='s'&&o.k!=='hl'&&(()=>{const g=o.bb;return g[0]<b[2]+m&&g[2]>b[0]-m&&g[1]<b[3]+m*0.3&&g[3]>b[1]-m*0.3;})()))continue;
+    const r=lcMatch(strokes);
+    if(r.k&&r.k[0]!=='_'&&r.d<(S.lcStrict??0.12)&&map[r.k]&&map[r.k]!=='none'){hit={k:r.k,act:map[r.k],extra,d:r.d};break;}
+  }
+  if(!hit)return false;
+  /* písmeno smazat a nástroj přepnout */
+  clearTimeout(holdTimer);act=null;live.style.mixBlendMode='';unfade(true);
+  if(hit.extra.length){snapItems(page);const ids=new Set(hit.extra.map(r=>r.it.id));page.items=page.items.filter(o=>!ids.has(o.id));pcache.delete(page.id);changed();render();}
+  recentStrokes.length=0;drawOverlay();
+  const A=hit.act;
+  if(A==='fix'){if(T.pen.style!=='marker')T.pen.prevStyle=T.pen.style;T.pen.style='marker';saveT();setTool('pen');updateToolbar();}
+  else if(A==='pen'){if(T.pen.style==='marker'){T.pen.style=T.pen.prevStyle||'fountain';saveT();}setTool('pen');updateToolbar();}
+  else if(A==='ruler')toggleRuler();else if(A==='ctl'){radial.cx=a.sx0;radial.cy=a.sy0;openCtl(radAnchor());}else if(A==='zen')setZen(!S.zen);
+  else setTool(A);
+  vibrate(12);toast(hit.k+' → '+LC_ACTS[A]);if(S.zen)posZen();
+  return true;
+}
 function commitDraw(a){
   let it=a.it;
   if(a.R&&!a.shaped&&!a.straight){const r=a.R[a.R.length-1];if(a.raw&&Math.hypot(a.raw[0]-r[0],a.raw[1]-r[1])>0.6){a.R.push([a.raw[0],a.raw[1],r[2]]);smoothTail(a);}
@@ -1663,6 +1725,7 @@ function commitDraw(a){
   if(it.k!=='hl'&&S.scribble!==false&&scribbleErase(a.page,it))return;
   recStamp(it);
   snapItems(a.page); a.page.items=a.page.items.concat([it]); drawOnMain(a.page,it); changed();
+  recentStrokes.push({page:a.page,it,t:performance.now()});if(recentStrokes.length>4)recentStrokes.shift();
   if(it.k==='sh')checkFrame(a.page,it);else checkCircle(a.page,it,H_.undo.length);
 }
 function commitShape(a){
@@ -4230,6 +4293,12 @@ async function openSettings(){
     {const f=el('label',{class:'field'},'<span>Boční tlačítko pera</span>');const sl=el('select');[['radial','Otevře kolečko (výchozí)'],['eraser','Guma – dokud ho držíte'],['lasso','Laso – dokud ho držíte'],['hl','Zvýrazňovač – dokud ho držíte'],['ctl','Panel ovládání'],['undo','Zpět'],['zen','Zapnout / vypnout lišty']].forEach(([v,l])=>sl.append(new Option(l,v,false,v===(S.penBtn||'radial'))));sl.onchange=()=>{S.penBtn=sl.value;saveS();};f.append(sl);b.append(f);}
     {const f=el('label',{class:'field'},'<span>Zadní konec pera (guma na peru)</span>');const sl=el('select');[['eraser','Guma'],['lasso','Laso']].forEach(([v,l])=>sl.append(new Option(l,v,false,v===(S.penEnd||'eraser'))));sl.onchange=()=>{S.penEnd=sl.value;saveS();};f.append(sl);b.append(f);}
     {const f=el('label',{class:'field'},'<span>Dvojklep prstem</span>');const sl=el('select');[['zen','Skrýt / zobrazit lišty'],['ctl','Panel ovládání'],['fit','Stránka na šířku obrazovky'],['undo','Zpět'],['off','Nic']].forEach(([v,l])=>sl.append(new Option(l,v,false,v===(S.dblTap||'zen'))));sl.onchange=()=>{S.dblTap=sl.value;saveS();};f.append(sl);b.append(f);}
+    toggle(b,'Písmeno + podržení pera přepne nástroj (napište G a pero podržte → guma)',S.letterCmd!==false,v=>{S.letterCmd=v;saveS();});
+    {const f=el('div',{class:'field'},'<span>Písmena a nástroje</span>');const g=el('div',{class:'lcgrid'});const M=lcMap();
+     Object.keys(LC_DEF).forEach(L=>{const r=el('label',{class:'lcrow'},'<b>'+L+'</b>');const sl=el('select');Object.entries(LC_ACTS).forEach(([v,l])=>sl.append(new Option(l,v,false,v===M[L])));sl.onchange=()=>{S.letterMap=Object.assign({},S.letterMap||{},{[L]:sl.value});saveS();};r.append(sl);g.append(r);});
+     f.append(g);b.append(f);}
+    slider(b,'Jak přísně písmena rozpoznávat',0.06,0.2,0.01,S.lcStrict??0.12,v=>v<=0.09?'přísně':v>=0.15?'volně':'středně',v=>{S.lcStrict=v;saveS();});
+    b.append(el('p',{class:'shint'},'Napište samostatné velké písmeno (kousek od ostatního textu) a na konci posledního tahu pero chvilku podržte. Písmeno zmizí a nástroj se přepne. U písmen z více tahů (F, T) se započítají i tahy napsané těsně předtím.'));
     b.append(el('p',{class:'shint'},'<b>Panel ovládání</b> (nástroje, barvy, tloušťky, stránky, knihovna, nastavení) otevřete plovoucím tlačítkem, položkou „Ovládání“ v kolečku, bočním tlačítkem pera nebo dvojklepem – podle toho, co si tu nastavíte. Do kolečka si můžete přidat i akce: Nová stránka, Přehled stránek, Knihovna, Pravítko, Čistá obrazovka…'));
     if(nb)b0.insertBefore(b,b0.firstChild);
     grp('Kolečko nástrojů','pen');
@@ -4264,6 +4333,7 @@ function openHelp(){
   modal('Jak ovládat Span',b=>{b.innerHTML=`<ul class="help">
 <li><b>Kolečko nástrojů:</b> přiložte pero a chvíli ho nechte stát. Kolem hrotu se objeví kolečko – přejeďte perem na nástroj, barvu nebo tloušťku a zvedněte. Boční tlačítko pera otevře kolečko okamžitě.</li>
 <li><b>Čistá obrazovka:</b> dvojklep prstem (nebo klávesa F, nebo ⋯ → Čistá obrazovka) skryje všechny lišty. Zůstane jen malé průhledné tlačítko – tažením ho přesunete, klepnutím otevřete <i>panel ovládání</i> s nástroji, barvami, tloušťkami, stránkami a nastavením. Panel jde dát i do kolečka nebo na boční tlačítko pera (Nastavení → Ovládání perem).</li>
+<li><b>Písmeno = nástroj:</b> napište samostatné velké písmeno a pero na konci chvilku podržte – <b>G</b> guma, <b>F</b> fix, <b>L</b> laso, <b>P</b> pero, <b>Z</b> zvýrazňovač, <b>T</b> text. Písmeno zmizí. Přiřazení změníte v Nastavení → Ovládání perem.</li>
 <li><b>Zakroužkování:</b> perem zakroužkujte napsané – objeví se Vybrat / Kopírovat, kruh pak zmizí. Prázdný kruh zůstane obyčejným kruhem.</li>
 <li><b>Stránky na šířku:</b> pod poslední stránkou jsou tlačítka Přidat stránku / Na šířku; otočení stávající stránky je v ⋯.</li>
 <li><b>Přesný tvar:</b> nakreslete kruh, čáru, obdélník nebo trojúhelník a na konci pero podržte – tah se srovná.</li>
@@ -4919,7 +4989,7 @@ try{navigator.getBattery&&navigator.getBattery().then(b=>{const up=()=>{const lo
    po prvním otevření s internetem pak vše funguje bez připojení.
    ========================================================= */
 function offlineCapable(){return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!/claude/.test(location.hostname);}
-const APP_BUILD='26. 11. 2026 13:39';
+const APP_BUILD='26. 11. 2026 13:43';
 function updateBar(){if($('#updBar'))return;const b=el('div',{class:'upd-bar',id:'updBar',role:'status'},'<span>Je připravená nová verze Spanu</span>');
   const go=el('button',{class:'btn primary'},'Obnovit');go.onclick=async()=>{try{commitText();savePos();await flushSaveNow();}catch(e){}location.reload();};
   const no=el('button',{class:'ib','aria-label':'Později'},ic('close'));no.onclick=()=>b.remove();b.append(go,no);document.body.append(b);}
