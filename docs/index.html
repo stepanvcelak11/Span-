@@ -1726,6 +1726,12 @@ function letterCommand(fromTap){
   else setTool(A);
   if(S.tmpBack!==false&&['eraser','pen','fix','hl','lasso','text','shape','tape','laser'].includes(A)&&!(A==='pen'&&prev.tool==='pen'&&prev.style!=='marker')){T.tmpPrev=prev;if(A==='laser')tmpReturn(4000);}
   vibrate(12);toast(hit.k+' → '+LC_ACTS[A]+(T.tmpPrev?' (po použití zpět)':''));if(S.zen)posZen();
+  /* nástroj hned navázat na pero, které pořád drží displej – stačí pokračovat v pohybu */
+  if(['eraser','pen','fix','hl','lasso','shape','tape','laser','text'].includes(A)&&!radial.open){
+    const P=fromTap?[a.sx0,a.sy0]:(a.stillAt||[a.sx0,a.sy0]);
+    beginAct({pointerType:a.ptype,pointerId:a.pointerId,buttons:1,button:0,pressure:0.5},P[0],P[1]);
+    if(act){act.far=true;act.letterGo=true;clearTimeout(holdTimer);if(act.type==='erase')drawOverlay();}
+  }
   return true;
 }
 /* nástroj zapnutý písmenem je dočasný – po použití se vrátí ten předchozí */
@@ -5043,7 +5049,7 @@ try{navigator.getBattery&&navigator.getBattery().then(b=>{const up=()=>{const lo
    po prvním otevření s internetem pak vše funguje bez připojení.
    ========================================================= */
 function offlineCapable(){return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!/claude/.test(location.hostname);}
-const APP_BUILD='26. 11. 2026 15:04';
+const APP_BUILD='26. 11. 2026 15:12';
 function updateBar(){if($('#updBar'))return;const b=el('div',{class:'upd-bar',id:'updBar',role:'status'},'<span>Je připravená nová verze Spanu</span>');
   const go=el('button',{class:'btn primary'},'Obnovit');go.onclick=async()=>{try{commitText();savePos();await flushSaveNow();}catch(e){}location.reload();};
   const no=el('button',{class:'ib','aria-label':'Později'},ic('close'));no.onclick=()=>b.remove();b.append(go,no);document.body.append(b);}
