@@ -849,17 +849,18 @@ const ic=(n,cls='i')=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true
 /* ---------- úložiště ---------- */
 const store={get(k,d){try{const v=localStorage.getItem('span:'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('span:'+k,JSON.stringify(v));}catch(e){}}};
 const DB={db:null,mem:new Map(),
- async open(){try{this.db=await new Promise((res,rej)=>{const r=indexedDB.open('span-notes',3);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('bg'))d.createObjectStore('bg',{keyPath:'id'});if(!d.objectStoreNames.contains('nb'))d.createObjectStore('nb',{keyPath:'id'});if(!d.objectStoreNames.contains('meta'))d.createObjectStore('meta',{keyPath:'id'});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}catch(e){this.db=null;}},
+ async open(){try{this.db=await new Promise((res,rej)=>{const r=indexedDB.open('span-notes',4);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('pg'))d.createObjectStore('pg',{keyPath:'id'});if(!d.objectStoreNames.contains('bg'))d.createObjectStore('bg',{keyPath:'id'});if(!d.objectStoreNames.contains('nb'))d.createObjectStore('nb',{keyPath:'id'});if(!d.objectStoreNames.contains('meta'))d.createObjectStore('meta',{keyPath:'id'});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}catch(e){this.db=null;}},
  os(m,st='nb'){return this.db.transaction(st,m).objectStore(st);},
  getMeta(id){if(!this.db)return Promise.resolve(store.get('meta:'+id,null));return new Promise(res=>{try{const r=this.os('readonly','meta').get(id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null);}catch(e){res(null);}});},
  putMeta(o){store.set('meta:'+o.id,o);if(!this.db)return Promise.resolve();return new Promise(res=>{try{const r=this.os('readwrite','meta').put(o);r.onsuccess=r.onerror=()=>res();}catch(e){res();}});},
  all(){if(!this.db)return Promise.resolve([...this.mem.values()]);return new Promise(res=>{try{
    /* pozadí stránek (PDF) leží zvlášť v úložišti 'bg' – sešit při každém uložení neklonuje megabajty obrázků */
-   const tx=this.db.transaction(['nb','bg'],'readonly');let A=[],B=[];tx.objectStore('nb').getAll().onsuccess=e=>A=e.target.result||[];tx.objectStore('bg').getAll().onsuccess=e=>B=e.target.result||[];
-   tx.oncomplete=()=>{for(const b of B){if(b.id.startsWith('t:')){BGT.set(b.id.slice(2),b.data);continue;}BGS.str.set(b.id,b.data);BGS.id.set(b.data,b.id);BGS.saved.add(b.id);}A.forEach(bgResolve);res(A);};tx.onerror=tx.onabort=()=>res(A);}catch(e){res([]);}});},
+   /* tahy každé stránky leží zvlášť v úložišti 'pg' – ukládá se jen stránka, která se změnila */
+   const tx=this.db.transaction(['nb','bg','pg'],'readonly');let A=[],B=[],P=[];tx.objectStore('nb').getAll().onsuccess=e=>A=e.target.result||[];tx.objectStore('bg').getAll().onsuccess=e=>B=e.target.result||[];tx.objectStore('pg').getAll().onsuccess=e=>P=e.target.result||[];
+   tx.oncomplete=()=>{const PM=new Map(P.map(r=>[r.id,r.items]));for(const n of A)for(const p of n.pages||[])if(p.itemsRef){p.items=PM.get(n.id+':'+p.id)||[];delete p.itemsRef;PGS.set(p,{i:p.items,k:n.id+':'+p.id});}for(const b of B){if(b.id.startsWith('t:')){BGT.set(b.id.slice(2),b.data);continue;}BGS.str.set(b.id,b.data);BGS.id.set(b.data,b.id);BGS.saved.add(b.id);}A.forEach(bgResolve);res(A);};tx.onerror=tx.onabort=()=>res(A);}catch(e){res([]);}});},
  put(nb){if(!this.db){this.mem.set(nb.id,nb);return Promise.resolve(true);}return new Promise(res=>{try{
-   const {o,recs}=bgStrip(nb);const tx=this.db.transaction(['nb','bg'],'readwrite');const bs=tx.objectStore('bg');recs.forEach(r=>bs.put(r));tx.objectStore('nb').put(o);
-   tx.oncomplete=()=>{recs.forEach(r=>BGS.saved.add(r.id));res(true);};tx.onerror=tx.onabort=e=>{console.warn(e);res(false);};}catch(e){console.warn(e);res(false);}});},
+   const {o,recs}=bgStrip(nb),pr=pgStrip(nb,o);const tx=this.db.transaction(['nb','bg','pg'],'readwrite');const bs=tx.objectStore('bg');recs.forEach(r=>bs.put(r));const ps=tx.objectStore('pg');pr.forEach(r=>ps.put({id:r.id,items:r.items}));tx.objectStore('nb').put(o);
+   tx.oncomplete=()=>{recs.forEach(r=>BGS.saved.add(r.id));pr.forEach(r=>PGS.set(r.page,{i:r.items,k:r.id}));res(true);};tx.onerror=tx.onabort=e=>{console.warn(e);res(false);};}catch(e){console.warn(e);res(false);}});},
  putBgs(recs){if(!this.db||!recs.length)return Promise.resolve();return new Promise(res=>{try{const tx=this.db.transaction('bg','readwrite');const bs=tx.objectStore('bg');recs.forEach(r=>bs.put(r));tx.oncomplete=()=>{recs.forEach(r=>BGS.saved.add(r.id));res();};tx.onerror=tx.onabort=()=>res();}catch(e){res();}});},
  del(id){if(!this.db){this.mem.delete(id);return Promise.resolve();}return new Promise(res=>{try{const r=this.os('readwrite').delete(id);r.onsuccess=r.onerror=()=>res();}catch(e){res();}});}
 };
@@ -2453,7 +2454,7 @@ document.addEventListener('pointerup',()=>{if(!fsWanted()||fsFail>2)return;try{d
 document.addEventListener('fullscreenchange',()=>{setTimeout(()=>{if(nb){W=0;resize();}},120);});
 function toggleFullscreen(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>toast('Celá obrazovka tady není dostupná.'));else if(!r)toast('Celá obrazovka tady není dostupná.');}}catch(e){toast('Celá obrazovka tady není dostupná.');}}
 function openNotebook(n){applyEdTheme();applyBars();edEnter();
-  requestWake();pcache.clear();commitText();nb=n;nb.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});
+  requestWake();pcache.clear();commitText();nb=n;nb.pages.forEach(p=>{if(!p.items)p.items=[];else if(p.items.some(it=>it.t==='s'&&!it.bb)){const sv=PGS.get(p),was=sv&&sv.i===p.items;p.items=p.items.map(finalizeLoaded);if(was)PGS.set(p,{i:p.items,k:sv.k});}});
   H_.undo=[];H_.redo=[];sel=null;act=null;W=0;ruler.on=false;
   layoutPages();$('#lib').hidden=true;$('#editor').hidden=false;
   togglePanel(false);updateToolbar();updUndo();
@@ -4502,16 +4503,31 @@ const VER={MAX:15,EVERY:10*60e3};
 const verRange=id=>IDBKeyRange.bound('v:'+id+':','v:'+id+':￿');
 function verReq(mode,fn){return new Promise(res=>{if(!DB.db){res(null);return;}try{const r=fn(DB.os(mode,'meta'));r.onsuccess=()=>res(r.result);r.onerror=()=>res(null);}catch(e){res(null);}});}
 async function verList(id){const a=await verReq('readonly',os=>os.getAll(verRange(id)));return (a||[]).sort((x,y)=>y.t-x.t);}
+/* otisk obsahu stránky (id, poloha, barva, text…) – rychlý FNV hash */
+function itemsHash(items){let h=2166136261>>>0;const add=s=>{for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}};
+  add(String(items.length));for(const it of items){const b=it.bb||[it.x,it.y,it.w,it.h];add(it.id+'|'+it.t+'|'+(it.c||'')+'|'+(it.w||'')+'|'+(b?b.map(v=>Math.round((v||0)*10)).join(','):'')+'|'+(it.p?it.p.length:'')+'|'+(it.text||'')+'|'+(it.src?it.src.length:'')+'|'+(it.k||'')+'|'+(it.fl?1:0));}
+  return h.toString(36)+items.length.toString(36);}
+/* verze → sešit s tahy (načte stránky podle odkazů; starší verze mají tahy přímo uvnitř) */
+async function verLoad(r,onlyFirst){const d=JSON.parse(r.data);const ps=onlyFirst?d.pages.slice(0,1):d.pages;
+  await Promise.all(ps.map(async p=>{if(p.vref){const x=await verReq('readonly',os=>os.get(p.vref));p.items=(x&&x.items)||[];delete p.vref;}}));
+  return bgResolveAsync(d);}
+async function verGc(id){const vs=(await verReq('readonly',os=>os.getAll(verRange(id))))||[];const used=new Set();vs.forEach(v=>{const re=/"vref":"([^"]+)"/g;let m;while((m=re.exec(v.data||'')))used.add(m[1]);});
+  const ks=(await verReq('readonly',os=>os.getAllKeys(IDBKeyRange.bound('vp:'+id+':','vp:'+id+':\uffff'))))||[];for(const k of ks)if(!used.has(k))await verReq('readwrite',os=>os.delete(k));}
 async function verSnap(n,why){
   if(!DB.db||!n||n.kind==='sheet'||!n.pages)return false;const t=Date.now();
-  const {o,recs}=bgStrip(n);await DB.putBgs(recs);const data=JSON.stringify(o,(k,v)=>k[0]==='_'?undefined:v);
-  const ok=await verReq('readwrite',os=>os.put({id:'v:'+n.id+':'+t,t,why,pages:n.pages.length,size:data.length,data}));
+  /* Verze ukládá tahy po stránkách podle otisku obsahu: nezměněná stránka se neukládá znovu,
+     takže verze velké učebnice je rychlá a nezasekne psaní. */
+  const {o,recs}=bgStrip(n);await DB.putBgs(recs);
+  const have=new Set((await verReq('readonly',os=>os.getAllKeys(IDBKeyRange.bound('vp:'+n.id+':','vp:'+n.id+':\uffff'))))||[]);
+  const add=[];o.pages=o.pages.map((q,i)=>{const p=n.pages[i],k='vp:'+n.id+':'+itemsHash(p.items||[]);if(!have.has(k)){have.add(k);add.push({id:k,items:p.items||[]});}const c=Object.assign({},q);delete c.items;delete c.itemsRef;c.vref=k;return c;});
+  const data=JSON.stringify(o,(k,v)=>k[0]==='_'?undefined:v);
+  const ok=await new Promise(res=>{try{const tx=DB.db.transaction('meta','readwrite'),os=tx.objectStore('meta');add.forEach(r=>os.put(r));os.put({id:'v:'+n.id+':'+t,t,why,pages:n.pages.length,size:data.length,data});tx.oncomplete=()=>res(true);tx.onerror=tx.onabort=()=>res(null);}catch(e){res(null);}});
   n._lastSnap=t;
   const keys=(await verReq('readonly',os=>os.getAllKeys(verRange(n.id))))||[];
-  if(keys.length>VER.MAX){keys.sort();for(const k of keys.slice(0,keys.length-VER.MAX))await verReq('readwrite',os=>os.delete(k));}
+  if(keys.length>VER.MAX){keys.sort();for(const k of keys.slice(0,keys.length-VER.MAX))await verReq('readwrite',os=>os.delete(k));verGc(n.id).catch(()=>{});}
   return ok!==null;
 }
-async function verOnOpen(n){const keys=(await verReq('readonly',os=>os.getAllKeys(verRange(n.id))))||[];keys.sort();const last=keys.length?+String(keys[keys.length-1]).split(':').pop():0;n._lastSnap=last;if(Date.now()-last>VER.EVERY&&nb===n)verSnap(n,'Při otevření');}
+async function verOnOpen(n){const keys=(await verReq('readonly',os=>os.getAllKeys(verRange(n.id))))||[];keys.sort();const last=keys.length?+String(keys[keys.length-1]).split(':').pop():0;n._lastSnap=last;if(Date.now()-last>VER.EVERY&&nb===n){const go=()=>{if(nb!==n)return;if(act){setTimeout(go,1500);return;}verSnap(n,'Při otevření');};(window.requestIdleCallback||setTimeout)(go,{timeout:4000});}}
 function verMaybe(){if(nb&&nb.kind!=='sheet'&&Date.now()-(nb._lastSnap||0)>VER.EVERY)verSnap(nb,'Automaticky');}
 const fmtWhen=t=>new Date(t).toLocaleString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
 async function openVersions(){
@@ -4524,7 +4540,7 @@ async function openVersions(){
     const L=el('div',{class:'ver-list'});
     if(!list.length)L.append(el('p',{class:'lib-note'},'Zatím žádné uložené verze.'));
     list.forEach(r=>{const row=el('div',{class:'ver-row'});
-      const th=el('div',{class:'ver-th'});try{const d=bgResolve(JSON.parse(r.data));const p=d.pages[0];p.items=(p.items||[]).map(finalizeLoaded);th.append(pageThumb(p,64));}catch(e){}
+      const th=el('div',{class:'ver-th'});verLoad(r,true).then(d=>{const p=d.pages[0];p.items=(p.items||[]).map(finalizeLoaded);th.append(pageThumb(p,64));}).catch(()=>{});
       const info=el('div',{class:'ver-i'},`<b>${fmtWhen(r.t)}</b><span>${esc(r.why||'')} · ${r.pages} ${r.pages===1?'stránka':r.pages<5?'stránky':'stránek'}</span>`);
       const a=el('button',{class:'btn'},'Kopie');a.title='Otevřít jako nový sešit';a.onclick=()=>verAsCopy(r,b);
       const o=el('button',{class:'btn primary'},'Obnovit');o.onclick=()=>verRestore(r,b);
@@ -4534,13 +4550,13 @@ async function openVersions(){
 }
 async function verRestore(r,b){
   if(!nb)return;const ok=await modal('Obnovit verzi',x=>x.append(el('p',{},'Obnovit sešit do stavu z '+fmtWhen(r.t)+'? Současný stav se předtím uloží jako verze, takže o nic nepřijdete.')),[{label:'Zrušit'},{label:'Obnovit',cls:'primary',value:true}]);
-  if(!ok)return;await verSnap(nb,'Před obnovením');const d=await bgResolveAsync(JSON.parse(r.data));
+  if(!ok)return;await verSnap(nb,'Před obnovením');const d=await verLoad(r);
   nb.pages=d.pages.map(p=>Object.assign(p,{items:(p.items||[]).map(finalizeLoaded)}));nb.audio=d.audio||[];
   H_.undo=[];H_.redo=[];updUndo();pcache.clear();ocrCache.clear();clearSel();layoutPages();clampView();changed();flushSave();render();
   const ov=b.closest('.modal-ov');if(ov)ov.querySelector('.modal-foot .btn').click();toast('Obnoveno – verze z '+fmtWhen(r.t));
 }
 async function verAsCopy(r,b){
-  const d=await bgResolveAsync(JSON.parse(r.data));d.id=uid();d.title=(d.title||'Sešit')+' ('+fmtWhen(r.t)+')';d.created=d.updated=Date.now();d.fav=false;d.trashed=null;
+  const d=await verLoad(r);d.id=uid();d.title=(d.title||'Sešit')+' ('+fmtWhen(r.t)+')';d.created=d.updated=Date.now();d.fav=false;d.trashed=null;
   d.pages.forEach(p=>{p.items=(p.items||[]).map(finalizeLoaded);});await DB.put(d);notebooks.push(d);
   const ov=b.closest('.modal-ov');if(ov)ov.querySelector('.modal-foot .btn').click();toast('Kopie vytvořena v knihovně: '+d.title);
 }
@@ -4724,7 +4740,7 @@ try{navigator.getBattery&&navigator.getBattery().then(b=>{const up=()=>{const lo
    po prvním otevření s internetem pak vše funguje bez připojení.
    ========================================================= */
 function offlineCapable(){return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!/claude/.test(location.hostname);}
-const APP_BUILD='25. 11. 2026 13:32';
+const APP_BUILD='26. 11. 2026 11:38';
 function updateBar(){if($('#updBar'))return;const b=el('div',{class:'upd-bar',id:'updBar',role:'status'},'<span>Je připravená nová verze Spanu</span>');
   const go=el('button',{class:'btn primary'},'Obnovit');go.onclick=async()=>{try{commitText();savePos();await flushSaveNow();}catch(e){}location.reload();};
   const no=el('button',{class:'ib','aria-label':'Později'},ic('close'));no.onclick=()=>b.remove();b.append(go,no);document.body.append(b);}
@@ -4824,10 +4840,15 @@ function makeWelcome(){
   return {id:uid(),title:'Vítejte ve Span',cover:'#2D5BD3',created:Date.now(),updated:Date.now(),pages:[p1,p2]};
 }
 const BGS={id:new Map(),str:new Map(),saved:new Set()};
+/* uložené tahy stránek: stránka → pole tahů, které už v databázi je (pole se při změně vždy nahrazuje novým) */
+const PGS=new WeakMap();
+function pgStrip(n,o){const recs=[];if(!o.pages)return recs;
+  o.pages=o.pages.map((q,i)=>{const p=n.pages[i];if(!p)return q;const key=n.id+':'+p.id,sv=PGS.get(p);if(!sv||sv.i!==p.items||sv.k!==key)recs.push({id:key,items:p.items,page:p});const c=q===p?Object.assign({},p):q;delete c.items;c.itemsRef=1;return c;});
+  if(o===n)throw new Error('pgStrip');return recs;}
 function bgIdOf(str){let id=BGS.id.get(str);if(!id){id='b'+uid();BGS.id.set(str,id);BGS.str.set(id,str);}return id;}
 const bigBg=p=>typeof p.bg==='string'&&p.bg.length>4096;
 /* kopie sešitu pro uložení: místo obrázku pozadí jen odkaz (bgRef) + seznam dosud neuložených obrázků */
-function bgStrip(n){if(!n.pages)return {o:n,recs:[]};const recs=[],seen=new Set();
+function bgStrip(n){if(!n.pages)return {o:Object.assign({},n),recs:[]};const recs=[],seen=new Set();
   const pages=n.pages.map(p=>{if(!bigBg(p))return p;const id=bgIdOf(p.bg);if(!BGS.saved.has(id)&&!seen.has(id)){seen.add(id);recs.push({id,data:p.bg});}const q=Object.assign({},p);delete q.bg;q.bgRef=id;return q;});
   return {o:Object.assign({},n,{pages}),recs};}
 function bgResolve(n){if(n&&n.pages)n.pages.forEach(p=>{if(p.bgRef){const d=BGS.str.get(p.bgRef);if(d)p.bg=d;delete p.bgRef;}});return n;}
@@ -4835,7 +4856,10 @@ async function bgResolveAsync(n){const miss=(n.pages||[]).filter(p=>p.bgRef&&!BG
   if(miss.length&&DB.db)await new Promise(res=>{try{const tx=DB.db.transaction('bg','readonly'),os=tx.objectStore('bg');miss.forEach(id=>os.get(id).onsuccess=e=>{const r=e.target.result;if(r){BGS.str.set(r.id,r.data);BGS.id.set(r.data,r.id);BGS.saved.add(r.id);}});tx.oncomplete=tx.onerror=tx.onabort=()=>res();}catch(e){res();}});
   return bgResolve(n);}
 /* úklid: obrázky pozadí, na které už nic neodkazuje (smazané stránky a sešity) */
-async function bgCleanup(){if(!DB.db)return;const used=new Set();notebooks.forEach(n=>(n.pages||[]).forEach(p=>{if(bigBg(p)){const id=BGS.id.get(p.bg);if(id)used.add(id);}}));
+async function pgCleanup(){if(!DB.db)return;const live=new Set();notebooks.forEach(n=>(n.pages||[]).forEach(p=>live.add(n.id+':'+p.id)));
+  const keys=await new Promise(res=>{try{const r=DB.os('readonly','pg').getAllKeys();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}catch(e){res([]);}});
+  const dead=keys.filter(k=>!live.has(k));if(dead.length)await new Promise(res=>{try{const tx=DB.db.transaction('pg','readwrite'),os=tx.objectStore('pg');dead.forEach(k=>os.delete(k));tx.oncomplete=tx.onerror=tx.onabort=()=>res();}catch(e){res();}});}
+async function bgCleanup(){if(!DB.db)return;pgCleanup().catch(()=>{});const used=new Set();notebooks.forEach(n=>(n.pages||[]).forEach(p=>{if(bigBg(p)){const id=BGS.id.get(p.bg);if(id)used.add(id);}}));
   const vers=await new Promise(res=>{try{const r=DB.os('readonly','meta').getAll(IDBKeyRange.bound('v:','v:￿'));r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}catch(e){res([]);}});
   vers.forEach(v=>{const re=/"bgRef":"([^"]+)"/g;let m;while((m=re.exec(v.data||'')))used.add(m[1]);});
   const keys=await new Promise(res=>{try{const r=DB.os('readonly','bg').getAllKeys();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}catch(e){res([]);}});
