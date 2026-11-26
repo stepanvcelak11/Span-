@@ -363,10 +363,6 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .rec-p{grid-column:1/-1;width:100%;accent-color:var(--accent-2)}
 .calc-chip{position:absolute;z-index:7;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;border-radius:18px;border:0;background:var(--accent-2);color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.25);animation:pop .18s ease-out}
 .calc-chip svg{width:18px;height:18px}
-.circ-chip{position:absolute;z-index:7;display:inline-flex;gap:2px;padding:3px;border-radius:20px;background:var(--bar);border:1px solid var(--bar-line);box-shadow:0 6px 18px rgba(0,0,0,.25);animation:pop .18s ease-out}
-.circ-chip button{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 9px;border-radius:17px;border:0;background:transparent;color:var(--bar-ink);font:inherit;font-size:13.5px;font-weight:600}
-.circ-chip button:first-child{background:var(--accent-2);color:#fff}
-.circ-chip svg{width:17px;height:17px}
 .endadd{position:absolute;z-index:3;display:flex;gap:8px;left:0;top:0;will-change:transform}
 .endadd.vert{flex-direction:column}
 .endadd button{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 16px 0 12px;border-radius:20px;border:1px dashed var(--bar-line);background:var(--bar);color:var(--bar-ink);font:inherit;font-size:14px;font-weight:600;opacity:.92;box-shadow:var(--shadow)}
@@ -1259,7 +1255,7 @@ function render(){
     drawPage(c,p,{vis:[-m[4]/z,-m[5]/z,(W-m[4])/z,(H-m[5])/z],exclude:sel&&sel.page===p?sel.ids:null,editId:editing&&editing.page===p?editing.id:null});
     c.restore();
   }
-  posEndAdd(); posCircChip(); drawOverlay(); updatePageInd(); if(!fastMode){warmNeighbors();posLater();} if(editing)positionTA(); if(ZB.on&&!ZB.act)zbRender(); if(calcState)positionCalc(); if($('#calcChip'))hideCalcChip(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
+  posEndAdd(); drawOverlay(); updatePageInd(); if(!fastMode){warmNeighbors();posLater();} if(editing)positionTA(); if(ZB.on&&!ZB.act)zbRender(); if(calcState)positionCalc(); if($('#calcChip'))hideCalcChip(); if(sel&&!(act&&act.type==='seldrag'))showSelBar();
 }
 function pageShadow(c,x,y,w,h){if(document.body.classList.contains('dark-ui')){c.fillStyle='rgba(255,255,255,.07)';c.fillRect(x-1,y-1,w+2,h+2);return;}
   c.fillStyle='rgba(18,28,56,.05)';c.fillRect(x-3,y-1,w+6,h+7);c.fillStyle='rgba(18,28,56,.07)';c.fillRect(x-1.5,y,w+3,h+4);c.fillStyle='rgba(18,28,56,.10)';c.fillRect(x-.5,y,w+1,h+1.5);}
@@ -1366,7 +1362,7 @@ let wAcc=0,wLast=0;
 
 function onDown(e){
   if(e.target.closest('.selbar,textarea,.pages,.endadd,.zenbtn'))return;
-  hideCircChip();if(T.tmpPrev&&tmpT&&e.pointerType!=='touch'){clearTimeout(tmpT);tmpT=0;}
+  if(T.tmpPrev&&tmpT&&e.pointerType!=='touch'){clearTimeout(tmpT);tmpT=0;}
   closePops();
   stageRect=stage.getBoundingClientRect();
   if(e.pointerType==='pen'){lastPen=performance.now();if(!S.penSeen){S.penSeen=true;saveS();setTimeout(()=>{if(!S.zen&&!S.zenTip){S.zenTip=1;saveS();toast('Tip: dvojklepem prstem skryjete všechny lišty – vše pak ovládáte perem a kolečkem.');}},1500);}}
@@ -1769,7 +1765,7 @@ function commitDraw(a){
   snapItems(a.page); a.page.items=a.page.items.concat([it]); drawOnMain(a.page,it); changed();
   recentStrokes.push({page:a.page,it,t:performance.now()});
   if(T.tmpPrev)tmpReturn(S.tmpDelay??2500);if(recentStrokes.length>4)recentStrokes.shift();
-  if(it.k==='sh')checkFrame(a.page,it);else checkCircle(a.page,it,H_.undo.length);
+  if(it.k==='sh')checkFrame(a.page,it);
 }
 function commitShape(a){
   let pts=a.kind==='auto'?(recognize(a.raw)||(a.raw.length>1&&dist(a.a,a.b)>4?genShape('line',a.a,a.b):null)):(dist(a.a,a.b)>3?genShape(a.kind,a.a,a.b):null);
@@ -2282,36 +2278,6 @@ function setOrient(pages,land){const ok=pages.filter(p=>!p.bg&&(p.w>p.h)!==land)
   const cut=ok.some(p=>p.items.some(it=>{const g=getBounds(it);return g[2]>p.w+2||g[3]>p.h+2;}));
   toast((land?'Na šířku':'Na výšku')+(cut?' – část obsahu je mimo stránku, posuňte ji lasem (Zpět vrátí)':''));}
 
-/* zakroužkování perem → nabídka Vybrat / Kopírovat (bez přepnutí na laso) */
-let circ=null,circT=0;
-function hideCircChip(){if(!circ)return;circ=null;clearTimeout(circT);const c=$('#circChip');if(c)c.remove();}
-function posCircChip(){if(!circ)return;const c=$('#circChip');if(!c)return;const p=circ.page,b=circ.it.bb;c.style.left=Math.round((p._left+b[2])*z+ox-10)+'px';c.style.top=Math.round((p._top+b[1])*z+oy-22)+'px';}
-function checkCircle(page,it,uLen){
-  if(S.circSel===false||it.k==='hl'||it.t!=='s')return;
-  const p=it.p,n=p.length;if(n<10)return;
-  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,L=0;for(let i=0;i<n;i++){const q=p[i];x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);if(i)L+=dist(p[i-1],q);}
-  const diag=Math.hypot(x1-x0,y1-y0);if(diag*z<40)return;
-  /* uzavřená smyčka: konec blízko začátku (nebo se tah sám překříží) */
-  let closed=dist(p[0],p[n-1])<Math.max(18,diag*0.28);
-  if(!closed){for(let i=n-1;i>n*0.75&&!closed;i-=2)for(let j=0;j<n*0.25;j+=2)if(dist(p[i],p[j])<Math.max(8,diag*0.06)){closed=true;break;}}
-  if(!closed||L<diag*1.9)return;
-  const poly=p.map(q=>[q[0],q[1]]);
-  const ids=[];for(const o of page.items){if(o===it)continue;
-    if(o.t==='s'){const q=o.p,st=Math.max(1,Math.floor(q.length/30));let m=0,k=0;for(let i=0;i<q.length;i+=st){m++;if(inPoly(q[i][0],q[i][1],poly))k++;}if(m&&k/m>=0.75)ids.push(o.id);}
-    else{const g=getBounds(o);if(inPoly((g[0]+g[2])/2,(g[1]+g[3])/2,poly))ids.push(o.id);}}
-  if(!ids.length)return;
-  hideCircChip();hideCalcChip();
-  circ={page,it,ids,uLen};
-  const c=el('div',{class:'circ-chip',id:'circChip'});
-  const go=copy=>{const C=circ;hideCircChip();if(!C||!pageById(C.page.id))return;
-    const pg=C.page;if(H_.undo.length===C.uLen){H_.undo.pop();updUndo();}else snapItems(pg);
-    pg.items=pg.items.filter(o=>o.id!==C.it.id);pcache.delete(pg.id);changed();
-    const keep=C.ids.filter(id=>pg.items.some(o=>o.id===id));if(!keep.length){render();return;}
-    makeSel(pg,keep);if(copy)copySel(false);else toast('Vybráno – táhněte pro přesun');};
-  const b1=el('button',{},ic('sel')+'Vybrat');b1.onclick=()=>go(false);
-  const b2=el('button',{},ic('copy')+'Kopírovat');b2.onclick=()=>go(true);
-  c.append(b1,b2);$('#editor').append(c);posCircChip();circT=setTimeout(hideCircChip,4500);
-}
 function delPage(i){if(nb.pages.length<2){toast('Sešit musí mít alespoň jednu stránku');return;}clearSel();snapPages();nb.pages=nb.pages.filter((_,k)=>k!==i);layoutPages();clampView();changed();render();renderPanel();}
 function dupPage(i){snapPages();const src=nb.pages[i];const p=Object.assign({},src,{id:uid(),items:src.items.map(it=>Object.assign({},it,{id:uid()}))});nb.pages=nb.pages.slice(0,i+1).concat([p],nb.pages.slice(i+1));layoutPages();changed();render();renderPanel();}
 function movePage(i,d){const j=i+d;if(j<0||j>=nb.pages.length)return;snapPages();const a=nb.pages.slice();[a[i],a[j]]=[a[j],a[i]];nb.pages=a;layoutPages();changed();render();renderPanel();}
@@ -4366,7 +4332,6 @@ async function openSettings(){
     const c4=el('label',{class:'check'});const cb4=el('input',{type:'checkbox',id:'calcFr'});cb4.checked=S.calcFrames;cb4.onchange=()=>{S.calcFrames=cb4.checked;saveS();};c4.append(cb4,document.createTextNode('Nabídnout výpočet, když příklad orámuji'));b.append(c4);
     const c2=el('label',{class:'check'});const cb2=el('input',{type:'checkbox',id:'twoTap'});cb2.checked=S.twoTapUndo;cb2.onchange=()=>{S.twoTapUndo=cb2.checked;saveS();};c2.append(cb2,document.createTextNode('Klepnutí dvěma prsty = Zpět, třemi = Znovu'));b.append(c2);
     const c5=el('label',{class:'check'});const cb5=el('input',{type:'checkbox'});cb5.checked=S.scribble!==false;cb5.onchange=()=>{S.scribble=cb5.checked;saveS();};c5.append(cb5,document.createTextNode('Čmáranice přes napsané ho smaže (bez přepínání na gumu)'));b.append(c5);
-    const c7=el('label',{class:'check'});const cb7=el('input',{type:'checkbox'});cb7.checked=S.circSel!==false;cb7.onchange=()=>{S.circSel=cb7.checked;saveS();};c7.append(cb7,document.createTextNode('Zakroužkování perem nabídne Vybrat / Kopírovat (posun bez lasa)'));b.append(c7);
     b0.append(el('p',{class:'shint app-ver'},'Verze aplikace: '+(APP_BUILD.startsWith('__')?'vývojová':APP_BUILD)));
     {/* diagnostika okna – pomáhá zjistit, odkud je prázdný proužek nahoře */
      const pr=el('div',{style:'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:1px;visibility:hidden'});document.body.append(pr);const st=Math.round(pr.getBoundingClientRect().height);pr.remove();
@@ -4382,7 +4347,6 @@ function openHelp(){
 <li><b>Kolečko nástrojů:</b> přiložte pero a chvíli ho nechte stát. Kolem hrotu se objeví kolečko – přejeďte perem na nástroj, barvu nebo tloušťku a zvedněte. Boční tlačítko pera otevře kolečko okamžitě.</li>
 <li><b>Čistá obrazovka:</b> dvojklep prstem (nebo klávesa F, nebo ⋯ → Čistá obrazovka) skryje všechny lišty. Zůstane jen malé průhledné tlačítko – tažením ho přesunete, klepnutím otevřete <i>panel ovládání</i> s nástroji, barvami, tloušťkami, stránkami a nastavením. Panel jde dát i do kolečka nebo na boční tlačítko pera (Nastavení → Ovládání perem).</li>
 <li><b>Písmeno = nástroj:</b> napište samostatné velké písmeno a pero na konci chvilku podržte – <b>G</b> guma, <b>F</b> fix, <b>L</b> laso, <b>P</b> pero, <b>Z</b> zvýrazňovač, <b>T</b> text. Písmeno zmizí. Přiřazení změníte v Nastavení → Ovládání perem.</li>
-<li><b>Zakroužkování:</b> perem zakroužkujte napsané – objeví se Vybrat / Kopírovat, kruh pak zmizí. Prázdný kruh zůstane obyčejným kruhem.</li>
 <li><b>Stránky na šířku:</b> pod poslední stránkou jsou tlačítka Přidat stránku / Na šířku; otočení stávající stránky je v ⋯.</li>
 <li><b>Přesný tvar:</b> nakreslete kruh, čáru, obdélník nebo trojúhelník a na konci pero podržte – tah se srovná.</li>
 <li><b>Přesun objektů:</b> nástroj Laso – zakroužkujte, pak táhněte, zvětšujte za rohy a otáčejte horním úchytem. Přetažením na jinou stránku objekt přesunete tam.</li>
