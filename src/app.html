@@ -582,6 +582,28 @@ html:has(body.dark-ui){background:#0E0E10}
 .rad-add .chip svg{width:16px;height:16px}
 body.no-tools .fbar.fc{display:none}
 body.no-pal #vpal{display:none!important}
+/* čistá obrazovka: žádné lišty, jen malé plovoucí tlačítko (lze přesunout) */
+body.zen #editor .fbar{display:none}
+body.zen #vpal{display:none!important}
+.zenbtn{position:absolute;z-index:6;width:44px;height:44px;border-radius:50%;border:1px solid var(--bar-line);background:var(--bar);color:var(--bar-ink);display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);opacity:.55;touch-action:none;transition:opacity .25s}
+.zenbtn:hover,.zenbtn.drag{opacity:.95}
+.zenbtn svg{width:22px;height:22px}
+.zenbtn .zdot{position:absolute;right:5px;bottom:5px;width:11px;height:11px;border-radius:50%;border:2px solid var(--bar)}
+body.zen .zenbtn.on{display:flex}
+#editor.drawing .zenbtn{opacity:.12;pointer-events:none}
+.zpanel{display:flex;flex-direction:column;gap:10px;padding:10px;min-width:280px;max-width:min(360px,92vw)}
+.zpanel .zrow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.zpanel .zb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:12px;border:0;background:var(--bar-2,rgba(127,127,127,.12));color:inherit;font:inherit;font-size:11px;line-height:1.15;text-align:center}
+.zpanel .zb svg{width:22px;height:22px}
+.zpanel .zb[aria-pressed="true"]{background:var(--accent-2);color:#fff}
+.zpanel .zcols{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.zpanel .zcols button{width:28px;height:28px;border-radius:50%;border:0;box-shadow:0 0 0 1.5px rgba(127,127,127,.35)}
+.zpanel .zcols button[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--bar),0 0 0 4.5px var(--accent-2)}
+.zpanel .zh{font-size:11.5px;font-weight:600;opacity:.6;margin:2px 2px -4px;text-transform:uppercase;letter-spacing:.04em}
+.zpanel .zsz{display:flex;gap:6px;justify-content:center}
+.zpanel .zsz button{width:40px;height:34px;border-radius:10px;border:0;background:var(--bar-2,rgba(127,127,127,.12));display:flex;align-items:center;justify-content:center}
+.zpanel .zsz button[aria-pressed="true"]{background:var(--accent-2)}
+.zpanel .zsz i{display:block;border-radius:50%;background:currentColor}
 .upd-bar{position:fixed;z-index:85;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:8px 8px 8px 18px;border-radius:16px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);font-weight:600;animation:toastIn .26s var(--ease-out)}
 .upd-bar .btn{height:38px}
 .app-ver{text-align:center;margin:4px 0 0}
@@ -626,6 +648,7 @@ body.no-pal #vpal{display:none!important}
       <textarea id="ta" hidden spellcheck="false" aria-label="Text"></textarea>
       <div class="selbar" id="selbar" hidden></div>
       <div class="endadd" id="endAdd" hidden></div>
+      <button class="zenbtn" id="zenBtn" title="Ovládání (čistá obrazovka)" aria-label="Ovládání"></button>
       <aside class="pages" id="pages" aria-label="Stránky">
         <div class="pages-head"><span>Stránky</span><button class="ib" id="bGrid" title="Přehled stránek" aria-label="Přehled stránek"></button><button class="ib" id="bMarks" title="Jen záložky" aria-pressed="false"></button><button class="ib" id="bPagesClose" aria-label="Zavřít"></button></div>
         <div class="pages-list" id="pagesList"></div>
@@ -754,6 +777,8 @@ const PDFJS_W='lib/pdf.worker.min.js';
 
 /* ---------- ikony ---------- */
 const IC={
+ zen:'<path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/>',
+ ctl:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/>',
  battery:'<rect x="2.5" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3M6 10v4M9.5 10v4"/>',
  moon:'<path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/>',
  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
@@ -1160,7 +1185,7 @@ function flipAfterPan(vx){const i=curPageIndex(),st=spread()?2:1;let t=i-(i%st);
   flipTo(t);}
 function setLayout(m){const i=nb?curPageIndex():0;S.layout=m;saveS();if(!nb)return;layoutPages();z=fitZoom();if(HL()){flipTo(i,false);}else{ox=W/2;goToPage(i);}toast(m==='h'?'Listování po stránkách – táhněte prstem do stran':'Svislé posouvání stránek');}
 function resize(){
-  if(!nb)return;
+  if(!nb)return;if(S.zen)requestAnimationFrame(posZen);
   const r={width:stage.clientWidth,height:stage.clientHeight}; if(r.width<10)return;
   const first=!W; W=r.width; H=r.height; dpr=Math.min(window.devicePixelRatio||1,ECO()?1.5:3);
   for(const c of [board,live]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);c.style.width=W+'px';c.style.height=H+'px';}
@@ -1338,11 +1363,11 @@ stage.addEventListener('wheel',e=>{e.preventDefault();stageRect=stage.getBoundin
 let wAcc=0,wLast=0;
 
 function onDown(e){
-  if(e.target.closest('.selbar,textarea,.pages,.endadd'))return;
+  if(e.target.closest('.selbar,textarea,.pages,.endadd,.zenbtn'))return;
   hideCircChip();
   closePops();
   stageRect=stage.getBoundingClientRect();
-  if(e.pointerType==='pen'){lastPen=performance.now();if(!S.penSeen){S.penSeen=true;saveS();}}
+  if(e.pointerType==='pen'){lastPen=performance.now();if(!S.penSeen){S.penSeen=true;saveS();setTimeout(()=>{if(!S.zen&&!S.zenTip){S.zenTip=1;saveS();toast('Tip: dvojklepem prstem skryjete všechny lišty – vše pak ovládáte perem a kolečkem.');}},1500);}}
   cancelInertia();
   const [sx,sy]=sp(e);
   if(e.pointerType==='touch'&&isPalm(e)){palmIds.add(e.pointerId);return;}
@@ -1428,7 +1453,7 @@ function touchUp(){
       if(!gest.moved&&dt<380&&S.twoTapUndo&&performance.now()-lastPen>400){if(gest.fingers>=3)redo();else undo();}
       gest=null;if(!settleZoom())endFast();
     }
-  }else if(gest.type==='pan'){clearTimeout(lpTimer);if(!gest.moved&&performance.now()-gest.t0<350)tapAt(gest.lx,gest.ly);if(gest.moved&&hFits())flipAfterPan(performance.now()-gest.lt<80?gest.vx:0);else if(!(gest.moved&&performance.now()-gest.lt<60&&startInertia(gest.vx,gest.vy)))endFast();gest=null;}
+  }else if(gest.type==='pan'){clearTimeout(lpTimer);if(!gest.moved&&performance.now()-gest.t0<350){if(!dblTapCheck(gest.lx,gest.ly))tapAt(gest.lx,gest.ly);}if(gest.moved&&hFits())flipAfterPan(performance.now()-gest.lt<80?gest.vx:0);else if(!(gest.moved&&performance.now()-gest.lt<60&&startInertia(gest.vx,gest.vy)))endFast();gest=null;}
 }
 function startInertia(vx,vy){
   if(Math.hypot(vx,vy)<0.25)return false;
@@ -1452,14 +1477,19 @@ function beginAct(e,sx,sy){
   const ptype=e.pointerType;
   if(radial.open){radialTap(sx,sy);return;}
   if(editing){commitText();return;}
-  if((ptype==='mouse'&&e.button===2)||(ptype==='pen'&&(e.buttons&2))){   // pravé tlačítko / boční tlačítko pera
+  let btnTool=null;
+  if(ptype==='pen'&&(e.buttons&2)&&S.penBtn&&S.penBtn!=='radial'){      // boční tlačítko pera – vlastní akce
+    const pb=S.penBtn;
+    if(pb==='undo'||pb==='redo'||pb==='ctl'||pb==='zen'){act={type:'none',pointerId:e.pointerId,ptype,sx0:sx,sy0:sy,t0:performance.now(),far:true};if(pb==='undo')undo();else if(pb==='redo')redo();else if(pb==='zen')setZen(!S.zen);else{radial.cx=sx;radial.cy=sy;openCtl(radAnchor());}vibrate(8);return;}
+    btnTool=pb;
+  }else if((ptype==='mouse'&&e.button===2)||(ptype==='pen'&&(e.buttons&2))){   // pravé tlačítko / boční tlačítko pera
     openRadial(sx,sy);act={type:'radial',pointerId:e.pointerId,ptype,sx0:sx,sy0:sy,moved:false,far:true};return;
   }
   const rh=rulerHit(sx,sy);if(rh){act=startRulerAct(rh,sx,sy,e);return;}
   const base={pointerId:e.pointerId,ptype,sx0:sx,sy0:sy,t0:performance.now(),far:false};
   if(sel){const h=selHit(sx,sy);if(h){startSelDrag(h,sx,sy,e);return;}clearSel();
     if(T.tool!=='lasso'){act=Object.assign(base,{type:'none'});armHold();return;}}
-  let tool=T.tool; if(ptype==='pen'&&(e.buttons&32))tool='eraser';
+  let tool=btnTool||T.tool; if(ptype==='pen'&&(e.buttons&32))tool=S.penEnd==='lasso'?'lasso':'eraser';
   const page=pageAtWorld((sx-ox)/z,(sy-oy)/z);
   base.page=page; base.tool=tool;
   if(tool==='laser'){act=Object.assign(base,{type:'laser',far:true});laserAdd(sx,sy);return;}
@@ -1823,7 +1853,10 @@ const sizeTool=()=>SIZES[T.tool]?T.tool:'pen';
 const curColor=()=>(T[T.tool]&&T[T.tool].color)||T.pen.color;
 const curSize=()=>T[sizeTool()].size;
 /* vlastní obsah kolečka (Nastavení → Kolečko nástrojů) */
-const RAD_ALL=[['pen','Pero'],['hl','Zvýrazňovač'],['eraser','Guma'],['lasso','Laso'],['shape','Tvary'],['text','Text'],['tape','Páska'],['laser','Laser'],['undo','Zpět'],['redo','Znovu']];
+const RAD_ALL=[['pen','Pero'],['hl','Zvýrazňovač'],['eraser','Guma'],['lasso','Laso'],['shape','Tvary'],['text','Text'],['tape','Páska'],['laser','Laser'],['undo','Zpět'],['redo','Znovu'],['ctl','Ovládání'],['zen','Čistá obrazovka'],['addpg','Nová stránka'],['pages','Přehled stránek'],['back','Knihovna'],['ruler','Pravítko'],['finger','Psaní prstem'],['image','Obrázek'],['fit','Na šířku obrazovky'],['more','Další volby']];
+/* akce (ne nástroje), které jde dát do kolečka */
+const RAD_ACT={ctl:['ctl','Ovládání',()=>openCtl(radAnchor())],zen:['zen','Čistá obrazovka',()=>setZen(!S.zen)],addpg:['plus','Nová stránka',()=>addPage()],pages:['grid','Přehled stránek',()=>openPageGrid()],back:['back','Knihovna',()=>closeNotebook()],ruler:['ruler','Pravítko',()=>toggleRuler()],finger:['hand','Psaní prstem',()=>$('#bFinger').click()],image:['image','Obrázek',()=>$('#fImg').click()],fit:['fit','Na šířku obrazovky',()=>{fitWidth(true);render();}],more:['more','Další volby',()=>moreMenu(radAnchor())]};
+function radAnchor(){let a=$('#radAnchor');if(!a){a=el('div',{id:'radAnchor',style:'position:fixed;width:2px;height:2px;pointer-events:none'});document.body.append(a);}const R=stage.getBoundingClientRect();a.style.left=(R.left+(radial.cx||W/2))+'px';a.style.top=(R.top+(radial.cy||H/2))+'px';return a;}
 const radItems=()=>Array.isArray(S.radItems)&&S.radItems.length?S.radItems:['pen','hl','eraser','lasso','shape','text','undo','redo'];
 const radK=()=>clamp(S.radScale||1,0.6,1.4);
 function openRadial(x,y){
@@ -1834,7 +1867,8 @@ function openRadial(x,y){
   renderRadial();
 }
 function radBuild(withPaste){
-  const inner=radItems().map(id=>id==='undo'?{kind:'undo',label:'Zpět',icon:'undo'}:id==='redo'?{kind:'redo',label:'Znovu',icon:'redo'}:{kind:'tool',id,label:TOOL_N[id],icon:IC[id]?id:'pen'});
+  const ids=radItems().slice();if(S.zen&&S.zenHandle===false&&!ids.includes('ctl')&&!ids.includes('zen'))ids.push('ctl');
+  const inner=ids.map(id=>id==='undo'?{kind:'undo',label:'Zpět',icon:'undo'}:id==='redo'?{kind:'redo',label:'Znovu',icon:'redo'}:RAD_ACT[id]?{kind:'act',id,label:RAD_ACT[id][1],icon:RAD_ACT[id][0]}:{kind:'tool',id,label:TOOL_N[id],icon:IC[id]?id:'pen'});
   if(withPaste&&clip&&clip.length)inner.push({kind:'paste',label:'Vložit',icon:'paste'});
   const cols=favList().slice(0,S.radColors??8).map(c=>({kind:'color',c,label:'Barva'})),szs=S.radSizes===false?[]:SIZES[sizeTool()].map((v,i)=>({kind:'size',v,i,label:'Tloušťka '+(i+1)}));
   let outer=S.radOuter==='sizes'?szs.concat(cols):cols.concat(szs);if(!outer.length)outer=[{kind:'none',label:''}];
@@ -1858,6 +1892,7 @@ function radialApply(h){
   if(it.kind==='tool')setTool(it.id);
   else if(it.kind==='undo')undo(); else if(it.kind==='redo')redo();
   else if(it.kind==='paste')pasteAt(radial.ox,radial.oy);
+  else if(it.kind==='act'){const f=RAD_ACT[it.id][2];radAnchor();setTimeout(f,0);}
   else if(it.kind==='color'){if(!['pen','hl','shape','text'].includes(T.tool))setTool('pen');setColor(it.c);}
   else if(it.kind==='size')setSize(it.v);
   vibrate(6);
@@ -1933,6 +1968,7 @@ function bumpFav(c){
 }
 const lum=hex=>{const h=hex.replace('#','');if(h.length<6)return 1;const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255;return 0.2126*r+0.7152*g+0.0722*b;};
 function updateToolbar(){
+  if(S.zen)posZen();
   const dk=document.body.classList.contains('dark-ui'),col=['pen','hl','shape','text'].includes(T.tool)?curColor():null,L=col?lum(col):0,tc=!col||(dk?L<0.2:L>0.62)?'var(--bar-ink)':col;
   document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===T.tool;if(b.getAttribute('aria-pressed')!==String(on))b.setAttribute('aria-pressed',String(on));b.style.setProperty('--tool-c',on?tc:'var(--bar-ink)');});
   $('#bRuler').setAttribute('aria-pressed',String(ruler.on));$('#bZoom').setAttribute('aria-pressed',String(ZB.on));$('#bFinger').setAttribute('aria-pressed',String(fingerDraws()));
@@ -4121,8 +4157,45 @@ function radSettings(b){
   slider(b,'Jak dlouho se zastavit u položky',80,400,20,S.radSnakeMs||160,v=>v+' ms',v=>{S.radSnakeMs=v;saveS();});
   draw();
 }
-/* skrytí okrajových lišt – vše jde ovládat kolečkem */
-function applyBars(){document.body.classList.toggle('no-tools',!!S.hideTools);document.body.classList.toggle('no-pal',!!S.hidePal);}
+/* ---------- čistá obrazovka a panel ovládání ---------- */
+let lastTap=null;
+function dblTapCheck(x,y){
+  const act_=S.dblTap||'zen';if(act_==='off')return false;
+  const now=performance.now(),l=lastTap;lastTap={x,y,t:now};
+  if(!l||now-l.t>330||Math.hypot(x-l.x,y-l.y)>45)return false;
+  lastTap=null;vibrate(8);
+  if(act_==='zen')setZen(!S.zen);else if(act_==='ctl'){radial.cx=x;radial.cy=y;openCtl(radAnchor());}else if(act_==='fit'){fitWidth(true);render();}else if(act_==='undo')undo();
+  return true;
+}
+function setZen(on,quiet){S.zen=!!on;if(on&&!S.radial)S.radial=true;saveS();applyBars();posZen();
+  if(!quiet)toast(on?(S.zenHandle===false?'Čistá obrazovka – ovládání v kolečku (podržte pero) nebo dvojklepem prstu':'Čistá obrazovka – ovládání pod plovoucím tlačítkem, lišty vrátíte dvojklepem prstu'):'Lišty zobrazeny');}
+function posZen(){const b=$('#zenBtn');if(!b)return;b.classList.toggle('on',!!S.zen&&S.zenHandle!==false);
+  const P=S.zenPos||{x:1,y:0.5};const w=W||innerWidth,h=H||innerHeight;b.style.left=Math.round(clamp(P.x*(w-44),6,w-50))+'px';b.style.top=Math.round(clamp(P.y*(h-44),6,h-50))+'px';
+  b.innerHTML=ic('ctl')+`<i class="zdot" style="background:${curColor()}"></i>`;}
+function zenBtnInit(){const b=$('#zenBtn');let d=null;
+  b.addEventListener('pointerdown',e=>{e.stopPropagation();d={x0:e.clientX,y0:e.clientY,l:b.offsetLeft,t:b.offsetTop,moved:false,id:e.pointerId};try{b.setPointerCapture(e.pointerId);}catch(_){}});
+  b.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;if(!d.moved&&Math.hypot(dx,dy)<7)return;d.moved=true;b.classList.add('drag');
+    b.style.left=clamp(d.l+dx,6,W-50)+'px';b.style.top=clamp(d.t+dy,6,H-50)+'px';});
+  const up=e=>{if(!d||e.pointerId!==d.id)return;const m=d.moved;d=null;b.classList.remove('drag');
+    if(m){S.zenPos={x:clamp(b.offsetLeft/Math.max(1,W-44),0,1),y:clamp(b.offsetTop/Math.max(1,H-44),0,1)};saveS();}else openCtl(b);};
+  b.addEventListener('pointerup',up);b.addEventListener('pointercancel',e=>{d=null;b.classList.remove('drag');});}
+/* Panel ovládání – vše důležité na jednom místě, otevře se z plovoucího tlačítka, kolečka, bočního tlačítka pera nebo dvojklepem */
+function openCtl(anchor){
+  openPop(anchor,p=>{const P=el('div',{class:'zpanel'});
+    const zb=(icn,l,fn,on)=>{const b=el('button',{class:'zb','aria-pressed':String(!!on)},ic(icn)+'<span>'+esc(l)+'</span>');b.onclick=()=>{closePops();fn();};return b;};
+    const row=(...bs)=>{const r=el('div',{class:'zrow'});r.append(...bs);P.append(r);};
+    P.append(el('div',{class:'zh'},'Nástroje'));
+    row(...['pen','hl','eraser','lasso','shape'].map(t=>zb(t,TOOL_N[t].split(' ')[0],()=>{setTool(t);posZen();},T.tool===t)));
+    row(...['text','tape','laser'].map(t=>zb(t,TOOL_N[t],()=>{setTool(t);posZen();},T.tool===t)),zb('ruler','Pravítko',toggleRuler,ruler.on),zb('gear','Možnosti',()=>setTimeout(()=>openToolOptions(T.tool,anchor.isConnected?anchor:$('#zenBtn')),0)));
+    if(['pen','hl','shape','text'].includes(T.tool)){P.append(el('div',{class:'zh'},'Barva a tloušťka'));
+      const cs=el('div',{class:'zcols'});favList().slice(0,10).forEach(c=>{const b=el('button',{'aria-pressed':String(c.toLowerCase()===curColor().toLowerCase()),'aria-label':'Barva',style:'background:'+c});b.onclick=()=>{setColor(c);posZen();cs.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));};cs.append(b);});P.append(cs);
+      if(SIZES[sizeTool()]){const sz=el('div',{class:'zsz'});SIZES[sizeTool()].forEach((v,i)=>{const b=el('button',{'aria-pressed':String(Math.abs(v-curSize())<0.01),'aria-label':'Tloušťka '+(i+1)},`<i style="width:${4+i*3}px;height:${4+i*3}px"></i>`);b.onclick=()=>{setSize(v);sz.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));};sz.append(b);});P.append(sz);}}
+    P.append(el('div',{class:'zh'},'Sešit'));
+    row(zb('undo','Zpět',undo),zb('redo','Znovu',redo),zb('plus','Nová stránka',()=>addPage()),zb('grid','Stránky',openPageGrid),zb('back','Knihovna',closeNotebook));
+    row(zb('hand',fingerDraws()?'Prst píše':'Jen pero',()=>$('#bFinger').click(),fingerDraws()),zb('fit','Na šířku',()=>{fitWidth(true);render();}),zb('zen',S.zen?'Zobrazit lišty':'Čistá obrazovka',()=>setZen(!S.zen),S.zen),zb('more','Další volby',()=>setTimeout(()=>moreMenu(anchor.isConnected?anchor:$('#bMore')),0)),zb('gear','Nastavení',openSettings));
+    p.append(P);});
+}
+function applyBars(){document.body.classList.toggle('no-tools',!!S.hideTools);document.body.classList.toggle('no-pal',!!S.hidePal);document.body.classList.toggle('zen',!!S.zen);posZen();}
 function setBars(tools,pal){S.hideTools=tools;S.hidePal=pal;if((tools||pal)&&!S.radial){S.radial=true;toast('Kolečko nástrojů zapnuto – nástroje teď vybíráte podržením pera');}saveS();applyBars();}
 async function openSettings(){
   await modal('Nastavení',b0=>{
@@ -4134,15 +4207,23 @@ async function openSettings(){
     grp('Baterie','battery');
     const fb=el('div',{class:'field'},'<span>Úsporný režim</span>');chips(fb,[['auto','Automaticky pod 20 %'],['on','Zapnuto'],['off','Vypnuto']],S.eco||'auto',v=>{S.eco=v;saveS();applyEco();});b.append(fb);
     b.append(el('p',{class:'shint'},'Úsporný režim kreslí plátno v nižším rozlišení, vypne animace a nechá obrazovku normálně zhasnout. Jinak se obrazovka drží rozsvícená jen během psaní (2,5 min od posledního dotyku).'));
+    grp('Ovládání perem a čistá obrazovka','ctl');
+    toggle(b,'Čistá obrazovka – skrýt všechny lišty, nic nepřekáží (zkratka: dvojklep prstem, klávesa F)',!!S.zen,v=>setZen(v,true));
+    toggle(b,'V čisté obrazovce ukazovat malé plovoucí tlačítko ovládání (přesunete ho tažením)',S.zenHandle!==false,v=>{S.zenHandle=v;saveS();posZen();});
+    {const f=el('label',{class:'field'},'<span>Boční tlačítko pera</span>');const sl=el('select');[['radial','Otevře kolečko (výchozí)'],['eraser','Guma – dokud ho držíte'],['lasso','Laso – dokud ho držíte'],['hl','Zvýrazňovač – dokud ho držíte'],['ctl','Panel ovládání'],['undo','Zpět'],['zen','Zapnout / vypnout lišty']].forEach(([v,l])=>sl.append(new Option(l,v,false,v===(S.penBtn||'radial'))));sl.onchange=()=>{S.penBtn=sl.value;saveS();};f.append(sl);b.append(f);}
+    {const f=el('label',{class:'field'},'<span>Zadní konec pera (guma na peru)</span>');const sl=el('select');[['eraser','Guma'],['lasso','Laso']].forEach(([v,l])=>sl.append(new Option(l,v,false,v===(S.penEnd||'eraser'))));sl.onchange=()=>{S.penEnd=sl.value;saveS();};f.append(sl);b.append(f);}
+    {const f=el('label',{class:'field'},'<span>Dvojklep prstem</span>');const sl=el('select');[['zen','Skrýt / zobrazit lišty'],['ctl','Panel ovládání'],['fit','Stránka na šířku obrazovky'],['undo','Zpět'],['off','Nic']].forEach(([v,l])=>sl.append(new Option(l,v,false,v===(S.dblTap||'zen'))));sl.onchange=()=>{S.dblTap=sl.value;saveS();};f.append(sl);b.append(f);}
+    b.append(el('p',{class:'shint'},'<b>Panel ovládání</b> (nástroje, barvy, tloušťky, stránky, knihovna, nastavení) otevřete plovoucím tlačítkem, položkou „Ovládání“ v kolečku, bočním tlačítkem pera nebo dvojklepem – podle toho, co si tu nastavíte. Do kolečka si můžete přidat i akce: Nová stránka, Přehled stránek, Knihovna, Pravítko, Čistá obrazovka…'));
+    if(nb)b0.insertBefore(b,b0.firstChild);
     grp('Kolečko nástrojů','pen');
     const f1=el('label',{class:'field'},`<span>Otevře se po podržení: <b id="holdV">${S.holdMs} ms</b></span>`);const r=el('input',{type:'range',id:'holdMs',min:'150',max:'1000',step:'25',value:String(S.holdMs)});r.oninput=()=>{S.holdMs=+r.value;$('#holdV').textContent=r.value+' ms';saveS();};f1.append(r);b.append(f1);
     slider(b,'Velikost kolečka',60,140,5,Math.round(radK()*100),v=>v+' %',v=>{S.radScale=v/100;saveS();});
     radSettings(b);
-    toggle(b,'Skrýt horní lištu nástrojů (pero, guma, laso…)',!!S.hideTools,v=>setBars(v,!!S.hidePal));
+    toggle(b,'Skrýt jen horní lištu nástrojů (pero, guma, laso…)',!!S.hideTools,v=>setBars(v,!!S.hidePal));
     toggle(b,'Skrýt boční paletu barev a tlouštěk',!!S.hidePal,v=>setBars(!!S.hideTools,v));
     b.append(el('p',{class:'shint'},'Barvy v kolečku jsou vaše oblíbené z levé palety – podržením barvy v paletě ji změníte.'));
     grp('Pero a gesta','hand');
-    const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();if(!cb.checked&&(S.hideTools||S.hidePal)){S.hideTools=S.hidePal=false;saveS();applyBars();toast('Bez kolečka jsou lišty nástrojů a barev zase vidět');}};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
+    const c1=el('label',{class:'check'});const cb=el('input',{type:'checkbox',id:'radialOn'});cb.checked=S.radial;cb.onchange=()=>{S.radial=cb.checked;saveS();if(!cb.checked&&(S.hideTools||S.hidePal||S.zen)){S.hideTools=S.hidePal=false;S.zen=false;saveS();applyBars();toast('Bez kolečka jsou lišty nástrojů a barev zase vidět');}};c1.append(cb,document.createTextNode('Otevřít kolečko podržením pera na místě'));b.append(c1);
     const f2=el('label',{class:'field'},'<span>Když po nakreslení tahu pero podržím</span>');const s2=el('select',{id:'afterHold'});[['shape','Převést na přesný tvar'],['menu','Otevřít kolečko'],['off','Nic nedělat']].forEach(([v,l])=>s2.append(new Option(l,v,false,v===S.afterHold)));s2.onchange=()=>{S.afterHold=s2.value;saveS();};f2.append(s2);b.append(f2);
     const f3=el('div',{class:'field'},'<span>Psaní rukou (prstem)</span>');chips(f3,[['off','Jen perem'],['on','Perem i prstem'],['auto','Automaticky']],S.finger,v=>{S.finger=v;saveS();if(nb)updateToolbar();});b.append(f3);
     b.append(el('p',{class:'shint'},'<b>Jen perem:</b> prst a ruka stránku jen posouvají a přibližují, nikdy nepíšou. <b>Automaticky:</b> prstem se píše, dokud tablet nepozná pero. Rychlé přepnutí je i tlačítkem s rukou v horní liště sešitu.'));
@@ -4165,6 +4246,9 @@ async function openSettings(){
 function openHelp(){
   modal('Jak ovládat Span',b=>{b.innerHTML=`<ul class="help">
 <li><b>Kolečko nástrojů:</b> přiložte pero a chvíli ho nechte stát. Kolem hrotu se objeví kolečko – přejeďte perem na nástroj, barvu nebo tloušťku a zvedněte. Boční tlačítko pera otevře kolečko okamžitě.</li>
+<li><b>Čistá obrazovka:</b> dvojklep prstem (nebo klávesa F, nebo ⋯ → Čistá obrazovka) skryje všechny lišty. Zůstane jen malé průhledné tlačítko – tažením ho přesunete, klepnutím otevřete <i>panel ovládání</i> s nástroji, barvami, tloušťkami, stránkami a nastavením. Panel jde dát i do kolečka nebo na boční tlačítko pera (Nastavení → Ovládání perem).</li>
+<li><b>Zakroužkování:</b> perem zakroužkujte napsané – objeví se Vybrat / Kopírovat, kruh pak zmizí. Prázdný kruh zůstane obyčejným kruhem.</li>
+<li><b>Stránky na šířku:</b> pod poslední stránkou jsou tlačítka Přidat stránku / Na šířku; otočení stávající stránky je v ⋯.</li>
 <li><b>Přesný tvar:</b> nakreslete kruh, čáru, obdélník nebo trojúhelník a na konci pero podržte – tah se srovná.</li>
 <li><b>Přesun objektů:</b> nástroj Laso – zakroužkujte, pak táhněte, zvětšujte za rohy a otáčejte horním úchytem. Přetažením na jinou stránku objekt přesunete tam.</li>
 <li><b>Páska na učení:</b> nástroj Páska (v liště vedle zvýrazňovače, klávesa U) – táhněte přes pojem, výsledek nebo slovíčko. Klepnutím perem či prstem pásku odkryjete a zase zakryjete. Menu ⋯ → <i>Opakování s páskou</i> projde všechny pásky jako kartičky (Umím / Neumím, chyby se opakují).</li>
@@ -4327,7 +4411,7 @@ function closeTop(){const o=document.querySelectorAll('.modal-ov');const t=o[o.l
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());{const cp=nb.pages[curPageIndex()];if(cp&&!cp.bg){const ld=cp.w>cp.h;it('fit',ld?'Otočit stránku na výšku':'Otočit stránku na šířku',()=>setOrient([cp],!ld));}}it('fit','Celá obrazovka',toggleFullscreen);{const d=edDark();it(d?'sun':'moon',d?'Světlé okolí stránek':'Tmavé okolí stránek',()=>setEdTheme(d?'light':'dark'));if(S.hideTools)it('gear','Možnosti nástroje ('+(TOOL_N[T.tool]||T.tool)+')',()=>setTimeout(()=>openToolOptions(T.tool,$('#bMore')),0));{const hid=S.hideTools&&S.hidePal;it('pen',hid?'Zobrazit lišty nástrojů a barev':'Skrýt lišty (ovládat jen kolečkem)',()=>setBars(!hid,!hid));}}it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());{const cp=nb.pages[curPageIndex()];if(cp&&!cp.bg){const ld=cp.w>cp.h;it('fit',ld?'Otočit stránku na výšku':'Otočit stránku na šířku',()=>setOrient([cp],!ld));}}it('fit','Celá obrazovka',toggleFullscreen);{const d=edDark();it(d?'sun':'moon',d?'Světlé okolí stránek':'Tmavé okolí stránek',()=>setEdTheme(d?'light':'dark'));if(S.hideTools)it('gear','Možnosti nástroje ('+(TOOL_N[T.tool]||T.tool)+')',()=>setTimeout(()=>openToolOptions(T.tool,$('#bMore')),0));it('zen',S.zen?'Zobrazit lišty':'Čistá obrazovka (bez lišt)',()=>setZen(!S.zen));it('ctl','Panel ovládání',()=>setTimeout(()=>openCtl($('#bMore')),0));}it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -4869,7 +4953,7 @@ $('#bGrid').innerHTML=ic('grid');$('#bGrid').onclick=openPageGrid;
 $('#bMarks').onclick=()=>{marksOnly=!marksOnly;$('#bMarks').setAttribute('aria-pressed',String(marksOnly));renderPanel();};
 $('#bAddPage').onclick=()=>addPage();
 $('#bMore').onclick=e=>moreMenu(e.currentTarget);
-$('#bBack').onclick=closeNotebook;
+$('#bBack').onclick=closeNotebook;zenBtnInit();
 $('#bSide').onclick=()=>{LV.side=!LV.side;saveLV();renderLib();};
 $('#bLibAdd').onclick=e=>menuPop(e.currentTarget,[['quick','Rychlá poznámka',quickNote],['book','Nový sešit',newNotebook],['table','Nová tabulka (Excel)',()=>newSheetDoc()],['folderPlus','Nová složka',()=>editFolder()],['tag','Nová kategorie',()=>editCategory()],'-',['down','Importovat PDF, Excel nebo zálohu',importAny]]);
 $('#bLibMore').onclick=e=>menuPop(e.currentTarget,[['down','Zálohovat celou knihovnu',exportAll],['up','Obnovit ze zálohy',()=>$('#fBak').click()],'-',['check','Offline režim',offlineInfo],['gear','Nastavení',openSettings],['help','Nápověda',openHelp]]);
@@ -4892,7 +4976,7 @@ document.addEventListener('keydown',e=>{
   if((k==='delete'||k==='backspace')&&sel){delSel();return;}
   if(k==='escape'){if(radial.open)closeRadial();else clearSel();return;}
   if(mod)return;
-  const map={p:'pen',h:'hl',e:'eraser',l:'lasso',s:'shape',t:'text',k:'laser',u:'tape'};if(map[k])setTool(map[k]);if(k==='r')toggleRuler();
+  const map={p:'pen',h:'hl',e:'eraser',l:'lasso',s:'shape',t:'text',k:'laser',u:'tape'};if(map[k])setTool(map[k]);if(k==='r')toggleRuler();if(k==='f')setZen(!S.zen);
   if(k==='+'||k==='=')zoomAnim(W/2,H/2,z*1.25);if(k==='-')zoomAnim(W/2,H/2,z/1.25);
 });
 document.addEventListener('paste',e=>{if(!nb||editing)return;const f=[...(e.clipboardData&&e.clipboardData.files||[])].find(f=>f.type.startsWith('image/'));if(f){e.preventDefault();insertImage(f);}});
