@@ -1523,6 +1523,7 @@ function armHold(){
 }
 function onHold(){
   if(!act||act.far||!holdable(act))return;
+  if(S.letterCmd!==false&&act.ptype!=='touch'&&act.type==='draw'&&recentStrokes.length&&letterCommand(true))return;
   const a=act;
   if(a.type==='erase'&&a.changed){a.page.items=a.before;render();}
   live.style.mixBlendMode='';unfade();
@@ -1647,6 +1648,7 @@ function scribbleErase(page,it){
 const recentStrokes=[];
 const LC_ACTS={eraser:'Guma',pen:'Pero',fix:'Fix',hl:'Zvýrazňovač',lasso:'Laso',text:'Text',shape:'Tvary',tape:'Páska',laser:'Laser',ruler:'Pravítko',ctl:'Panel ovládání',zen:'Čistá obrazovka',none:'—'};
 const LC_DEF={G:'eraser',F:'fix',L:'lasso',P:'pen',Z:'hl',T:'text'};
+const lcKey=k=>k&&k[0]!=='_'?k.toUpperCase():k;
 const lcMap=()=>Object.assign({},LC_DEF,S.letterMap||{});
 let LC_T=null;
 function lcTemplates(){
@@ -1655,18 +1657,19 @@ function lcTemplates(){
   const seg=(...p)=>{const o=[];for(let i=1;i<p.length;i++){const a=p[i-1],b=p[i];for(let k=0;k<8;k++){const t=k/8;o.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}}o.push(p[p.length-1]);return o;};
   const g1=arc(40,50,38,48,-40,-340),ge=g1[g1.length-1];
   const D={
-    G:[[g1.concat(seg(ge,[44,ge[1]]))],[g1.concat(seg(ge,[78,50],[46,50]))],[arc(40,50,38,48,-40,-350),seg([80,52],[46,52])],[arc(40,50,38,48,-40,-340).concat(seg(ge,[50,ge[1]+2],[78,60],[78,96]))]],
+    G:[[g1.concat(seg(ge,[44,ge[1]]))],[g1.concat(seg(ge,[78,50],[46,50]))],[arc(40,50,38,48,-40,-350),seg([80,52],[46,52])],[arc(40,50,38,48,-45,-320)],[arc(40,50,38,48,-40,-345).concat(seg([78,58],[60,56]))],[arc(40,50,38,48,-40,-340).concat(seg(ge,[50,ge[1]+2],[78,60],[78,96]))]],
     F:[[seg([0,100],[0,0]),seg([0,0],[60,0]),seg([0,48],[45,48])],[seg([60,0],[0,0],[0,100]),seg([0,48],[45,48])],[seg([0,0],[0,100]),seg([0,0],[60,0],),seg([0,50],[40,50])]],
     L:[[seg([0,0],[0,100],[60,100])],[seg([0,0],[2,100],[55,96])]],
     P:[[seg([0,100],[0,0]).concat(arc(0,25,45,25,-90,90,16))],[seg([0,0],[0,100]),seg([0,0],[25,0]).concat(arc(25,25,25,25,-90,90,14)).concat(seg([25,50],[0,50]))]],
     Z:[[seg([0,0],[60,0],[0,100],[60,100])],[seg([5,5],[60,0],[0,98],[62,100])]],
     T:[[seg([0,0],[70,0]),seg([35,0],[35,100])],[seg([35,0],[35,100]),seg([0,0],[70,0])]],
-    /* návnady – podobné tvary, které nic nespouští */
-    _C:[[arc(40,50,38,48,-40,-320)]],_O:[[arc(40,50,38,48,-90,270)]],_I:[[seg([0,0],[0,100])]],_V:[[seg([0,0],[30,100],[60,0])]],_U:[[seg([0,0],[0,70]).concat(arc(30,70,30,30,180,0,12)).concat(seg([60,70],[60,0]))]],
-    _S:[[arc(30,25,28,24,-20,-270).concat(arc(30,75,28,25,-90,160))]],_N:[[seg([0,100],[0,0],[60,100],[60,0])]],_E:[[seg([60,0],[0,0],[0,100],[60,100]),seg([0,50],[45,50])]],_H:[[seg([0,0],[0,100]),seg([60,0],[60,100]),seg([0,50],[60,50])]],
-    _J:[[seg([50,0],[50,75]).concat(arc(25,75,25,25,0,180,12))]],_7:[[seg([0,0],[60,0],[15,100])]],_2:[[arc(30,28,28,26,-160,20,14).concat(seg([55,40],[0,100],[60,100]))]],_1:[[seg([10,20],[35,0],[35,100])]],
-    _A:[[seg([0,100],[30,0],[60,100]),seg([12,60],[48,60])]],_X:[[seg([0,0],[60,100]),seg([60,0],[0,100])]],_plus:[[seg([30,0],[30,100]),seg([0,50],[60,50])]],_K:[[seg([0,0],[0,100]),seg([55,0],[0,55],[55,100])]],_R:[[seg([0,100],[0,0]).concat(arc(0,25,45,25,-90,90,16)).concat(seg([0,50],[50,100]))]],
-    _B:[[seg([0,100],[0,0]).concat(arc(0,25,40,25,-90,90,14)).concat(arc(0,75,48,25,-90,90,14))]],_D:[[seg([0,100],[0,0]).concat(arc(0,50,55,50,-90,90,20))]],_Y:[[seg([0,0],[30,50],[60,0]),seg([30,50],[30,100])]],_line:[[seg([0,50],[100,50])]],_e:[[seg([5,55],[60,55]).concat(arc(32,55,30,40,0,-300,20))]]
+    g:[[arc(30,30,28,28,-30,-360,20).concat(seg([58,20],[58,110])).concat(arc(32,110,26,22,0,160,10))],[arc(30,30,28,28,0,360,20),seg([58,10],[58,105]).concat(arc(32,105,26,22,0,150,10))]],
+    f:[[arc(45,15,15,15,-20,-180,10).concat(seg([30,15],[30,100])),seg([10,45],[52,45])]],
+    l:[[seg([0,100],[30,20]).concat(arc(36,15,8,15,180,360,8)).concat(seg([44,15],[28,100],[48,96]))]],
+    p:[[seg([0,40],[0,140]),seg([0,45]).concat(arc(25,65,25,25,-150,180,16))],[seg([0,140],[0,40]).concat(arc(25,65,25,25,-90,180,16))]],
+    t:[[seg([25,0],[25,100],[45,96]),seg([0,30],[50,30])]],
+    /* návnady jen pro tvary (kruh, čára) – písmena nijak neblokují */
+    _O:[[arc(40,50,38,48,-90,270)]],_I:[[seg([0,0],[0,100])]],_line:[[seg([0,50],[100,50])]],_rect:[[seg([0,0],[80,0],[80,60],[0,60],[0,0])]],_tri:[[seg([40,0],[80,70],[0,70],[40,0])]],_arrow:[[seg([0,50],[100,50],[80,35]),seg([100,50],[80,65])]]
   };
   LC_T=[];for(const k in D)for(const v of D[k])LC_T.push({k,c:pcloud(v)});return LC_T;
 }
@@ -1674,29 +1677,34 @@ let LC_U=null;
 const lcUser=()=>{if(!LC_U)LC_U=(store.get('lcUser',[])||[]).map(t=>({k:t.k,u:1,c:pcloud(t.s)}));return LC_U;};
 function lcMatch(strokes){let best=null,bd=Infinity,bu=0;const c=pcloud(strokes);
   /* vlastní vzory mají přednost (o 25 % „bližší“) */
-  for(const t of lcUser().concat(lcTemplates())){const d=pMatch(c,t.c)*(t.u?0.75:1);if(d<bd){bd=d;best=t.k;bu=t.u||0;}}return {k:best,d:bd,u:bu};}
-function letterCommand(){
-  const a=act,page=a.page,now=performance.now(),cur=a.it.p.map(q=>[q[0],q[1]]);
-  if(cur.length<6)return false;
+  for(const t of lcUser().concat(lcTemplates())){const d=pMatch(c,t.c)*(t.u?0.75:1);if(d<bd){bd=d;best=lcKey(t.k);bu=t.u||0;}}return {k:best,d:bd,u:bu};}
+function letterCommand(fromTap){
+  const a=act,page=a.page;if(!page)return false;const now=performance.now();let cur=fromTap?null:a.it.p.map(q=>[q[0],q[1]]);
+  if(cur&&cur.length<6)return false;
   const bbOf_=pts=>{let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of pts){x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);}return [x0,y0,x1,y1];};
   const rec=recentStrokes.filter(r=>r.page===page&&now-r.t<3000&&page.items.includes(r.it)).reverse();
-  const tries=[[]];if(rec[0])tries.push([rec[0]]);if(rec[1])tries.push([rec[0],rec[1]]);
+  let selfId=null,tries=[[]];if(rec[0])tries.push([rec[0]]);if(rec[1])tries.push([rec[0],rec[1]]);
+  if(fromTap){   // pero zvednuto a znovu přiloženo na napsané písmeno → podržení
+    const r0=rec[0];if(!r0||now-r0.t>2500)return false;const g=r0.it.bb,[lx,ly]=toLocal(a.sx0,a.sy0,page),m=Math.max(g[2]-g[0],g[3]-g[1])*0.35;
+    if(lx<g[0]-m||lx>g[2]+m||ly<g[1]-m||ly>g[3]+m)return false;
+    cur=r0.it.p.map(q=>[q[0],q[1]]);selfId=r0.it.id;tries=[[]];if(rec[1])tries.push([rec[1]]);if(rec[2])tries.push([rec[1],rec[2]]);rec.shift();}
   const map=lcMap();let hit=null,near=null;
   for(const extra of tries){
     const strokes=[cur].concat(extra.map(r=>r.it.p.map(q=>[q[0],q[1]])));
     const b=bbOf_([].concat(...strokes)),h=b[3]-b[1],w=b[2]-b[0],sz=Math.max(w,h);
-    if(sz*z<16||sz*z>360||h<w*0.3)continue;                       // písmeno: rozumná velikost, spíš vyšší než široké
+    if(sz*z<14||sz*z>280||h<w*0.3)continue;                       // písmeno: rozumná velikost, spíš vyšší než široké
     if(extra.length){const cb=bbOf_(cur);if(extra.some(r=>{const g=r.it.bb;return g[0]>cb[2]+sz*0.5||g[2]<cb[0]-sz*0.5||g[1]>cb[3]+sz*0.5||g[3]<cb[1]-sz*0.5;}))continue;}
     /* samostatné písmeno – vedle nesmí být jiné písmo (jinak jde o psaní slova) */
-    const ex=new Set(extra.map(r=>r.it.id)),m=sz*0.55;
+    const ex=new Set(extra.map(r=>r.it.id)),m=sz*0.55;if(selfId)ex.add(selfId);
     if(page.items.some(o=>!ex.has(o.id)&&o.t==='s'&&o.k!=='hl'&&(()=>{const g=o.bb;return g[0]<b[2]+m&&g[2]>b[0]-m&&g[1]<b[3]+m*0.3&&g[3]>b[1]-m*0.3;})()))continue;
     const r=lcMatch(strokes);
-    if(r.k&&r.k[0]!=='_'&&r.d<(S.lcStrict??0.15)*(r.u?1.3:1)&&map[r.k]&&map[r.k]!=='none'){hit={k:r.k,act:map[r.k],extra,d:r.d};break;}
-    if(!near&&r.k&&r.k[0]!=='_'&&r.d<(S.lcStrict??0.15)*2.2&&extra.length===0)near=r.k;
+    if(r.k&&r.k[0]!=='_'&&r.d<(S.lcStrict??0.3)*(r.u?1.2:1)&&map[r.k]&&map[r.k]!=='none'){hit={k:r.k,act:map[r.k],extra,d:r.d};break;}
+    if(!near&&r.k&&r.k[0]!=='_'&&r.d<(S.lcStrict??0.3)*1.8&&extra.length===0)near=r.k;
   }
   if(!hit){if(near&&S.lcHint!==false)toast('Písmeno nepoznáno (nejblíž „'+near+'“) – naučte ho: Nastavení → Ovládání perem → Naučit moje písmena');return false;}
   /* písmeno smazat a nástroj přepnout */
   clearTimeout(holdTimer);act=null;live.style.mixBlendMode='';unfade(true);
+  if(fromTap)hit.extra=hit.extra.concat([recentStrokes[recentStrokes.length-1]]);
   if(hit.extra.length){snapItems(page);const ids=new Set(hit.extra.map(r=>r.it.id));page.items=page.items.filter(o=>!ids.has(o.id));pcache.delete(page.id);changed();render();}
   recentStrokes.length=0;drawOverlay();
   const A=hit.act,prev={tool:T.tool,style:T.pen.style};
@@ -1736,7 +1744,7 @@ async function teachLetters(){
     const act_=el('div',{class:'row'});
     const sv=el('button',{class:'btn primary'},'Uložit vzor');sv.onclick=()=>{if(!strokes.length||strokes.every(s=>s.length<3)){toast('Nejdřív písmeno napište');return;}const U=store.get('lcUser',[])||[];U.push({k:cur,s:strokes.map(s=>s.filter((q,i)=>i%2===0||i===s.length-1).map(q=>[Math.round(q[0]),Math.round(q[1])]))});while(U.length>120)U.shift();store.set('lcUser',U);LC_U=null;strokes=[];paint();cnt();toast('Uloženo – '+cur);};
     const cl=el('button',{class:'btn'},'Přepsat');cl.onclick=()=>{strokes=[];paint();};
-    const tst=el('button',{class:'btn'},'Vyzkoušet');tst.onclick=()=>{if(!strokes.length)return;const r=lcMatch(strokes);toast(r.k&&r.k[0]!=='_'?'Poznáno: '+r.k+' ('+(r.d<(S.lcStrict??0.15)*(r.u?1.3:1)?'jistě':'nejisté')+')':'Nepoznáno');};
+    const tst=el('button',{class:'btn'},'Vyzkoušet');tst.onclick=()=>{if(!strokes.length)return;const r=lcMatch(strokes);toast(r.k&&r.k[0]!=='_'?'Poznáno: '+r.k+' ('+(r.d<(S.lcStrict??0.3)*(r.u?1.2:1)?'jistě':'nejisté')+')':'Nepoznáno');};
     const del=el('button',{class:'btn'},'Smazat vzory „'+cur+'“');del.onclick=()=>{const U=(store.get('lcUser',[])||[]).filter(t=>t.k!==cur);store.set('lcUser',U);LC_U=null;cnt();toast('Vzory smazány');};
     act_.append(sv,cl,tst,del);b.append(act_);
     requestAnimationFrame(()=>{paint();cnt();});
@@ -4331,7 +4339,7 @@ async function openSettings(){
     {const bt=el('button',{class:'btn primary'},ic('pen')+'Naučit moje písmena');bt.onclick=()=>teachLetters();b.append(bt);const n=(store.get('lcUser',[])||[]).length;b.append(el('p',{class:'shint'},n?'Uložené vzory vašeho písma: '+n:'Zatím rozpoznává jen podle obecných tvarů. Když každé písmeno 3× napíšete do učení, pozná vaše písmo mnohem spolehlivěji.'));}
     toggle(b,'Nástroj zapnutý písmenem je dočasný – po použití se vrátí ten předchozí',S.tmpBack!==false,v=>{S.tmpBack=v;saveS();});
     slider(b,'Pero/fix/zvýrazňovač zapnutý písmenem se vrátí po pauze',1000,8000,500,S.tmpDelay??2500,v=>(v/1000).toLocaleString('cs-CZ')+' s',v=>{S.tmpDelay=v;saveS();});
-    slider(b,'Jak přísně písmena rozpoznávat',0.06,0.2,0.01,S.lcStrict??0.15,v=>v<=0.1?'přísně':v>=0.15?'volně':'středně',v=>{S.lcStrict=v;saveS();});
+    slider(b,'Jak přísně písmena rozpoznávat',0.1,0.6,0.02,S.lcStrict??0.3,v=>v<=0.2?'přísně':v>=0.4?'volně':'středně',v=>{S.lcStrict=v;saveS();});
     b.append(el('p',{class:'shint'},'Napište samostatné velké písmeno (kousek od ostatního textu) a na konci posledního tahu pero chvilku podržte. Písmeno zmizí a nástroj se přepne. U písmen z více tahů (F, T) se započítají i tahy napsané těsně předtím.'));
     b.append(el('p',{class:'shint'},'<b>Panel ovládání</b> (nástroje, barvy, tloušťky, stránky, knihovna, nastavení) otevřete plovoucím tlačítkem, položkou „Ovládání“ v kolečku, bočním tlačítkem pera nebo dvojklepem – podle toho, co si tu nastavíte. Do kolečka si můžete přidat i akce: Nová stránka, Přehled stránek, Knihovna, Pravítko, Čistá obrazovka…'));
     if(nb)b0.insertBefore(b,b0.firstChild);
