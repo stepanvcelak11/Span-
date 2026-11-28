@@ -49,3 +49,4 @@ Webová aplikace (PWA) na ručně psané poznámky, inspirovaná Noteshelf 3.
 
 ## Spuštění na tabletu
 Zapněte GitHub Pages (Settings → Pages → Branch, složka `/docs`), otevřete adresu v Chrome a dejte **Přidat na plochu / Instalovat aplikaci**.
+- Doučování matematiky (Matematika 2: vícenásobné a křivkové integrály, Green, potenciál, DR 1. řádu): příklady ze cvičení i nově vymyšlené Claudem, zadání na stránku, kontrola ručního výpočtu z obrázku stránky, nápověda, postup, nákres oblasti, přehled slabých témat.

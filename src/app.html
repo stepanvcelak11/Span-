@@ -589,6 +589,43 @@ body.zen #vpal{display:none!important}
 .zenbtn .zdot{position:absolute;right:5px;bottom:5px;width:11px;height:11px;border-radius:50%;border:2px solid #fff}
 body.zen .zenbtn.on{display:flex}
 #editor.drawing .zenbtn{opacity:.2;pointer-events:none}
+.tutor{position:absolute;top:10px;bottom:10px;left:10px;width:min(410px,calc(100vw - 20px));z-index:9;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 44px rgba(0,0,0,.24);transform:translateX(calc(-100% - 24px));transition:transform .3s var(--ease-out);overflow:hidden}
+.tutor.right{left:auto;right:10px;transform:translateX(calc(100% + 24px))}
+.tutor.open{transform:none}
+.tutor.min{bottom:auto}
+.tutor.min .t-body,.tutor.min .t-foot,.tutor.min .t-prog{display:none}
+.t-head{display:flex;align-items:center;gap:4px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--line)}
+.t-head b{font:700 15.5px var(--f-display);margin-right:auto;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.t-head b svg{width:20px;height:20px;color:var(--accent-2)}
+.t-head select{max-width:150px;height:32px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);font:inherit;font-size:13px;font-weight:600;padding:0 6px}
+.t-head .ib{width:34px;height:34px}
+.t-prog{font-size:12px;color:var(--muted);padding:6px 14px 0}
+.t-body{flex:1;overflow-y:auto;padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;-webkit-user-select:text;user-select:text}
+.t-msg{max-width:94%;padding:9px 12px;border-radius:14px;font-size:14.5px;line-height:1.45;overflow-wrap:anywhere}
+.t-msg.a{align-self:flex-start;background:var(--surface-2)}
+.t-msg.u{align-self:flex-end;background:var(--accent-2);color:#fff}
+.t-msg.task{border:1.5px solid var(--accent-2);background:var(--surface);max-width:100%}
+.t-msg p{margin:0 0 6px}.t-msg p:last-child{margin:0}
+.t-msg ul{margin:4px 0 6px;padding-left:20px}.t-msg li{margin:2px 0}
+.t-msg code{font-size:13px;background:rgba(127,127,127,.15);padding:0 4px;border-radius:4px}
+.t-msg mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
+.t-msg mjx-container[display="true"]{margin:6px 0!important}
+.t-msg .tsv{width:100%;max-width:330px;height:auto;display:block;margin:6px auto;background:#fff;border-radius:10px;border:1px solid var(--line)}
+.t-tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:10px;margin:0 6px 5px 0}
+.t-tag.task{background:var(--accent-soft);color:var(--accent-ink)}
+.t-tag.ok{background:#d8f3dc;color:#1b6e2e}.t-tag.bad{background:#fde2e1;color:#a4161a}.t-tag.wip{background:#fff1cc;color:#8a5a00}
+.t-att{display:flex;align-items:center;gap:5px;font-size:12px;opacity:.85;margin-bottom:3px}.t-att svg{width:14px;height:14px}
+.t-foot{border-top:1px solid var(--line);padding:8px 10px 10px;display:flex;flex-direction:column;gap:8px}
+.t-acts{display:flex;flex-wrap:wrap;gap:6px}
+.t-acts button{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 11px 0 9px;border-radius:17px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;font-size:13px;font-weight:600}
+.t-acts button.pri{background:var(--accent-2);border-color:transparent;color:#fff}
+.t-acts button svg{width:16px;height:16px}
+.t-acts button:disabled{opacity:.4}
+.t-in{display:flex;gap:6px;align-items:flex-end}
+.t-in textarea{flex:1;resize:none;min-height:40px;max-height:120px;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--ink);font:inherit;font-size:14.5px;padding:9px 11px}
+.t-in button{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--accent-2);color:#fff;display:flex;align-items:center;justify-content:center}
+.t-in button svg{width:19px;height:19px}.t-in button:disabled{opacity:.4}
+@media (max-width:700px){.tutor,.tutor.right{left:0;right:0;width:auto;top:auto;bottom:0;height:60vh;border-radius:18px 18px 0 0;transform:translateY(105%)}.tutor.open{transform:none}.tutor.min{height:auto}}
 .zpanel{display:flex;flex-direction:column;gap:10px;padding:10px;min-width:280px;max-width:min(360px,92vw)}
 .zpanel .zrow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .zpanel .zb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:12px;border:0;background:var(--bar-2,rgba(127,127,127,.12));color:inherit;font:inherit;font-size:11px;line-height:1.15;text-align:center}
@@ -676,6 +713,7 @@ body.zen .zenbtn.on{display:flex}
       <button class="ib" id="bAddPg" title="Přidat stránku" aria-label="Přidat stránku"></button>
       <button class="ib" id="bZoom" hidden title="Lupa psaní" aria-label="Lupa psaní"></button>
       <button class="ib" id="bFinger" title="Psaní prstem (zapnout / vypnout)" aria-label="Psaní prstem"></button>
+      <button class="ib" id="bTutor" title="Doučování matematiky" aria-label="Doučování"></button>
       <button class="ib" id="bMore" title="Další" aria-label="Další volby"></button>
     </div>
     <div class="zoom" id="zoomBox" hidden aria-label="Lupa psaní">
@@ -777,6 +815,8 @@ const PDFJS_W='lib/pdf.worker.min.js';
 
 /* ---------- ikony ---------- */
 const IC={
+ cap:'<path d="M2 9.5 12 5l10 4.5L12 14z"/><path d="M6 11.6V16c3.3 2.6 8.7 2.6 12 0v-4.4"/><path d="M22 9.5v5"/>',
+ send:'<path d="M4 12 20 4l-4 16-4-6.5z"/><path d="M12 13.5 20 4"/>',
  zen:'<path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/>',
  ctl:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/>',
  battery:'<rect x="2.5" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3M6 10v4M9.5 10v4"/>',
@@ -922,7 +962,7 @@ const isDark=p=>p.paper==='dark'||p.paper==='black';
 
 /* ---------- stav ---------- */
 let notebooks=[], nb=null, clip=null;
-let W=0,H=0,dpr=1,z=1,ox=0,oy=0,docH=0,maxPW=PW;
+let W=0,H=0,dpr=1,z=1,ox=0,oy=0,docH=0,maxPW=PW,padL=0,padR=0;
 const stage=$('#stage'), board=$('#board'), live=$('#live'), radialSvg=$('#radial'), ta=$('#ta'), selbar=$('#selbar');
 // Pozor: {alpha:false} ani {desynchronized:true} nepoužívat – na tabletech s Androidem (Chrome) pak plátno zčerná.
 const bctx=board.getContext('2d');
@@ -1187,7 +1227,7 @@ function setLayout(m){const i=nb?curPageIndex():0;S.layout=m;saveS();if(!nb)retu
 function resize(){
   if(!nb)return;if(S.zen)requestAnimationFrame(posZen);
   const r={width:stage.clientWidth,height:stage.clientHeight}; if(r.width<10)return;
-  const first=!W; W=r.width; H=r.height; dpr=Math.min(window.devicePixelRatio||1,ECO()?1.5:3);
+  const first=!W; W=r.width; H=r.height; if(typeof tutRoomPrev!=='undefined'&&tutRoomPrev&&W<900){padL=padR=0;z=tutRoomPrev.z;tutRoomPrev=null;} dpr=Math.min(window.devicePixelRatio||1,ECO()?1.5:3);
   for(const c of [board,live]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);c.style.width=W+'px';c.style.height=H+'px';}
   if(first)fitWidth(); clampView(); render();
 }
@@ -1202,7 +1242,7 @@ function clampView(){
   if(HL()&&nb&&nb.pages.length){const P=nb.pages,fc=pageCenterX(0),lc=pageCenterX(P.length-1);
     ox=clamp(ox,Math.min(W/2-lc*z,W-docW*z-30),Math.max(W/2-fc*z,30));
     const ch=maxPH*z;if(ch<=H-70)oy=Math.max(56,(H-ch)/2+16);else oy=clamp(oy,H-ch-40,60);return;}
-  const cw=maxPW*z; if(cw<=W+1)ox=W/2; else ox=clamp(ox,W-cw/2-30,cw/2+30);
+  const cw=maxPW*z,aw=W-padL-padR; if(cw<=aw+1)ox=padL+aw/2; else ox=clamp(ox,W-padR-cw/2-30,padL+cw/2+30);
   const ch=docH*z; oy=clamp(oy,Math.min(0,H-150-ch),100);
 }
 function zoomAt(sx,sy,nz){nz=clamp(nz,0.2,6);ox=sx-(sx-ox)*nz/z;oy=sy-(sy-oy)*nz/z;z=nz;clampView();scheduleRender();}
@@ -1644,7 +1684,7 @@ function scribbleErase(page,it){
 }
 /* ---------- písmeno + podržení pera = rychlá volba nástroje (G guma, F fix, L laso…) ---------- */
 const recentStrokes=[];
-const LC_ACTS={eraser:'Guma',pen:'Pero',fix:'Fix',hl:'Zvýrazňovač',lasso:'Laso',text:'Text',shape:'Tvary',tape:'Páska',laser:'Laser',ruler:'Pravítko',ctl:'Panel ovládání',settings:'Nastavení',zen:'Čistá obrazovka',none:'—'};
+const LC_ACTS={eraser:'Guma',pen:'Pero',fix:'Fix',hl:'Zvýrazňovač',lasso:'Laso',text:'Text',shape:'Tvary',tape:'Páska',laser:'Laser',ruler:'Pravítko',ctl:'Panel ovládání',settings:'Nastavení',tutor:'Doučování',zen:'Čistá obrazovka',none:'—'};
 const LC_DEF={G:'eraser',F:'fix',L:'lasso',P:'pen',Z:'hl',T:'text'};
 const lcKey=k=>k&&k[0]!=='_'?k.toUpperCase():k;
 const lcMap=()=>Object.assign({},LC_DEF,S.letterMap||{});
@@ -1711,7 +1751,7 @@ function letterCommand(fromTap){
   const A=hit.act,prev={tool:T.tool,style:T.pen.style};
   if(A==='fix'){if(T.pen.style!=='marker')T.pen.prevStyle=T.pen.style;T.pen.style='marker';saveT();setTool('pen');updateToolbar();}
   else if(A==='pen'){if(T.pen.style==='marker'){T.pen.style=T.pen.prevStyle||'fountain';saveT();}setTool('pen');updateToolbar();}
-  else if(A==='ruler')toggleRuler();else if(A==='ctl'){radial.cx=a.sx0;radial.cy=a.sy0;openCtl(radAnchor());}else if(A==='zen')setZen(!S.zen);else if(A==='settings')openSettings();
+  else if(A==='ruler')toggleRuler();else if(A==='ctl'){radial.cx=a.sx0;radial.cy=a.sy0;openCtl(radAnchor());}else if(A==='zen')setZen(!S.zen);else if(A==='settings')openSettings();else if(A==='tutor')tutToggle();
   else setTool(A);
   if(S.tmpBack!==false&&['eraser','pen','fix','hl','lasso','text','shape','tape','laser'].includes(A)&&!(A==='pen'&&prev.tool==='pen'&&prev.style!=='marker')){T.tmpPrev=prev;if(A==='laser')tmpReturn(4000);}
   vibrate(12);toast(hit.k+' → '+LC_ACTS[A]+(T.tmpPrev?' (po použití zpět)':''));if(S.zen)posZen();
@@ -1973,9 +2013,9 @@ const sizeTool=()=>SIZES[T.tool]?T.tool:'pen';
 const curColor=()=>(T[T.tool]&&T[T.tool].color)||T.pen.color;
 const curSize=()=>T[sizeTool()].size;
 /* vlastní obsah kolečka (Nastavení → Kolečko nástrojů) */
-const RAD_ALL=[['pen','Pero'],['hl','Zvýrazňovač'],['eraser','Guma'],['lasso','Laso'],['shape','Tvary'],['text','Text'],['tape','Páska'],['laser','Laser'],['undo','Zpět'],['redo','Znovu'],['ctl','Ovládání'],['zen','Čistá obrazovka'],['addpg','Nová stránka'],['pages','Přehled stránek'],['back','Knihovna'],['ruler','Pravítko'],['finger','Psaní prstem'],['image','Obrázek'],['fit','Na šířku obrazovky'],['settings','Nastavení'],['more','Další volby']];
+const RAD_ALL=[['pen','Pero'],['hl','Zvýrazňovač'],['eraser','Guma'],['lasso','Laso'],['shape','Tvary'],['text','Text'],['tape','Páska'],['laser','Laser'],['undo','Zpět'],['redo','Znovu'],['ctl','Ovládání'],['zen','Čistá obrazovka'],['addpg','Nová stránka'],['pages','Přehled stránek'],['back','Knihovna'],['ruler','Pravítko'],['finger','Psaní prstem'],['image','Obrázek'],['fit','Na šířku obrazovky'],['settings','Nastavení'],['tutor','Doučování'],['more','Další volby']];
 /* akce (ne nástroje), které jde dát do kolečka */
-const RAD_ACT={ctl:['ctl','Ovládání',()=>openCtl(radAnchor())],zen:['zen','Čistá obrazovka',()=>setZen(!S.zen)],addpg:['plus','Nová stránka',()=>addPage()],pages:['grid','Přehled stránek',()=>openPageGrid()],back:['back','Knihovna',()=>closeNotebook()],ruler:['ruler','Pravítko',()=>toggleRuler()],finger:['hand','Psaní prstem',()=>$('#bFinger').click()],image:['image','Obrázek',()=>$('#fImg').click()],fit:['fit','Na šířku obrazovky',()=>{fitWidth(true);render();}],settings:['gear','Nastavení',()=>openSettings()],more:['more','Další volby',()=>moreMenu(radAnchor())]};
+const RAD_ACT={ctl:['ctl','Ovládání',()=>openCtl(radAnchor())],zen:['zen','Čistá obrazovka',()=>setZen(!S.zen)],addpg:['plus','Nová stránka',()=>addPage()],pages:['grid','Přehled stránek',()=>openPageGrid()],back:['back','Knihovna',()=>closeNotebook()],ruler:['ruler','Pravítko',()=>toggleRuler()],finger:['hand','Psaní prstem',()=>$('#bFinger').click()],image:['image','Obrázek',()=>$('#fImg').click()],fit:['fit','Na šířku obrazovky',()=>{fitWidth(true);render();}],settings:['gear','Nastavení',()=>openSettings()],tutor:['cap','Doučování',()=>tutToggle()],more:['more','Další volby',()=>moreMenu(radAnchor())]};
 function radAnchor(){let a=$('#radAnchor');if(!a){a=el('div',{id:'radAnchor',style:'position:fixed;width:2px;height:2px;pointer-events:none'});document.body.append(a);}const R=stage.getBoundingClientRect();a.style.left=(R.left+(radial.cx||W/2))+'px';a.style.top=(R.top+(radial.cy||H/2))+'px';return a;}
 const radItems=()=>Array.isArray(S.radItems)&&S.radItems.length?S.radItems:['pen','hl','eraser','lasso','shape','text','undo','redo'];
 const radK=()=>clamp(S.radScale||1,0.6,1.4);
@@ -2677,7 +2717,7 @@ function restorePos(n){if(nb!==n||!W)return;const v=(store.get('pos',{})||{})[n.
   if(v.z&&!v.h)z=clamp(v.z,0.2,6);const p=n.pages[i];oy=H*0.45-(p._top+(v.f||0)*p.h)*z;if(v.x!=null)ox=v.x;clampView();render();if(v.i>0)toast('Pokračujete na straně '+(i+1));}
 let posT=0;function posLater(){clearTimeout(posT);posT=setTimeout(savePos,800);}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')savePos();});
-function closeNotebook(){savePos();setTimeout(applyTheme,0);closePageGrid();if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui','dark-ui');if(ZB.on)toggleZoom(false);closeCalc();releaseWake();commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
+function closeNotebook(){if($('#tutor'))tutClose();savePos();setTimeout(applyTheme,0);closePageGrid();if(STUDY)studyEnd(true);const bc=$('#backChip');if(bc)bc.remove();tapeOpen.clear();document.body.classList.remove('light-ui','dark-ui');if(ZB.on)toggleZoom(false);closeCalc();releaseWake();commitText();clearSel();if(nb){nb._lastY=oy;flushSave();}closeRadial();nb=null;$('#editor').hidden=true;$('#lib').hidden=false;renderLib();}
 
 /* =========================================================
    Lupa psaní (zoom box) – píšete velkým písmem dole, na stránku se zapíše zmenšeně
@@ -3039,9 +3079,9 @@ async function getSample(){
   try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null;if(sampleFn){const l=await sampleFn.limits().catch(()=>null);if(!l||!l.images)sampleFn=null;}}catch(e){sampleFn=null;}
   return sampleFn;
 }
-function strokesImage(page,items){
+function strokesImage(page,items,mx){
   let b=[1e9,1e9,-1e9,-1e9];items.forEach(it=>{const g=getBounds(it);b=[Math.min(b[0],g[0]),Math.min(b[1],g[1]),Math.max(b[2],g[2]),Math.max(b[3],g[3])];});
-  const pad=20,w=b[2]-b[0]+pad*2,h=b[3]-b[1]+pad*2,sc=Math.min(3,1100/Math.max(w,h));
+  const pad=20,w=b[2]-b[0]+pad*2,h=b[3]-b[1]+pad*2,sc=Math.min(3,(mx||1100)/Math.max(w,h));
   const c=document.createElement('canvas');c.width=Math.max(8,Math.round(w*sc));c.height=Math.max(8,Math.round(h*sc));
   const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.setTransform(sc,0,0,sc,(pad-b[0])*sc,(pad-b[1])*sc);
   items.forEach(it=>drawItem(x,it.t==='s'&&it.k!=='hl'?Object.assign({},it,{c:'#000'}):it,{paper:'white'}));
@@ -4287,7 +4327,7 @@ function openCtl(anchor){
       const cs=el('div',{class:'zcols'});favList().slice(0,10).forEach(c=>{const b=el('button',{'aria-pressed':String(c.toLowerCase()===curColor().toLowerCase()),'aria-label':'Barva',style:'background:'+c});b.onclick=()=>{setColor(c);posZen();cs.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));};cs.append(b);});P.append(cs);
       if(SIZES[sizeTool()]){const sz=el('div',{class:'zsz'});SIZES[sizeTool()].forEach((v,i)=>{const b=el('button',{'aria-pressed':String(Math.abs(v-curSize())<0.01),'aria-label':'Tloušťka '+(i+1)},`<i style="width:${4+i*3}px;height:${4+i*3}px"></i>`);b.onclick=()=>{setSize(v);sz.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));};sz.append(b);});P.append(sz);}}
     P.append(el('div',{class:'zh'},'Sešit'));
-    row(zb('undo','Zpět',undo),zb('redo','Znovu',redo),zb('plus','Nová stránka',()=>addPage()),zb('grid','Stránky',openPageGrid),zb('back','Knihovna',closeNotebook));
+    row(zb('cap','Doučování',tutToggle),zb('undo','Zpět',undo),zb('redo','Znovu',redo),zb('plus','Nová stránka',()=>addPage()),zb('grid','Stránky',openPageGrid),zb('back','Knihovna',closeNotebook));
     row(zb('hand',fingerDraws()?'Prst píše':'Jen pero',()=>$('#bFinger').click(),fingerDraws()),zb('fit','Na šířku',()=>{fitWidth(true);render();}),zb('zen',S.zen?'Zobrazit lišty':'Čistá obrazovka',()=>setZen(!S.zen),S.zen),zb('more','Další volby',()=>setTimeout(()=>moreMenu(anchor.isConnected?anchor:$('#bMore')),0)),zb('gear','Nastavení',openSettings));
     p.append(P);});
 }
@@ -4352,6 +4392,7 @@ function openHelp(){
   modal('Jak ovládat Span',b=>{b.innerHTML=`<ul class="help">
 <li><b>Kolečko nástrojů:</b> přiložte pero a chvíli ho nechte stát. Kolem hrotu se objeví kolečko – přejeďte perem na nástroj, barvu nebo tloušťku a zvedněte. Boční tlačítko pera otevře kolečko okamžitě.</li>
 <li><b>Čistá obrazovka:</b> dvojklep prstem (nebo klávesa F, nebo ⋯ → Čistá obrazovka) skryje všechny lišty. Zůstane jen malé průhledné tlačítko – tažením ho přesunete, klepnutím otevřete <i>panel ovládání</i> s nástroji, barvami, tloušťkami, stránkami a nastavením. Panel jde dát i do kolečka nebo na boční tlačítko pera (Nastavení → Ovládání perem).</li>
+<li><b>Doučování matematiky:</b> tlačítko s čepicí (vpravo nahoře, v panelu ovládání nebo v ⋯). Příklady na 2. zápočet a zkoušku podle vašich cvičení – zadání se vloží na stránku, počítáte perem pod něj a <b>Zkontroluj</b> pošle výřez stránky Claudovi, který najde chybný krok. Nápověda, celý postup, nákres oblasti, výsledek. Příklady ze cvičení fungují i offline, chat a kontrola jen na claude.ai.</li>
 <li><b>Písmeno = nástroj:</b> napište samostatné velké písmeno a pero na konci chvilku podržte – <b>G</b> guma, <b>F</b> fix (stačí i obrácené L „Γ“ – F bez prostřední čárky), <b>L</b> laso, <b>P</b> pero, <b>Z</b> zvýrazňovač, <b>T</b> text (stačí i L hlavou dolů a zrcadlově „┐“). Písmeno zmizí. Přiřazení změníte v Nastavení → Ovládání perem.</li>
 <li><b>Stránky na šířku:</b> pod poslední stránkou jsou tlačítka Přidat stránku / Na šířku; otočení stávající stránky je v ⋯.</li>
 <li><b>Přesný tvar:</b> nakreslete kruh, čáru, obdélník nebo trojúhelník a na konci pero podržte – tah se srovná.</li>
@@ -4513,10 +4554,275 @@ function playBar(a){
 }
 function closeTop(){const o=document.querySelectorAll('.modal-ov');const t=o[o.length-1];if(t)t.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));}
 
+/* =========================================================
+   Doučování matematiky – příklady ze cvičení, chat s Claudem,
+   kontrola ručního výpočtu přímo ze stránky
+   ========================================================= */
+const TUT_TOPICS=[
+ ['dvoj','Dvojný integrál – meze, elementární oblast','zk'],
+ ['dvojT','Dvojný integrál – transformace (lineární, polární)','zk'],
+ ['troj','Trojný integrál – kartézsky','z2'],
+ ['trojC','Trojný integrál – cylindrické souřadnice','z2'],
+ ['trojS','Trojný integrál – sférické souřadnice','z2'],
+ ['kriv1','Křivkový integrál 1. druhu (ds, délka křivky)','z2'],
+ ['kriv2','Křivkový integrál 2. druhu (práce pole)','z2'],
+ ['green','Greenova věta','z2'],
+ ['cesta','Nezávislost na cestě, potenciál','z2'],
+ ['drsep','Diferenciální rovnice – separace proměnných','zk'],
+ ['drlin','Diferenciální rovnice – lineární (variace konstanty)','zk'],
+ ['drex','Diferenciální rovnice – exaktní','zk']];
+const tutTopic=id=>(TUT_TOPICS.find(t=>t[0]===id)||[id,id])[1];
+/* příklady přímo z vašich cvičení (výsledky ověřené) */
+const TUT_BANK=[
+ ['dvoj','∬_A x²/(1+y²) dx dy,  A = ⟨0;1⟩ × ⟨0;1⟩','π/12','cvičení 3'],
+ ['dvoj','∬_A 1/(x+y)² dx dy,  A: 3 ≤ x ≤ 4, 1 ≤ y ≤ 2','ln(25/24)','cvičení 3'],
+ ['dvoj','∬_A y dx dy,  A = {[x;y] ∈ R²; x² + y² ≤ a², x + y ≥ a}, a > 0','a³/6','cvičení 3 (moodle)'],
+ ['dvoj','∬_A y dx dy,  A = {[x;y] ∈ R²; x² − y + 2 ≤ 0, x + y − 4 ≤ 0}','81/5','cvičení 3'],
+ ['dvoj','∬_A xy dx dy,  A = {[x;y] ∈ R²; y² − x² ≤ 1, x² + y² ≤ 9, x ≥ 0, y ≥ 0}','49/8 (oblast rozdělit v x = 2)','cvičení 3'],
+ ['dvojT','∬_D (x − y)² dx dy,  D: 0 ≤ x ≤ 2, 1 − x ≤ y ≤ 2 − x  (substituce u = x, v = x + y)','10/3','cvičení 4'],
+ ['dvojT','∬_A √(1 − x² − y²) dx dy,  A = {[x;y] ∈ R²; x² + y² ≤ y, x ≥ 0}','(3π − 4)/18','cvičení 4'],
+ ['dvojT','∬_A √(9 − x² − y²) dx dy,  A = {[x;y] ∈ R²; x² + y² ≤ 9, y > 0}','9π','cvičení 4'],
+ ['dvojT','∬_D (x² + y²) dx dy,  D = {[x;y] ∈ R²; x² + y² ≤ 2, x ≥ 0, y ≥ 0}','π/2','cvičení 4'],
+ ['dvojT','∬_A xy dx dy,  A = {[x;y] ∈ R²; x² + y² ≥ 2x, x² + y² ≤ 4x, y > 0}','10','cvičení 5'],
+ ['dvojT','∬_A ln√(x² + y²) / (x² + y²) dx dy,  A = {[x;y] ∈ R²; 1 < x² + y² < e², x > 0, y > 0}','π/4','cvičení 5'],
+ ['troj','∭_A xy dx dy dz,  A = {[x;y;z] ∈ R³; x² + y² ≤ 1, 0 ≤ z ≤ 2, x > 0, y > 0}','1/4','cvičení 5'],
+ ['troj','∭_Ω y·cos(x + z) dx dy dz,  Ω = {[x;y;z] ∈ R³; 0 < y < √x, 0 < z < π/2 − x}','π²/16 − 1/2','cvičení 5'],
+ ['troj','∭_Ω 1/(1 + x + y + z)³ dx dy dz,  Ω = {[x;y;z] ∈ R³; x + y + z < 1, x > 0, y > 0, z > 0}','½·ln 2 − 5/16','cvičení 5'],
+ ['troj','∭_B z dx dy dz,  B = {[x;y;z] ∈ R³; x ≥ 0, y ≥ 0, z ≥ 0, x + y + z − 1 ≤ 0}','1/24','cvičení 5'],
+ ['troj','∭_B (x + y)/(4 + z) dx dy dz,  B = {[x;y;z] ∈ R³; x + y ≤ 3, x ≥ 0, y ≥ 0, 0 ≤ z ≤ 4}','9·ln 2','cvičení 5'],
+ ['troj','∭_Ω x/(z − 2)³ dx dy dz,  Ω: 6x + 3y + 2z < 12, z > 3, x > 0, y > 0','−1/9 + (8/27)·ln 2','přednáška'],
+ ['trojC','∭_A (x² + y²) dx dy dz,  A = {[x;y;z] ∈ R³; x² + y² − z ≤ 1, z ≤ 0}','π/6','cvičení 5'],
+ ['trojC','Objem tělesa A = {[x;y;z] ∈ R³; x² + y² ≤ 4, z ≥ 0, z + y ≤ 2}','8π','cvičení 6'],
+ ['trojC','∭_A (x² + y²) dx dy dz,  A = {[x;y;z] ∈ R³; x² + y² − 1 ≤ z² ≤ x² + y², 0 < z < 2}','11π/3','cvičení 6'],
+ ['trojC','Objem tělesa Ω: x² + y² + z² < 4z, x² + y² + z < 4','37π/6','přednáška'],
+ ['trojS','∭_A xyz dx dy dz,  A = {[x;y;z] ∈ R³; x² + y² + z² ≤ 2, x ≥ 0, y ≥ 0, z ≥ 0}','1/6','cvičení 6'],
+ ['trojS','∭_A z dx dy dz,  A = {[x;y;z] ∈ R³; x² + y² + z² ≤ 1, z ≥ 0}','π/4','doplněno'],
+ ['trojS','∭_A √(x² + y² + z²) dx dy dz,  A = {[x;y;z] ∈ R³; x² + y² + z² ≤ 1}','π','doplněno'],
+ ['kriv1','∫_l 1/(x − y) ds,  l: úsečka AB, A = [0;−2], B = [4;0]','√5·ln 2','cvičení 7'],
+ ['kriv1','∫_l x² ds,  l: y = ln x mezi body A = [1;0] a B = [2;ln 2]','(5√5 − 2√2)/3','cvičení 7'],
+ ['kriv1','∫_l (x² + y² + 3xy − 1) ds,  l = {[x;y] ∈ R²; 2x − y + 3 = 0, −1 ≤ x ≤ 3}','656√5/3','cvičení 7'],
+ ['kriv1','∫_l (x + y) ds,  l: obvod trojúhelníku O = [0;0], B = [2;1], C = [0;4]','(3√5 + 7√13 + 16)/2','cvičení 8 (ukázka ze zkoušky)'],
+ ['kriv1','∫_l xyz ds,  l: r(t) = t·i + (√8·t^(3/2)/3)·j + (t²/2)·k, 0 ≤ t ≤ 1','16√2/143','cvičení 8 (ze zkoušky)'],
+ ['kriv2','Práce pole F = xy·i + (x + y)·j po křivce y = arctg x z bodu A = [1;π/4] do B = [0;0]','1/2 − π/4 − (ln 2)/2 − π²/32','cvičení 8'],
+ ['kriv2','∫_γ y dx + z dy + x dz,  γ = {[x;y;z] ∈ R³; x² + y² = 1, x + z = 1}, φ ∈ ⟨0;2π⟩','−2π','cvičení 9'],
+ ['green','∮_l y² dx + (x + y)² dy,  l: △ABC, A = [a;0], B = [a;a], C = [0;a]','2a³/3','cvičení 9'],
+ ['green','∮_l (xy − x + ½y² − y) dx + (xy + ½x² − y) dy,  l: hranice oblasti mezi y = x² − 3x − 2 a y = x + 3','36','cvičení 9'],
+ ['cesta','∫_AB (2y − 6xy³) dx + (2x − 9x²y²) dy,  A = [0;0], B = [2;2] – ověřte nezávislost a spočítejte přes potenciál','V = 2xy − 3x²y³ + C,  výsledek −88','cvičení 9'],
+ ['cesta','∫_γ (x dx + y dy)/(x² + y²),  A = [−2;−6], B = [1;0]: a) nezávislost na cestě, b) potenciál a hodnota','V = ½·ln(x² + y²),  výsledek −½·ln 40','cvičení 10'],
+ ['cesta','F = (x² + yz)·i + (y² + xz)·j + (z² + xy)·k: a) nezávislost na cestě, b) potenciál, c) práce z M = [1;−2;3] do N = [2;3;4]','rot F = 0;  V = x³/3 + y³/3 + z³/3 + xyz + C;  A = 169/3','cvičení 10 (u ZK celý, u zápočtu a)'],
+ ['drsep',"y'·√(1 − x²) − y² − 1 = 0",'y = tg(arcsin x + C)','cvičení 10'],
+ ['drsep',"2y'·√x = y",'y = K·e^(√x)','cvičení 10'],
+ ['drsep',"x + xy + y'(y + xy) = 0",'e^(x+y) = K(1 + x)(1 + y)','cvičení 10'],
+ ['drlin',"y' − 2xy = 6x",'y = C·e^(x²) − 3','cvičení 11'],
+ ['drlin',"y'·sin x − y·cos x = 1",'y = C·sin x − cos x','cvičení 11'],
+ ['drlin',"y' − 2xy = 2x·e^(x²),  y(0) = 4",'y = (x² + 4)·e^(x²)','cvičení 11'],
+ ['drex','(2xy + 3) dx + (x² − 1) dy = 0','x²y + 3x − y = C','doplněno'],
+ ['drex','(3x² + 2xy) dx + (x² + 2y) dy = 0','x³ + x²y + y² = C','doplněno']];
+/* výtah ze cvičení – značení a postupy, aby Claude učil stejně jako ve škole */
+const TUT_KB=`Předmět: Matematika 2 (VŠ). 1. zápočet (dvojné integrály) už student napsal. 2. zápočet: trojný integrál a jeho transformace (cylindrické, sférické), křivkový integrál 1. a 2. druhu (délka křivky, práce), Greenova věta, nezávislost na integrační cestě (u zápočtu jen ověření nezávislosti; u zkoušky celý příklad: ověření, potenciál, práce). Zkouška: vše – navíc dvojný integrál (Fubini, elementární oblasti, transformace lineární a polární) a diferenciální rovnice 1. řádu (separace proměnných, lineární – variace konstanty, exaktní). Na zkoušce budou i příklady z Moodlu na integrační cestu.
+Značení ze cvičení: oblast A = {[x;y;z] ∈ R³; …}, intervaly ⟨a;b⟩, vnitřní integrál se píše do závorky ∫(∫(∫ … dz)dy)dx, primitivní funkce v hranatých závorkách [ ]ₐᵇ, mezikroky se řetězí šipkou „→“, substituce se píše do svislých čar |t = …, dt = …| s tabulkou mezí (x | 0 | 1 ; t | … | …). Kvadratické rovnice vzorcem (−b ± √(b² − 4ac))/2a. Průsečíky křivek se počítají porovnáním rovnic. Kružnice doplněním na čtverec: x² + y² − 4x ≤ 0 → (x − 2)² + y² ≤ 4, S[2;0], r = 2.
+Postup u vícenásobných integrálů: 1) náčrt oblasti (průměty do roviny xy), 2) meze (elementární oblast: x ∈ ⟨a;b⟩, y ∈ ⟨φ₁(x);φ₂(x)⟩, z ∈ ⟨ψ₁(x,y);ψ₂(x,y)⟩), případně rozdělit oblast, 3) transformace a Jakobián, 4) integrace od vnitřního integrálu, 5) dosazení mezí a úprava.
+Transformace: obecně ∬ f dx dy = ∬ f(φ(u,v),ψ(u,v))·|J| du dv, J = determinant parciálních derivací. Lineární (např. u = x, v = x + y → x = u, y = v − u, J = 1). Polární: x = ρcosφ, y = ρsinφ, J = ρ, ρ ∈ ⟨0;∞), φ ∈ ⟨0;2π⟩ (např. x² + y² ≤ y → ρ ≤ sinφ). Cylindrické: x = ρcosφ, y = ρsinφ, z = z, J = ρ (zobecněné x = aρcosφ, y = bρsinφ, J = abρ). „Válec je důležitý umět.“ Sférické (konvence školy!): x = ρ·cosφ·cosψ, y = ρ·sinφ·cosψ, z = ρ·sinψ, J = ρ²·cosψ, ρ ∈ ⟨0;∞), φ ∈ ⟨0;2π⟩, ψ ∈ ⟨−π/2;π/2⟩ (ψ je odchylka od roviny xy). Když se integrand i meze rozpadnou, integrál se počítá jako součin I₁·I₂·I₃.
+Křivkový integrál 1. druhu: ∫_l f ds; explicitně y = y(x): ∫ f(x,y(x))·√(1 + y′²) dx; parametricky x = φ(t), y = ψ(t): ∫ f(φ,ψ)·√(φ′² + ψ′²) dt; úsečka AB: x = x_A + t·(AB)₁, y = y_A + t·(AB)₂, t ∈ ⟨0;1⟩; ∫_l 1 ds = délka křivky. Lomená čára (trojúhelník) = součet úseček.
+Křivkový integrál 2. druhu (práce): ∫ P dx + Q dy (+ R dz) – dosadit parametrizaci, dx = φ′(t)dt…, pozor na orientaci (meze od počátečního do koncového bodu). Řez válce rovinou: x = cosφ, y = sinφ, z z rovnice roviny.
+Greenova věta: ∮_l P dx + Q dy = ∬_D (∂Q/∂x − ∂P/∂y) dx dy, l kladně orientovaná hranice D.
+Nezávislost na cestě: v R² ∂Q/∂x = ∂P/∂y, v R³ rot F = (∂R/∂y − ∂Q/∂z; ∂P/∂z − ∂R/∂x; ∂Q/∂x − ∂P/∂y) = (0;0;0). Potenciál: V = ∫P dx + g(y,z), pak ∂V/∂y = Q → g, ∂V/∂z = R → H(z); ∫_A^B = V(B) − V(A).
+DR separace: y′ = g(x)·h(y) → ∫dy/h(y) = ∫g(x)dx, konstanty přejmenovat (ln|C|, K = e^C̃). Lineární y′ = a(x)y + b(x): 1) homogenní separací y = C·e^{∫a dx}, 2) variace konstanty y_p = C(x)·…, dosadit, C′(x) = …, 3) y = obecné řešení homogenní + y_p, 4) počáteční podmínka. Exaktní M dx + N dy = 0: kritérium ∂M/∂y = ∂N/∂x, f = ∫M dx + g(y), g′(y) = N − ∂/∂y∫M dx, řešení f(x,y) = C.
+Časté chyby studenta ze sešitu (dávej na ně pozor): zapomenutý Jakobián, poloměr kružnice (r² vs r), aritmetika při dosazování mezí (např. 27/2 − 27/6 = 9, ne 4), konstanta musí být uvnitř: y = tg(arcsin x + C), ne tg(arcsin x) + C; po odlogaritmování e^{x+y} = K(1+x)(1+y), ne „= ln|…|“, znaménka v rot F.`;
+
+let TUT=null,tutBusy=null;
+function tutLoad(){if(!TUT){const s=store.get('tutor',null)||{};TUT={mode:s.mode||'z2',msgs:Array.isArray(s.msgs)?s.msgs:[],cur:s.cur||null,prog:s.prog||{}};}return TUT;}
+function tutSave(){try{store.set('tutor',{mode:TUT.mode,msgs:TUT.msgs.slice(-60),cur:TUT.cur,prog:TUT.prog});}catch(e){}}
+function tutPool(){const m=TUT.mode;if(TUT_TOPICS.some(t=>t[0]===m))return [m];return TUT_TOPICS.filter(t=>m==='zk'||t[2]==='z2').map(t=>t[0]);}
+function tutPick(){const pool=tutPool();const w=pool.map(id=>{const p=TUT.prog[id]||{};return ((p.bad||0)+1.5)/((p.ok||0)+1);});
+  let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0)return pool[i];}return pool[0];}
+function tutToggle(){const p=$('#tutor');if(p&&p.classList.contains('open'))tutClose();else tutOpen();}
+function tutClose(){const p=$('#tutor');if(!p)return;p.classList.remove('open');tutRoom(false);clearTimeout(p._t);p._t=setTimeout(()=>{if(!p.classList.contains('open'))p.hidden=true;},300);}
+async function tutOpen(){
+  tutLoad();let p=$('#tutor');if(!p)p=tutBuild();
+  p.classList.toggle('right',S.hand==='left');p.hidden=false;clearTimeout(p._t);requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('open')));
+  tutRender();tutRoom(true);mjLoad();const sf=await getSample();p.classList.toggle('offline',!sf);tutButtons();
+}
+let tutRoomPrev=null;
+function tutRoom(on){
+  if(!nb)return;
+  if(on){if(W<900||tutRoomPrev||HL())return;const pw=Math.min(410,W-20)+20,right=S.hand==='left';
+    tutRoomPrev={z};const cy=(H/2-oy)/z;padL=right?0:pw;padR=right?pw:0;
+    if(maxPW*z>W-pw-16)z=clamp((W-pw-16)/maxPW,0.2,3);oy=H/2-cy*z;clampView();render();}
+  else if(tutRoomPrev){const cy=(H/2-oy)/z;padL=padR=0;z=tutRoomPrev.z;tutRoomPrev=null;oy=H/2-cy*z;clampView();render();}
+}
+function tutBuild(){
+  const p=el('aside',{class:'tutor',id:'tutor','aria-label':'Doučování'});p.hidden=true;
+  const h=el('div',{class:'t-head'});h.append(el('b',{},ic('cap')+'Doučování'));
+  const sel_=el('select',{'aria-label':'Na co se připravuji'});
+  [['z2','2. zápočet'],['zk','Zkouška (vše)']].forEach(([v,l])=>sel_.append(new Option(l,v)));
+  const og=el('optgroup',{label:'Jen jedno téma'});TUT_TOPICS.forEach(t=>og.append(new Option(t[1],t[0])));sel_.append(og);
+  sel_.value=TUT.mode;sel_.onchange=()=>{TUT.mode=sel_.value;tutSave();tutProg();};
+  const bMin=el('button',{class:'ib',title:'Sbalit','aria-label':'Sbalit'},ic('down'));bMin.onclick=()=>{p.classList.toggle('min');bMin.innerHTML=ic(p.classList.contains('min')?'up':'down');};
+  const bClr=el('button',{class:'ib',title:'Vymazat konverzaci','aria-label':'Vymazat konverzaci'},ic('trash'));
+  bClr.onclick=async()=>{if(!TUT.msgs.length)return;const ok=await modal('Vymazat konverzaci?',b=>b.append(el('p',{},'Smaže se chat i aktuální příklad. Přehled úspěšnosti zůstane.')),[{label:'Zrušit'},{label:'Vymazat',cls:'primary',value:true}]);if(ok){TUT.msgs=[];TUT.cur=null;tutSave();tutRender();}};
+  const bX=el('button',{class:'ib',title:'Zavřít','aria-label':'Zavřít doučování'},ic('close'));bX.onclick=tutClose;
+  h.append(sel_,bClr,bMin,bX);
+  const prog=el('div',{class:'t-prog',id:'tProg'});
+  const body=el('div',{class:'t-body',id:'tBody'});
+  const foot=el('div',{class:'t-foot'});
+  const acts=el('div',{class:'t-acts',id:'tActs'});
+  const A=(id,icn,l,fn,cls)=>{const b=el('button',{id,class:cls||''},ic(icn)+'<span>'+esc(l)+'</span>');b.onclick=fn;acts.append(b);};
+  A('tNew','plus','Nový příklad',()=>tutNew(false),'pri');A('tBank','book','Ze cvičení',()=>tutNew(true));A('tCheck','check','Zkontroluj',()=>tutAct('check'),'pri');
+  A('tHint','help','Nápověda',()=>tutAct('hint'));A('tSol','outline','Postup',()=>tutAct('solution'));A('tDraw','shape','Oblast',()=>tutAct('draw'));A('tRes','star','Výsledek',tutResult);A('tPut','text','Na stránku',()=>tutPlace(true));
+  const inp=el('div',{class:'t-in'});const ta_=el('textarea',{rows:'1',placeholder:'Zeptejte se na cokoli k příkladu…','aria-label':'Zpráva'});
+  ta_.addEventListener('input',()=>{ta_.style.height='auto';ta_.style.height=Math.min(120,ta_.scrollHeight)+'px';});
+  ta_.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+  const bs=el('button',{id:'tSend','aria-label':'Odeslat',title:'Odeslat'},ic('send'));
+  const send=()=>{if(tutBusy){tutBusy.abort();return;}const t=ta_.value.trim();if(!t)return;ta_.value='';ta_.style.height='auto';tutAct('chat',t);};bs.onclick=send;
+  inp.append(ta_,bs);foot.append(acts,inp);
+  p.append(h,prog,body,foot);p.addEventListener('pointerdown',e=>e.stopPropagation());
+  $('#editor').append(p);return p;
+}
+function tutProg(){const e=$('#tProg');if(!e)return;const pool=tutPool();let ok=0,bad=0;pool.forEach(id=>{const q=TUT.prog[id]||{};ok+=q.ok||0;bad+=q.bad||0;});
+  const weak=pool.filter(id=>(TUT.prog[id]||{}).bad>((TUT.prog[id]||{}).ok||0)).map(tutTopic);
+  e.textContent=(ok||bad?`Správně ${ok} · s chybou ${bad}`:'Zatím nic spočítáno')+(weak.length?' · procvičit: '+weak.slice(0,2).join(', '):'');}
+function tutButtons(){const p=$('#tutor');if(!p)return;const off=p.classList.contains('offline'),c=TUT.cur;
+  const set=(id,dis)=>{const b=$('#'+id);if(b)b.disabled=!!dis;};
+  set('tNew',!!tutBusy);set('tBank',!!tutBusy);set('tCheck',off||!c||tutBusy);set('tHint',off||!c||tutBusy);set('tSol',off||!c||tutBusy);set('tDraw',off||!c||tutBusy);set('tRes',!c||!c.vysledek);set('tPut',!c);
+  const t=$('#tutor textarea');if(t){t.disabled=off;t.placeholder=off?'Chat s Claudem funguje jen v aplikaci otevřené na claude.ai':'Zeptejte se na cokoli k příkladu…';}
+  const s=$('#tSend');if(s){s.disabled=off;s.innerHTML=ic(tutBusy?'close':'send');s.title=tutBusy?'Zastavit':'Odeslat';}}
+function tutWelcome(){
+  return `**Ahoj!** Tady se připravíte na **2. zápočet** i na **zkoušku**. Vybírám příklady stejného typu, jaké jste dělali ve cvičeních, a slabší témata dávám častěji.\n- **Nový příklad** – Claude vymyslí nový příklad a vloží ho na stránku, vy ho pod něj počítáte perem.\n- **Ze cvičení** – příklad přímo z vašich cvik (funguje i offline, s výsledkem).\n- **Zkontroluj** – Claude si přečte váš rozepsaný výpočet a řekne, ve kterém kroku je chyba (řešení neprozradí, dokud nechcete).\n- **Nápověda / Postup / Oblast / Výsledek** – podle toho, jak moc chcete pomoct.\nNahoře přepnete **2. zápočet**, **Zkoušku** nebo jen jedno téma.`;}
+function tutRender(){
+  const b=$('#tBody');if(!b)return;b.innerHTML='';
+  if(!TUT.msgs.length)b.append(tutBubble({r:'a',t:tutWelcome()}));
+  TUT.msgs.forEach(m=>b.append(tutBubble(m)));tutProg();tutButtons();mjTypeset(b).then(()=>{b.scrollTop=b.scrollHeight;});b.scrollTop=b.scrollHeight;
+}
+function tutBubble(m){
+  const d=el('div',{class:'t-msg '+(m.r==='u'?'u':'a')+(m.task?' task':'')});tutFill(d,m);return d;}
+function tutFill(d,m){
+  const R=tutMd(m.t||'');let h='';
+  if(m.task)h+=`<div class="t-tag task">${esc(m.task)}</div>`;
+  if(m.st)h+=`<div class="t-tag ${m.st==='OK'?'ok':m.st==='CHYBA'?'bad':'wip'}">${m.st==='OK'?'✓ Správně':m.st==='CHYBA'?'✗ Je tu chyba':'… Rozpracováno'}</div>`;
+  if(m.img)h+=`<div class="t-att">${ic('image')}výřez stránky s výpočtem</div>`;
+  d.innerHTML=h+R.html;
+  d.querySelectorAll('.tsvg').forEach(x=>{const s=tutSvg(R.svgs[+x.dataset.i]);if(s)x.replaceWith(s);else x.remove();});
+}
+function tutMd(s){
+  const svgs=[],maths=[];
+  s=String(s).replace(/```svg\s*([\s\S]*?)```/g,(m,c)=>{svgs.push(c);return '\u0000'+(svgs.length-1)+'\u0000';}).replace(/```(?:\w+)?\s*([\s\S]*?)```/g,'$1');
+  s=s.replace(/\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$[^$\n]+?\$/g,m=>{maths.push(m);return '\u0001'+(maths.length-1)+'\u0001';});
+  let h=esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<i>$2</i>').replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  let out='',inL=false;
+  for(const l of h.split('\n')){const li=l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)/),hd=l.match(/^\s*#{1,4}\s*(.*)/);
+    if(li){if(!inL){out+='<ul>';inL=true;}out+='<li>'+li[1]+'</li>';continue;}
+    if(inL){out+='</ul>';inL=false;}
+    if(hd)out+='<p><b>'+hd[1]+'</b></p>';else if(l.trim())out+='<p>'+l+'</p>';}
+  if(inL)out+='</ul>';
+  out=out.replace(/\u0001(\d+)\u0001/g,(m,i)=>esc(maths[+i])).replace(/<p>\u0000(\d+)\u0000<\/p>|\u0000(\d+)\u0000/g,(m,a,b)=>'<div class="tsvg" data-i="'+(a||b)+'"></div>');
+  return {html:out,svgs};
+}
+function tutSvg(src){
+  try{let t=String(src||'').trim();if(!/<svg[^>]*xmlns=/.test(t))t=t.replace(/<svg\b/,'<svg xmlns="http://www.w3.org/2000/svg"');const d=new DOMParser().parseFromString(t,'image/svg+xml');const s=d.documentElement;
+    if(!s||s.nodeName.toLowerCase()!=='svg'||d.getElementsByTagName('parsererror').length)return null;
+    s.querySelectorAll('script,foreignObject,iframe,image,a,style,use,animate,set').forEach(n=>n.remove());
+    const walk=n=>{[...n.attributes].forEach(a=>{const v=a.value||'';if(/^on/i.test(a.name)||/href$/i.test(a.name)||/javascript:|url\s*\(/i.test(v))n.removeAttribute(a.name);});[...n.children].forEach(walk);};walk(s);
+    s.removeAttribute('width');s.removeAttribute('height');if(!s.getAttribute('viewBox'))s.setAttribute('viewBox','0 0 320 320');s.setAttribute('class','tsv');
+    return document.importNode(s,true);}catch(e){return null;}
+}
+/* matematika v chatu – MathJax (SVG) se načte až při otevření doučování */
+let mjP=null;
+function mjLoad(){
+  if(mjP)return mjP;
+  mjP=new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v);}};
+    window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{enableMenu:false},startup:{typeset:false,ready(){try{MathJax.startup.defaultReady();}catch(e){}fin(true);}}};
+    const urls=['https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js','https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js'];
+    const tryU=i=>{if(i>=urls.length){fin(false);return;}const s=document.createElement('script');s.src=urls[i];s.async=true;s.onerror=()=>{s.remove();tryU(i+1);};document.head.append(s);};
+    tryU(0);setTimeout(()=>fin(false),20000);});
+  return mjP;
+}
+async function mjTypeset(node){if(!node||!(await mjLoad()))return;try{await MathJax.typesetPromise([node]);}catch(e){}}
+function tutPush(m){TUT.msgs.push(m);tutSave();const b=$('#tBody');if(!b)return null;if(TUT.msgs.length===1)b.innerHTML='';const d=tutBubble(m);b.append(d);mjTypeset(d).then(()=>{b.scrollTop=b.scrollHeight;});b.scrollTop=b.scrollHeight;return d;}
+/* nový příklad: ze cvičení (offline) nebo vymyšlený Claudem */
+async function tutNew(fromBank){
+  tutLoad();const topic=tutPick();const sf=fromBank?null:await getSample();
+  if(fromBank||!sf){
+    const all=TUT_BANK.filter(b=>b[0]===topic),last=TUT.cur&&TUT.cur.zadani;
+    const pool=(all.length?all:TUT_BANK.filter(b=>tutPool().includes(b[0]))).filter(b=>b[1]!==last);
+    const b=pool[Math.floor(Math.random()*pool.length)]||TUT_BANK[0];
+    TUT.cur={topic:b[0],zadani:b[1],text:b[1],vysledek:b[2],src:b[3],id:uid()};
+    tutPush({r:'a',task:tutTopic(b[0])+' · '+b[3],t:'**Zadání:** '+b[1]+(sf?'':'\n\n*Offline: výsledek ukáže tlačítko Výsledek. Kontrolu výpočtu a chat zvládne Claude na claude.ai.*')});
+    if(S.tutPlace!==false)tutPlace(false);tutButtons();return;}
+  const ex=TUT_BANK.filter(b=>b[0]===topic).sort(()=>Math.random()-0.5).slice(0,3).map(b=>'- '+b[1]+'  (výsledek '+b[2]+')').join('\n');
+  const d=tutPush({r:'a',t:'Vymýšlím příklad – '+tutTopic(topic)+'…'});tutBusy=new AbortController();tutButtons();
+  try{
+    const r=await sf.json(`Jsi doučovatel matematiky (VŠ, Matematika 2). Kontext ze cvičení studenta:\n${TUT_KB}\n\nVymysli JEDEN NOVÝ příklad na téma „${tutTopic(topic)}“ v obtížnosti 2. zápočtu / zkoušky. Ať je podobný typům ze cvičení, ale ne stejný. Vzory ze cvičení:\n${ex||'(bez vzorů)'}\nPříklad musí mít rozumně spočitatelný, „hezký“ výsledek. Spočítej ho sám pečlivě dvakrát a ověř.\nVrať JSON objekt: {"zadani": "zadání v češtině, matematika v LaTeXu mezi $…$", "text": "totéž zadání jako prostý text s Unicode symboly (∬ ∭ ∫ ∮ √ ² ³ ≤ ≥ π φ ρ ∈ ⟨ ⟩ ·), bez LaTeXu, nejvýš 3 řádky – vloží se na stránku", "vysledek": "výsledek v LaTeXu", "postup": "stručný referenční postup ve 3–6 krocích (meze, Jakobián, mezivýsledky), LaTeX"}`,{modelTier:'complex',signal:tutBusy.signal});
+    if(!r||!r.zadani)throw {code:'bad'};
+    TUT.cur={topic,zadani:String(r.zadani),text:String(r.text||r.zadani).replace(/\$/g,''),vysledek:String(r.vysledek||''),postup:String(r.postup||''),src:'nový',id:uid()};
+    TUT.msgs.pop();if(d)d.remove();tutPush({r:'a',task:tutTopic(topic),t:'**Zadání:** '+TUT.cur.zadani});
+    if(S.tutPlace!==false)tutPlace(false);
+  }catch(e){TUT.msgs.pop();if(d)d.remove();if(e&&e.name==='AbortError'){}else{tutPush({r:'a',t:tutErr(e)+' Dám vám zatím příklad ze cvičení.'});tutBusy=null;return tutNew(true);}}
+  finally{tutBusy=null;tutButtons();}
+}
+function tutErr(e){const c=e&&e.code;return c==='not_granted'?'Claude není pro tuto stránku povolen.':c==='rate_limited'?'Claude je teď přetížený, zkuste to za chvíli.':'Claude teď neodpověděl.';}
+function tutResult(){const c=TUT&&TUT.cur;if(!c||!c.vysledek)return;tutPush({r:'a',t:'**Výsledek:** '+(/[\\^_{}]/.test(c.vysledek)&&!/\$/.test(c.vysledek)?'$'+c.vysledek+'$':c.vysledek)});}
+/* zadání na stránku – pod poslední obsah na aktuální stránce, jinak na novou stránku */
+function tutPlace(manual){
+  const c=TUT&&TUT.cur;if(!c||!nb)return;if(editing)commitText();
+  let i=curPageIndex(),page=nb.pages[i];
+  const low=page.items.reduce((m,o)=>{try{return Math.max(m,getBounds(o)[3]);}catch(e){return m;}},0);
+  const vy0=HL()?0:(-oy)/z-page._top;let y=Math.max(70,vy0+40,low?low+60:70);
+  if(y>page.h-300){addPage(i+1);i=i+1;page=nb.pages[i];y=70;}
+  const txt=c.text||c.zadani;const it={t:'x',id:uid(),x:60,y,w:page.w-120,s:21,c:'#2a4a7f',f:'sans',b:false,i:false,text:'✎ '+tutTopic(c.topic)+'\n'+txt};
+  const before=page.items;page.items=page.items.concat([it]);pushUndo({k:'items',pid:page.id,items:before});changed();
+  c.place={pid:page.id,y:y-6,tid:it.id};tutSave();
+  if(!HL()){oy=-(page._top+y-30)*z+60;clampView();}
+  render();if(!manual)toast('Zadání je na stránce – počítejte pod něj, pak Zkontroluj');
+}
+/* obrázek výpočtu: zadání + vše pod ním na stejné stránce, jinak viditelná část stránky */
+async function tutCapture(){
+  const c=TUT.cur;let page=null,its=[];
+  if(c&&c.place)page=pageById(c.place.pid);
+  if(page){const nextTask=page.items.filter(o=>o.t==='x'&&o.id!==c.place.tid&&/^✎ /.test(o.text||'')&&o.y>c.place.y).map(o=>o.y).sort((a,b)=>a-b)[0];
+    its=page.items.filter(o=>{if(o.t!=='s'&&o.t!=='x')return false;const g=getBounds(o);return g[3]>=c.place.y&&(nextTask==null||g[1]<nextTask-4);});}
+  if(!page||!its.some(o=>o.t==='s')){page=nb.pages[curPageIndex()];
+    const x0=(0-ox)/z-page._left,x1=(W-ox)/z-page._left,y0=(0-oy)/z-page._top,y1=(H-oy)/z-page._top;
+    its=page.items.filter(o=>{if(o.t!=='s'&&o.t!=='x')return false;const g=getBounds(o);return g[2]>x0&&g[0]<x1&&g[3]>y0&&g[1]<y1;});}
+  if(!its.some(o=>o.t==='s'))return null;return strokesImage(page,its,1600);
+}
+async function tutAct(kind,text){
+  tutLoad();const sf=await getSample();if(!sf){tutPush({r:'a',t:'Tohle umí jen Claude – otevřete aplikaci na claude.ai. Offline můžete počítat příklady **Ze cvičení** a porovnat s tlačítkem **Výsledek**.'});return;}
+  if(tutBusy)return;const c=TUT.cur;
+  let img=null;
+  if(kind==='check'||kind==='hint'||(kind==='chat'&&c)){try{img=await tutCapture();}catch(e){img=null;}
+    if(kind==='check'&&!img){tutPush({r:'a',t:'Na stránce zatím nevidím žádný ruční výpočet. Počítejte perem pod zadání a pak klepněte na **Zkontroluj**.'});return;}}
+  const ask={check:'Zkontroluj můj dosavadní výpočet (obrázek).',hint:'Dej mi nápovědu k dalšímu kroku.',solution:'Ukaž mi celý postup řešení.',draw:'Nakresli oblast.'}[kind]||text;
+  tutPush({r:'u',t:ask,img:img&&kind!=='chat'?1:0});
+  const instr={
+    check:`Na přiloženém obrázku je výřez mé stránky: nahoře zadání, pod ním můj ruční výpočet (může být rozpracovaný). Přečti ho pečlivě a zkontroluj krok po kroku: náčrt/oblast a meze, transformaci a Jakobián, integraci, dosazení mezí a aritmetiku. Pokud najdeš chybu, napiš KDE přesně je (ocituj ten řádek/výraz z mého výpočtu), proč je to špatně a dej nápovědu, jak dál – ale neprozrazuj celé řešení ani výsledek. Pokud je zatím vše správně, řekni to stručně a co je další krok. Pokud je výpočet hotový a správný, pochval a potvrď výsledek. Když něco nejde přečíst, zeptej se. Na úplně poslední řádek napiš jen: STAV: OK (hotovo a správně), STAV: CHYBA (je tam chyba) nebo STAV: ROZPRACOVÁNO (zatím bez chyby, ale nedokončeno).`,
+    hint:`Podle obrázku (pokud je přiložen) zjisti, kde ve výpočtu jsem, a dej mi JEDNU malou nápovědu k dalšímu kroku. Neprozrazuj výsledek ani celé řešení.`,
+    solution:`Ukaž kompletní řešení krok po kroku stejným značením a postupem jako ve cvičení (náčrt slovně, meze, transformace a Jakobián, integrace, výsledek). Stručně, ale bez vynechaných kroků.`,
+    draw:`Nakresli oblast integrace (nebo křivku/těleso) aktuálního příkladu jako JEDEN blok \`\`\`svg … \`\`\` s viewBox="0 0 320 320": osy se šipkami a popisky x, y (u těles schematický náčrt v kosoúhlém promítání se z), důležité body a průsečíky popsané čísly, hraniční křivky popsané rovnicemi, oblast vyšrafovaná nebo vyplněná poloprůhlednou modrou (#3a86ff, opacity 0.25). Čáry stroke="#222", text fill="#222" font-size 12–14. Bez skriptů, obrázků a odkazů. Pod obrázek napiš 1–2 věty, jak z náčrtu vyčíst meze.`,
+    chat:`Odpověz na moji otázku. Pokud je přiložen obrázek, je to můj aktuální výpočet na stránce.`}[kind];
+  const sys=`Jsi trpělivý a přesný doučovatel matematiky pro českého studenta VŠ (Matematika 2), který se připravuje na 2. zápočtový test a zkoušku. Mluv česky, tykej, buď stručný (obvykle do 8 vět), věcný a povzbudivý. Matematiku piš v LaTeXu: inline $…$, samostatně $$…$$. Používej STEJNÉ značení a postupy jako ve cvičeních studenta:\n${TUT_KB}\n\nZásady doučování: veď studenta k vlastnímu řešení, neprozrazuj výsledek ani celý postup, dokud o něj výslovně nepožádá nebo dokud ho sám správně nespočítá. Chyby označuj konkrétně. Když se ptá na teorii, vysvětli ji na aktuálním příkladu.`+
+    (c?`\n\nAKTUÁLNÍ PŘÍKLAD (téma: ${tutTopic(c.topic)}, zdroj: ${c.src||'—'}):\n${c.zadani}\nREFERENČNÍ VÝSLEDEK (jen pro tebe, studentovi ho neříkej, dokud nepožádá o řešení nebo ho nespočítá správně): ${c.vysledek||'neuveden – spočítej si ho sám'}${c.postup?'\nReferenční postup (jen pro tebe): '+c.postup:''}`:`\n\nZatím není zadán žádný příklad – pokud se student ptá obecně, odpověz; pokud chce počítat, doporuč tlačítko Nový příklad.`);
+  const hist=TUT.msgs.slice(-13,-1).filter(m=>m.t&&!/^Vymýšlím příklad/.test(m.t)).map(m=>({role:m.r==='u'?'user':'assistant',content:(m.task?'[Zadání] ':'')+m.t}));
+  const msgs=[{role:'user',content:sys+'\n\nPotvrď, že rozumíš.'},{role:'assistant',content:'Rozumím, budu postupovat podle těchto pravidel.'}];
+  hist.forEach(m=>{const l=msgs[msgs.length-1];if(l.role===m.role)l.content+='\n\n'+m.content;else msgs.push(m);});
+  const fin=(kind==='chat'?text+'\n\n':'')+instr;
+  if(msgs[msgs.length-1].role==='user')msgs[msgs.length-1].content+='\n\n'+fin;else msgs.push({role:'user',content:fin});
+  const m={r:'a',t:'…'};const d=tutPush(m);tutBusy=new AbortController();tutButtons();let last=0;
+  try{
+    const r=await sf(msgs,{images:img?[img]:undefined,modelTier:kind==='chat'?'default':'complex',signal:tutBusy.signal,cache:false,
+      onText:({text})=>{m.t=text||'…';const now=performance.now();if(d&&now-last>120){last=now;tutFill(d,{r:'a',t:m.t.replace(/\n?\s*STAV:.*$/i,'')});const b=$('#tBody');if(b)b.scrollTop=b.scrollHeight;}}});
+    let t=(r&&r.text)||m.t||'';const st=t.match(/STAV:\s*(OK|CHYBA|ROZPRACOV[AÁ]NO)\s*$/i);
+    if(st){t=t.replace(/\n?\s*STAV:.*$/i,'').trim();m.st=st[1].toUpperCase().startsWith('ROZPR')?'WIP':st[1].toUpperCase();
+      if(c&&kind==='check'){const p=TUT.prog[c.topic]=TUT.prog[c.topic]||{ok:0,bad:0};if(m.st==='OK'&&!c.ok){p.ok++;c.ok=1;}if(m.st==='CHYBA'&&!c.bad){p.bad++;c.bad=1;}}}
+    m.t=t||'(bez odpovědi)';
+  }catch(e){m.t=e&&e.name==='AbortError'?(m.t==='…'?'(zastaveno)':m.t):tutErr(e);}
+  finally{tutBusy=null;tutSave();if(d){tutFill(d,m);mjTypeset(d).then(()=>{const b=$('#tBody');if(b)b.scrollTop=b.scrollHeight;});}tutProg();tutButtons();}
+}
+
 function moreMenu(anchor){
   openPop(anchor,p=>{const m=el('div',{class:'menu'});
     const it=(icn,l,fn)=>{const b=el('button',{},ic(icn)+esc(l));b.onclick=()=>{closePops();fn();};m.append(b);};
-    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());{const cp=nb.pages[curPageIndex()];if(cp&&!cp.bg){const ld=cp.w>cp.h;it('fit',ld?'Otočit stránku na výšku':'Otočit stránku na šířku',()=>setOrient([cp],!ld));}}it('fit','Celá obrazovka',toggleFullscreen);{const d=edDark();it(d?'sun':'moon',d?'Světlé okolí stránek':'Tmavé okolí stránek',()=>setEdTheme(d?'light':'dark'));if(S.hideTools)it('gear','Možnosti nástroje ('+(TOOL_N[T.tool]||T.tool)+')',()=>setTimeout(()=>openToolOptions(T.tool,$('#bMore')),0));it('zen',S.zen?'Zobrazit lišty':'Čistá obrazovka (bez lišt)',()=>setZen(!S.zen));it('ctl','Panel ovládání',()=>setTimeout(()=>openCtl(radAnchor()),0));}it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
+    it('pages',HL()?'Svislé posouvání stránek':'Listování po stránkách',()=>setLayout(HL()?'v':'h'));it('cap','Doučování matematiky',tutToggle);it('search','Hledat v sešitě (i v rukopisu)',searchNotebook);it('grid','Přehled stránek',openPageGrid);it('outline','Osnova a záložky',()=>openOutline());it('history','Historie verzí',openVersions);it('smile','Nálepky',()=>stickerMenu());it('study','Opakování s páskou',()=>startStudy());if(nb.pages.some(p=>p.items.some(i=>i.t==='tp'))){const op=[...tapeOpen].length>0;it('tape',op?'Zakrýt všechny pásky':'Odkrýt všechny pásky',()=>setAllTapes(!op));}it('calc','Kalkulačka a grafy funkcí',openCalcBlank);it('table','Vložit tabulku',insertTable);it('note','Lepicí poznámka',()=>stickyMenu($('#bMore')));it('mic',REC.mr?'Zastavit nahrávání':'Nahrát zvuk',()=>REC.mr?stopRec():startRec());it('play','Nahrávky'+(nb.audio&&nb.audio.length?' ('+nb.audio.length+')':''),openRecordings);it('zoomBox','Lupa psaní',()=>toggleZoom());it('edit','Přejmenovat sešit',()=>renameNb(nb));it('laser','Laserové ukazovátko',()=>setTool('laser'));it('plus','Přidat stránku',()=>addPage());{const cp=nb.pages[curPageIndex()];if(cp&&!cp.bg){const ld=cp.w>cp.h;it('fit',ld?'Otočit stránku na výšku':'Otočit stránku na šířku',()=>setOrient([cp],!ld));}}it('fit','Celá obrazovka',toggleFullscreen);{const d=edDark();it(d?'sun':'moon',d?'Světlé okolí stránek':'Tmavé okolí stránek',()=>setEdTheme(d?'light':'dark'));if(S.hideTools)it('gear','Možnosti nástroje ('+(TOOL_N[T.tool]||T.tool)+')',()=>setTimeout(()=>openToolOptions(T.tool,$('#bMore')),0));it('zen',S.zen?'Zobrazit lišty':'Čistá obrazovka (bez lišt)',()=>setZen(!S.zen));it('ctl','Panel ovládání',()=>setTimeout(()=>openCtl(radAnchor()),0));}it('tpl','Pozadí stránky…',pageBackground);it('sel','Přizpůsobit šířce',()=>{fitWidth(true);render();});it('image','Vložit obrázek',()=>$('#fImg').click());
     if(clip&&clip.length)it('paste','Vložit',()=>pasteAt(W/2,H/2));
     m.append(el('hr'));it('file','Vložit PDF do sešitu',()=>{pdfInto=true;$('#fPdf').click();});
     m.append(el('hr'));it('down','Exportovat PDF',()=>exportPDF(nb));it('down','Exportovat stránku (PNG)',exportPNG);it('down','Záloha sešitu (.json)',()=>exportBackup(nb));
@@ -5043,7 +5349,7 @@ function offlineInfo(){
 }
 /* ---------- propojení UI ---------- */
 let pdfInto=false;
-[['bBack','back'],['bPages','grid'],['bUndo','undo'],['bRedo','redo'],['bImage','image'],['bRuler','ruler'],['bAddPg','plus'],['bFinger','hand'],['bMore','more'],['bMarks','star'],['bPagesClose','close'],['bSide','sidebar'],['bLibAdd','plus'],['bLibMore','more']].forEach(([id,i])=>{$('#'+id).innerHTML=ic(i);});
+[['bBack','back'],['bPages','grid'],['bUndo','undo'],['bRedo','redo'],['bImage','image'],['bRuler','ruler'],['bAddPg','plus'],['bFinger','hand'],['bMore','more'],['bTutor','cap'],['bMarks','star'],['bPagesClose','close'],['bSide','sidebar'],['bLibAdd','plus'],['bLibMore','more']].forEach(([id,i])=>{$('#'+id).innerHTML=ic(i);});
 $('#bAddPage').innerHTML=ic('plus')+'Přidat stránku';
 document.querySelectorAll('[data-tool]').forEach(b=>{b.innerHTML=ic(b.dataset.tool);onLong(b,()=>openToolOptions(b.dataset.tool,b));b.onclick=()=>{if(T.tool===b.dataset.tool)openToolOptions(T.tool,b);else setTool(b.dataset.tool);};});
 $('#bUndo').onclick=undo;$('#bRedo').onclick=redo;
@@ -5057,7 +5363,7 @@ $('#bPages').onclick=()=>togglePanel(!pagesOpen());$('#bPagesClose').onclick=()=
 $('#bGrid').innerHTML=ic('grid');$('#bGrid').onclick=openPageGrid;
 $('#bMarks').onclick=()=>{marksOnly=!marksOnly;$('#bMarks').setAttribute('aria-pressed',String(marksOnly));renderPanel();};
 $('#bAddPage').onclick=()=>addPage();
-$('#bMore').onclick=e=>moreMenu(e.currentTarget);
+$('#bMore').onclick=e=>moreMenu(e.currentTarget);$('#bTutor').onclick=tutToggle;
 $('#bBack').onclick=closeNotebook;zenBtnInit();
 $('#bSide').onclick=()=>{LV.side=!LV.side;saveLV();renderLib();};
 $('#bLibAdd').onclick=e=>menuPop(e.currentTarget,[['quick','Rychlá poznámka',quickNote],['book','Nový sešit',newNotebook],['table','Nová tabulka (Excel)',()=>newSheetDoc()],['folderPlus','Nová složka',()=>editFolder()],['tag','Nová kategorie',()=>editCategory()],'-',['down','Importovat PDF, Excel nebo zálohu',importAny]]);
