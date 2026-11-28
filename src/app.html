@@ -589,7 +589,7 @@ body.zen #vpal{display:none!important}
 .zenbtn .zdot{position:absolute;right:5px;bottom:5px;width:11px;height:11px;border-radius:50%;border:2px solid #fff}
 body.zen .zenbtn.on{display:flex}
 #editor.drawing .zenbtn{opacity:.2;pointer-events:none}
-.tutor{position:absolute;top:10px;bottom:10px;left:10px;width:min(410px,calc(100vw - 20px));z-index:9;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 44px rgba(0,0,0,.24);transform:translateX(calc(-100% - 24px));transition:transform .3s var(--ease-out);overflow:hidden}
+.tutor{position:absolute;top:10px;bottom:10px;left:10px;width:min(var(--tw,410px),calc(100vw - 20px));z-index:9;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 44px rgba(0,0,0,.24);transform:translateX(calc(-100% - 24px));transition:transform .3s var(--ease-out);overflow:hidden}
 .tutor.right{left:auto;right:10px;transform:translateX(calc(100% + 24px))}
 .tutor.open{transform:none}
 .tutor.min{bottom:auto}
@@ -625,7 +625,19 @@ body.zen .zenbtn.on{display:flex}
 .t-in textarea{flex:1;resize:none;min-height:40px;max-height:120px;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--ink);font:inherit;font-size:14.5px;padding:9px 11px}
 .t-in button{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--accent-2);color:#fff;display:flex;align-items:center;justify-content:center}
 .t-in button svg{width:19px;height:19px}.t-in button:disabled{opacity:.4}
-@media (max-width:700px){.tutor,.tutor.right{left:0;right:0;width:auto;top:auto;bottom:0;height:60vh;border-radius:18px 18px 0 0;transform:translateY(105%)}.tutor.open{transform:none}.tutor.min{height:auto}}
+#editor.tutL .fl,#editor.tutL #vpal,#editor.tutL #zenBtn{margin-left:var(--tutpad,0px)}
+#editor.tutR .fr{margin-right:var(--tutpad,0px)}
+#editor.tutL .fc{margin-left:calc(var(--tutpad,0px) / 2)}#editor.tutR .fc{margin-left:calc(var(--tutpad,0px) / -2)}
+.tutor.bottom,.tutor.bottom.right{left:0;right:0;width:auto!important;top:auto;bottom:0;border-radius:18px 18px 0 0;transform:translateY(105%)}
+.tutor.bottom.open{transform:none}.tutor.bottom.min{height:auto!important}
+.t-grip{position:absolute;z-index:2;touch-action:none}
+.tutor:not(.bottom) .t-grip{top:0;bottom:0;right:-2px;width:16px;cursor:ew-resize}
+.tutor.right:not(.bottom) .t-grip{right:auto;left:-2px}
+.tutor.bottom .t-grip{left:0;right:0;top:-2px;height:18px;cursor:ns-resize}
+.t-grip::after{content:'';position:absolute;border-radius:3px;background:var(--line)}
+.tutor:not(.bottom) .t-grip::after{top:50%;left:6px;width:4px;height:46px;margin-top:-23px}
+.tutor.bottom .t-grip::after{left:50%;top:6px;width:46px;height:4px;margin-left:-23px}
+.tutor.bottom .t-head{padding-top:12px}
 .zpanel{display:flex;flex-direction:column;gap:10px;padding:10px;min-width:280px;max-width:min(360px,92vw)}
 .zpanel .zrow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .zpanel .zb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:12px;border:0;background:var(--bar-2,rgba(127,127,127,.12));color:inherit;font:inherit;font-size:11px;line-height:1.15;text-align:center}
@@ -962,7 +974,7 @@ const isDark=p=>p.paper==='dark'||p.paper==='black';
 
 /* ---------- stav ---------- */
 let notebooks=[], nb=null, clip=null;
-let W=0,H=0,dpr=1,z=1,ox=0,oy=0,docH=0,maxPW=PW,padL=0,padR=0;
+let W=0,H=0,dpr=1,z=1,ox=0,oy=0,docH=0,maxPW=PW,padL=0,padR=0,padB=0;
 const stage=$('#stage'), board=$('#board'), live=$('#live'), radialSvg=$('#radial'), ta=$('#ta'), selbar=$('#selbar');
 // Pozor: {alpha:false} ani {desynchronized:true} nepoužívat – na tabletech s Androidem (Chrome) pak plátno zčerná.
 const bctx=board.getContext('2d');
@@ -1227,7 +1239,7 @@ function setLayout(m){const i=nb?curPageIndex():0;S.layout=m;saveS();if(!nb)retu
 function resize(){
   if(!nb)return;if(S.zen)requestAnimationFrame(posZen);
   const r={width:stage.clientWidth,height:stage.clientHeight}; if(r.width<10)return;
-  const first=!W; W=r.width; H=r.height; if(typeof tutRoomPrev!=='undefined'&&tutRoomPrev&&W<900){padL=padR=0;z=tutRoomPrev.z;tutRoomPrev=null;} dpr=Math.min(window.devicePixelRatio||1,ECO()?1.5:3);
+  const first=!W; W=r.width; H=r.height; if(typeof tutRoomPrev!=='undefined'&&tutRoomPrev)requestAnimationFrame(()=>tutLayout(true)); dpr=Math.min(window.devicePixelRatio||1,ECO()?1.5:3);
   for(const c of [board,live]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);c.style.width=W+'px';c.style.height=H+'px';}
   if(first)fitWidth(); clampView(); render();
 }
@@ -1243,7 +1255,7 @@ function clampView(){
     ox=clamp(ox,Math.min(W/2-lc*z,W-docW*z-30),Math.max(W/2-fc*z,30));
     const ch=maxPH*z;if(ch<=H-70)oy=Math.max(56,(H-ch)/2+16);else oy=clamp(oy,H-ch-40,60);return;}
   const cw=maxPW*z,aw=W-padL-padR; if(cw<=aw+1)ox=padL+aw/2; else ox=clamp(ox,W-padR-cw/2-30,padL+cw/2+30);
-  const ch=docH*z; oy=clamp(oy,Math.min(0,H-150-ch),100);
+  const ch=docH*z; oy=clamp(oy,Math.min(0,H-150-padB-ch),100);
 }
 function zoomAt(sx,sy,nz){nz=clamp(nz,0.2,6);ox=sx-(sx-ox)*nz/z;oy=sy-(sy-oy)*nz/z;z=nz;clampView();scheduleRender();}
 function pageAtWorld(wx,wy,strict=true){
@@ -4640,16 +4652,37 @@ function tutToggle(){const p=$('#tutor');if(p&&p.classList.contains('open'))tutC
 function tutClose(){const p=$('#tutor');if(!p)return;p.classList.remove('open');tutRoom(false);clearTimeout(p._t);p._t=setTimeout(()=>{if(!p.classList.contains('open'))p.hidden=true;},300);}
 async function tutOpen(){
   tutLoad();let p=$('#tutor');if(!p)p=tutBuild();
-  p.classList.toggle('right',S.hand==='left');p.hidden=false;clearTimeout(p._t);requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('open')));
-  tutRender();tutRoom(true);mjLoad();const sf=await getSample();p.classList.toggle('offline',!sf);tutButtons();
+  tutLayout(false);p.hidden=false;clearTimeout(p._t);requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('open')));
+  tutRender();setTimeout(()=>tutRoom(true),320);mjLoad();const sf=await getSample();p.classList.toggle('offline',!sf);tutButtons();
 }
 let tutRoomPrev=null;
-function tutRoom(on){
-  if(!nb)return;
-  if(on){if(W<900||tutRoomPrev||HL())return;const pw=Math.min(410,W-20)+20,right=S.hand==='left';
-    tutRoomPrev={z};const cy=(H/2-oy)/z;padL=right?0:pw;padR=right?pw:0;
-    if(maxPW*z>W-pw-16)z=clamp((W-pw-16)/maxPW,0.2,3);oy=H/2-cy*z;clampView();render();}
-  else if(tutRoomPrev){const cy=(H/2-oy)/z;padL=padR=0;z=tutRoomPrev.z;tutRoomPrev=null;oy=H/2-cy*z;clampView();render();}
+/* tablet na šířku: panel vedle stránky; na výšku (a telefon): panel dole – stránka se vždy posune, aby nebyla pod panelem */
+function tutSide(){return innerWidth>=900||(innerWidth>innerHeight&&innerWidth>=700);}
+function tutLayout(apply){
+  const p=$('#tutor');if(!p)return;const side=tutSide();p.classList.toggle('bottom',!side);p.classList.toggle('right',S.hand==='left');
+  const tw=clamp(S.tutW||(innerWidth>=1200?430:380),300,Math.max(300,innerWidth*0.6)),th=clamp(S.tutH||innerHeight*(innerWidth>=600?0.42:0.58),180,innerHeight*0.85);
+  p.style.setProperty('--tw',tw+'px');p.style.height=side?'':th+'px';
+  if(apply&&p.classList.contains('open'))tutRoom(true,true);
+}
+function tutRoom(on,re){
+  if(!nb)return;const p=$('#tutor');
+  if(on&&p){if(!tutRoomPrev)tutRoomPrev={z};else if(!re)return;
+    const cy=(H/2-oy)/z,side=tutSide(),min=p.classList.contains('min');
+    if(side&&!HL()){const pw=Math.min(parseFloat(p.style.getPropertyValue('--tw'))||410,W-20)+20,right=S.hand==='left';
+      padL=right?0:pw;padR=right?pw:0;padB=0;tutEd(right?'R':'L',pw);z=tutRoomPrev.z;if(maxPW*z>W-pw-16)z=clamp((W-pw-16)/maxPW,0.2,3);}
+    else{padL=padR=0;padB=side||min?0:(p.offsetHeight||H*0.42);z=tutRoomPrev.z;tutEd('',0);}
+    oy=H/2-cy*z;clampView();render();}
+  else if(!on&&tutRoomPrev){tutEd('',0);const cy=(H/2-oy)/z;padL=padR=padB=0;z=tutRoomPrev.z;tutRoomPrev=null;oy=H/2-cy*z;clampView();render();}
+}
+function tutEd(side,pw){const e=$('#editor');e.classList.toggle('tutL',side==='L');e.classList.toggle('tutR',side==='R');e.style.setProperty('--tutpad',pw+'px');}
+function tutGrip(p){
+  const g=el('div',{class:'t-grip','aria-hidden':'true'});let d=null;
+  g.addEventListener('pointerdown',e=>{e.stopPropagation();d={x:e.clientX,y:e.clientY,w:p.offsetWidth,h:p.offsetHeight,id:e.pointerId};try{g.setPointerCapture(e.pointerId);}catch(_){}p.style.transition='none';});
+  g.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;
+    if(p.classList.contains('bottom')){S.tutH=clamp(d.h-(e.clientY-d.y),180,innerHeight*0.85);p.style.height=S.tutH+'px';}
+    else{const dx=(S.hand==='left'?-1:1)*(e.clientX-d.x);S.tutW=clamp(d.w+dx,300,innerWidth*0.6);p.style.setProperty('--tw',S.tutW+'px');}});
+  const up=e=>{if(!d)return;d=null;p.style.transition='';saveS();tutRoom(true,true);};
+  g.addEventListener('pointerup',up);g.addEventListener('pointercancel',up);return g;
 }
 function tutBuild(){
   const p=el('aside',{class:'tutor',id:'tutor','aria-label':'Doučování'});p.hidden=true;
@@ -4658,7 +4691,7 @@ function tutBuild(){
   [['z2','2. zápočet'],['zk','Zkouška (vše)']].forEach(([v,l])=>sel_.append(new Option(l,v)));
   const og=el('optgroup',{label:'Jen jedno téma'});TUT_TOPICS.forEach(t=>og.append(new Option(t[1],t[0])));sel_.append(og);
   sel_.value=TUT.mode;sel_.onchange=()=>{TUT.mode=sel_.value;tutSave();tutProg();};
-  const bMin=el('button',{class:'ib',title:'Sbalit','aria-label':'Sbalit'},ic('down'));bMin.onclick=()=>{p.classList.toggle('min');bMin.innerHTML=ic(p.classList.contains('min')?'up':'down');};
+  const bMin=el('button',{class:'ib',title:'Sbalit','aria-label':'Sbalit'},ic('down'));bMin.onclick=()=>{p.classList.toggle('min');bMin.innerHTML=ic(p.classList.contains('min')?'up':'down');tutRoom(true,true);};
   const bClr=el('button',{class:'ib',title:'Vymazat konverzaci','aria-label':'Vymazat konverzaci'},ic('trash'));
   bClr.onclick=async()=>{if(!TUT.msgs.length)return;const ok=await modal('Vymazat konverzaci?',b=>b.append(el('p',{},'Smaže se chat i aktuální příklad. Přehled úspěšnosti zůstane.')),[{label:'Zrušit'},{label:'Vymazat',cls:'primary',value:true}]);if(ok){TUT.msgs=[];TUT.cur=null;tutSave();tutRender();}};
   const bX=el('button',{class:'ib',title:'Zavřít','aria-label':'Zavřít doučování'},ic('close'));bX.onclick=tutClose;
@@ -4676,7 +4709,7 @@ function tutBuild(){
   const bs=el('button',{id:'tSend','aria-label':'Odeslat',title:'Odeslat'},ic('send'));
   const send=()=>{if(tutBusy){tutBusy.abort();return;}const t=ta_.value.trim();if(!t)return;ta_.value='';ta_.style.height='auto';tutAct('chat',t);};bs.onclick=send;
   inp.append(ta_,bs);foot.append(acts,inp);
-  p.append(h,prog,body,foot);p.addEventListener('pointerdown',e=>e.stopPropagation());
+  p.append(tutGrip(p),h,prog,body,foot);p.addEventListener('pointerdown',e=>e.stopPropagation());
   $('#editor').append(p);return p;
 }
 function tutProg(){const e=$('#tProg');if(!e)return;const pool=tutPool();let ok=0,bad=0;pool.forEach(id=>{const q=TUT.prog[id]||{};ok+=q.ok||0;bad+=q.bad||0;});
@@ -4741,13 +4774,13 @@ async function mjTypeset(node){if(!node||!(await mjLoad()))return;try{await Math
 function tutPush(m){TUT.msgs.push(m);tutSave();const b=$('#tBody');if(!b)return null;if(TUT.msgs.length===1)b.innerHTML='';const d=tutBubble(m);b.append(d);mjTypeset(d).then(()=>{b.scrollTop=b.scrollHeight;});b.scrollTop=b.scrollHeight;return d;}
 /* nový příklad: ze cvičení (offline) nebo vymyšlený Claudem */
 async function tutNew(fromBank){
-  tutLoad();const topic=tutPick();const sf=fromBank?null:await getSample();
+  tutLoad();const topic=tutPick();const avail=await getSample(),sf=fromBank?null:avail;
   if(fromBank||!sf){
     const all=TUT_BANK.filter(b=>b[0]===topic),last=TUT.cur&&TUT.cur.zadani;
     const pool=(all.length?all:TUT_BANK.filter(b=>tutPool().includes(b[0]))).filter(b=>b[1]!==last);
     const b=pool[Math.floor(Math.random()*pool.length)]||TUT_BANK[0];
     TUT.cur={topic:b[0],zadani:b[1],text:b[1],vysledek:b[2],src:b[3],id:uid()};
-    tutPush({r:'a',task:tutTopic(b[0])+' · '+b[3],t:'**Zadání:** '+b[1]+(sf?'':'\n\n*Offline: výsledek ukáže tlačítko Výsledek. Kontrolu výpočtu a chat zvládne Claude na claude.ai.*')});
+    tutPush({r:'a',task:tutTopic(b[0])+' · '+b[3],t:'**Zadání:** '+b[1]+(avail?'':'\n\n*Offline: výsledek ukáže tlačítko Výsledek. Kontrolu výpočtu a chat zvládne Claude na claude.ai.*')});
     if(S.tutPlace!==false)tutPlace(false);tutButtons();return;}
   const ex=TUT_BANK.filter(b=>b[0]===topic).sort(()=>Math.random()-0.5).slice(0,3).map(b=>'- '+b[1]+'  (výsledek '+b[2]+')').join('\n');
   const d=tutPush({r:'a',t:'Vymýšlím příklad – '+tutTopic(topic)+'…'});tutBusy=new AbortController();tutButtons();
@@ -4772,7 +4805,7 @@ function tutPlace(manual){
   const txt=c.text||c.zadani;const it={t:'x',id:uid(),x:60,y,w:page.w-120,s:21,c:'#2a4a7f',f:'sans',b:false,i:false,text:'✎ '+tutTopic(c.topic)+'\n'+txt};
   const before=page.items;page.items=page.items.concat([it]);pushUndo({k:'items',pid:page.id,items:before});changed();
   c.place={pid:page.id,y:y-6,tid:it.id};tutSave();
-  if(!HL()){oy=-(page._top+y-30)*z+60;clampView();}
+  if(!HL()){oy=-(page._top+y-30)*z+(S.zen?40:96);clampView();}
   render();if(!manual)toast('Zadání je na stránce – počítejte pod něj, pak Zkontroluj');
 }
 /* obrázek výpočtu: zadání + vše pod ním na stejné stránce, jinak viditelná část stránky */
